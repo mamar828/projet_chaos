@@ -1,4 +1,4 @@
 *.pyc
 launch.json
 *.DS_Store
-.idea
+*.idea
