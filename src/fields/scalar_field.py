@@ -148,10 +148,9 @@ class ScalarField(Field):
             self,
             start: Vector,
             stop: Vector,
+            function,
             nb_ticks_per_axis: Dict[str, int] = None,
-            origin_position: Tuple[float, float, float] = None,
-            compute_gradient: bool = False,
-            compute_value: bool = False
+            origin_position: Tuple[float, float, float] = None
     ):
         """
         Computes the value of a certain function on a grid and returns its values as a numpy array.
@@ -162,6 +161,9 @@ class ScalarField(Field):
             The position of the starting corner of the space cube.
         stop : Vector
             The position of the stopping corner of the space cube.
+        function
+            Callable object that defines the operation to apply on all array elements. This function must take as
+            argument a Vector object of the three axis positions such as function(Vector(x, y, z)).
         nb_ticks_per_axis : Dict[str, int]
             The number of steps between the starting and stopping positions for each axis in the form of {axis, value}.
             Defaults to 100 values per dimension.
@@ -169,10 +171,6 @@ class ScalarField(Field):
             The position of the origin within the given space cube. It is of no consequence for 3D arrays, but for
             arrays with fewer dimensions it determines the position of the plane for the missing dimensions. Defaults to
             (0, 0, 0).
-        compute_gradient : bool
-            Whether to compute the gradient as the function. Defaults to False.
-        compute_value : bool
-            Whether to compute the value as the function. Defaults to False.
 
         Returns
         -------
@@ -180,6 +178,8 @@ class ScalarField(Field):
             The array of the computed function at the specified coordinates.
         """
 
+        if not callable(function):
+            raise TypeError("The function must be callable")
         if nb_ticks_per_axis is None:
             nb_ticks_per_axis = {"x": 100, "y": 100, "z": 100}
         if origin_position is None:
@@ -196,10 +196,7 @@ class ScalarField(Field):
         for i_x, x in enumerate(x_positions):
             for i_y, y in enumerate(y_positions):
                 for i_z, z in enumerate(z_positions):
-                    if compute_gradient:
-                        array[i_x, i_y, i_z] = self.get_gradient(Vector(x, y, z))
-                    elif compute_value:
-                        array[i_x, i_y, i_z] = self(Vector(x, y, z))
+                    array[i_x, i_y, i_z] = function(Vector(x, y, z))
 
         return array
 
@@ -236,9 +233,9 @@ class ScalarField(Field):
         return self._compute_field_wide_operations(
             start,
             stop,
+            lambda vector: self(vector),
             nb_ticks_per_axis,
-            origin_position,
-            compute_value=True
+            origin_position
         )
 
     def get_gradient_field(
@@ -274,9 +271,9 @@ class ScalarField(Field):
         return self._compute_field_wide_operations(
             start,
             stop,
+            lambda vector: self.get_gradient(vector),
             nb_ticks_per_axis,
             origin_position,
-            compute_gradient=True
         )
 
 

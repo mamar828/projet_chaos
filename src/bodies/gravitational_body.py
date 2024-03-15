@@ -22,7 +22,14 @@ class GravitationalBody(Body):
     position and velocity.
     """
 
-    def __init__(self, mass: float, position: Vector, velocity: Vector, fixed: bool = False):
+    def __init__(
+            self,
+            mass: float,
+            position: Vector,
+            velocity: Vector,
+            fixed: bool = False,
+            has_potential: bool = True
+    ):
         """
         Defines required parameters.
 
@@ -36,9 +43,11 @@ class GravitationalBody(Body):
             The velocity of the body when created.
         fixed : bool
             Whether the body is fixed to it's initial position independent of all velocity and potentials.
+        has_potential : bool
+            Whether the body generates a potential field during simulations.
         """
 
-        super().__init__(position, velocity, fixed)
+        super().__init__(position, velocity, fixed, has_potential)
         self.mass = mass
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-3)):
@@ -96,29 +105,3 @@ class GravitationalBody(Body):
         """
 
         return ScalarField([(-1, -self.mass * gravitational_constant, self._position)])
-
-    @property
-    def position(self) -> Vector:
-        """
-        Gives the body's position as a Vector object.
-
-        Returns
-        -------
-        position : Vector
-            The body's position.
-        """
-
-        return self._position
-
-    @property
-    def velocity(self) -> Vector:
-        """
-        Gives the body's velocity as a Vector object.
-
-        Returns
-        -------
-        velocity : Vector
-            The body's velocity.
-        """
-
-        return self._velocity

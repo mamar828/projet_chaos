@@ -23,7 +23,8 @@ class Body:
             self,
             position: Vector,
             velocity: Vector,
-            fixed: bool
+            fixed: bool,
+            has_potential: bool
     ):
         """
         Defines required parameters.
@@ -36,11 +37,14 @@ class Body:
             The velocity of the body when created.
         fixed : bool
             Whether the body is fixed to it's initial position independent of all velocity and potentials.
+        has_potential : bool
+            Whether the body generates a potential field during simulations.
         """
 
         self._position = position
         self._velocity = velocity
         self._fixed = fixed
+        self._has_potential = has_potential
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float):
         """
@@ -58,3 +62,68 @@ class Body:
         """
 
         raise NotImplementedError
+
+    @property
+    def fixed(self) -> bool:
+        """
+        Returns the fixed or movable state of the body.
+
+        Returns
+        -------
+        fixed : bool
+            The body's mouvement state.
+        """
+
+        return self._fixed
+
+    @property
+    def has_potential(self) -> bool:
+        """
+        Returns the potential generation state.
+
+        Returns
+        -------
+        has_potential : bool
+            The body's potential generation state.
+        """
+
+        return self._has_potential
+
+    @property
+    def potential(self) -> ScalarField:
+        """
+        Gives the body's potential as a ScalarField object.
+
+        Returns
+        -------
+        scalar_field : ScalarField
+            The ScalarField object associated with the body's potential.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def position(self) -> Vector:
+        """
+        Gives the body's position as a Vector object.
+
+        Returns
+        -------
+        position : Vector
+            The body's position.
+        """
+
+        return self._position
+
+    @property
+    def velocity(self) -> Vector:
+        """
+        Gives the body's velocity as a Vector object.
+
+        Returns
+        -------
+        velocity : Vector
+            The body's velocity.
+        """
+
+        return self._velocity
