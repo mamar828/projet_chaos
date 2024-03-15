@@ -25,6 +25,16 @@ class BaseSystem:
     """
 
     def __init__(self, list_of_bodies: List[Body], base_potential: Optional[ScalarField] = None):
+        """
+        Defines the required parameters.
+
+        Parameters
+        ----------
+        list_of_bodies : List[Body]
+            A list of the bodies used to create the system.
+        base_potential : Optional[ScalarField]
+            A ScalarField object to define the source-less potential. Defaults to a constant and null potential.
+        """
         if base_potential is None:
             base_potential = ScalarField([(0, 0, Vector(0, 0, 0))])
         self.base_potential = base_potential
