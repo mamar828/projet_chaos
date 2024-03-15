@@ -1,4 +1,5 @@
 import pygame as pg
+import numpy as np
 
 
 class Base_model:
@@ -13,6 +14,10 @@ class Base_model:
 
     def move(self, new_position):
         self.repr.topleft = new_position[0] - self.scale[0] // 2, new_position[1] - self.scale[1] // 2
+
+    @staticmethod
+    def get_random_color():
+        return np.random.randint(0, 255, 3)
 
 
 class Rectangle(Base_model):

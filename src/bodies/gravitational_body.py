@@ -26,7 +26,7 @@ class GravitationalBody(Body):
             self,
             mass: float,
             position: Vector,
-            velocity: Vector,
+            velocity: Vector = Vector(0, 0, 0),
             fixed: bool = False,
             has_potential: bool = True
     ):

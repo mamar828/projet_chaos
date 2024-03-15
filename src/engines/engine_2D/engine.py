@@ -2,9 +2,9 @@ import pygame as pg
 import numpy as np
 import sys
 
-from scene import *
-from tests import *
-from models import *
+from src.engines.engine_2D.scene import *
+from src.engines.engine_2D.models import *
+from src.systems.base_system import BaseSystem
 
 
 class Engine_2D:
@@ -13,7 +13,7 @@ class Engine_2D:
             framerate: int=60,
             fullscreen: bool=False,
             screen_color: tuple=(0,0,0),
-            scene_elements: list=None
+            system: BaseSystem=None
         ):
         self.window_size = window_size
         self.framerate = framerate
@@ -27,7 +27,7 @@ class Engine_2D:
         self.time = 0
         self.delta_time = 0     # Enables constant camera movement regardless of the framerate
 
-        self.scene = Scene(self, scene_elements)
+        self.scene = Scene(self, system)
 
     def check_events(self):
         for event in pg.event.get():
@@ -51,20 +51,16 @@ class Engine_2D:
             self.delta_time = self.clock.tick(self.framerate)
 
 
-listi = [
-    {"object_instance": Flat_earth(position=(51,51)), "model": Rectangle, "color": "blue", "scale": (100,100)},
-    {"object_instance": Flat_earth(position=(849,51)), "model": Circle, "color": "yellow", "scale": (100,100)},
-    {"object_instance": t(position=(700,600)), "model": Circle, "color": "orange", "scale": (80,150)}
-]
-
-
-if __name__ ==  "__main__":
-    # Create the graphics engine object
-    app = Engine_2D(
-        window_size=(1440,900),
-        framerate=60,
-        fullscreen=True,
-        screen_color=(0,60,60),
-        scene_elements=listi
-    )
-    app.run()
+# listi = [
+#     {"object_instance": Flat_earth(position=(51,51)), "model": Rectangle, "color": "blue", "scale": (100,100)},
+#     {"object_instance": Flat_earth(position=(849,51)), "model": Circle, "color": "yellow", "scale": (100,100)},
+#     {"object_instance": t(position=(700,600)), "model": Circle, "color": "orange", "scale": (80,150)}
+# ]
+# app = Engine_2D(
+#     window_size=(1440,900),
+#     framerate=60,
+#     fullscreen=True,
+#     screen_color=(0,60,60),
+#     system=listi
+# )
+# app.run()

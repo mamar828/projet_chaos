@@ -111,7 +111,6 @@ class ScalarField(Field):
         value : float
             The value of the field at the given position.
         """
-
         value = 0
         for term in self.terms:
             relative_distance = np.sqrt((term[2].x-position.x)**2+(term[2].y-position.y)**2+(term[2].z-position.z)**2)
