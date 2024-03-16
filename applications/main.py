@@ -11,14 +11,15 @@ from src.tools.vector import Vector
 
 test_system = BaseSystem(
     list_of_bodies=[
-        GravitationalBody(position=Vector(200,350,0), mass=1),
-        GravitationalBody(position=Vector(200,200,0), mass=10, fixed=True),
+        GravitationalBody(position=Vector(200,6.731*10**6,0), mass=1),
+        GravitationalBody(position=Vector(200,0,0), mass=6*10**24, fixed=True),
     ]
 )
+# test_system.show(show_potential=True)
 
 app = Engine_2D(
     window_size=(400,400),
-    framerate=1,
+    framerate=60,
     fullscreen=False,
     screen_color=(0,60,60),
     system=test_system

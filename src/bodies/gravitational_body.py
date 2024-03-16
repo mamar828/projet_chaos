@@ -69,7 +69,7 @@ class GravitationalBody(Body):
         t = time_step
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
-        potential = -1*potential
+        potential = -1 * (potential - self.potential)
         a_x, a_y, a_z = potential.get_gradient(self._position, epsilon)
         self._position = Vector(x+v_x*t+a_x/2*t**2, y+v_y*t+a_y/2*t**2, z+v_z*t+a_z/2*t**2)
         self._velocity = Vector(v_x+a_x*t, v_y+a_y*t, v_z+a_z*t)
