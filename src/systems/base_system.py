@@ -71,7 +71,11 @@ class BaseSystem:
         for body in self.attractive_bodies:
             potential_field += body.potential
         for body in self.moving_bodies:
-            body(time_step, potential_field*(10**(-self.n))**3, epsilon*10**(-self.n))
+            if body.has_potential:
+                acting_potential = potential_field - body.potential
+            else: 
+                acting_potential = potential_field
+            body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n))
 
     def show(
             self,
