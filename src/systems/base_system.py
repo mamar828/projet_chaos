@@ -54,7 +54,7 @@ class BaseSystem:
             if body.has_potential:
                 self.attractive_bodies.append(body)
 
-    def update(self, time_step: float, epsilon: float = 10**(-3)):
+    def update(self, time_step: float, epsilon: float = 10**(-2)):
         """
         Updates the position and velocity of the bodies within the system according to a potential and time step.
 

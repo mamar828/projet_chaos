@@ -118,7 +118,7 @@ class ScalarField(Field):
 
         return value
 
-    def get_gradient(self, position: Vector, epsilon: float = 10**(-3)) -> Vector:
+    def get_gradient(self, position: Vector, epsilon: float = 10**(-2)) -> Vector:
         """
         Computes the gradient of the scalar field at a given position using a step of size epsilon.
 
