@@ -9,6 +9,7 @@
 """
 
 from typing import Dict, List, Union, Optional
+from copy import copy, deepcopy
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +25,7 @@ class BaseSystem:
     A class used to compute simulations on systems made of multiple bodies.
     """
 
-    def __init__(self, list_of_bodies: List[Body], base_potential: Optional[ScalarField] = None, n: int = 1):
+    def __init__(self, list_of_bodies: List[Body], base_potential: Optional[ScalarField] = None, n: int = 0):
         """
         Defines the required parameters.
 
@@ -40,7 +41,7 @@ class BaseSystem:
         self.n = n
         if base_potential is None:
             base_potential = ScalarField([(0, 0, Vector(0, 0, 0))])
-        self.base_potential = base_potential
+        self._base_potential = base_potential
         self.fixed_bodies = []
         self.moving_bodies = []
         self.attractive_bodies = []
@@ -66,11 +67,12 @@ class BaseSystem:
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
             defaults to 10**(-3).
         """
-        potential_field = self.base_potential
+        potential_field = deepcopy(self._base_potential)
+        print(len(potential_field.terms))
         for body in self.attractive_bodies:
             potential_field += body.potential
         for body in self.moving_bodies:
-            body(time_step, potential_field*(10**(-self.n))**3, epsilon)
+            body(time_step, potential_field*(10**(-self.n))**3, epsilon*10**(-self.n))
 
     def show(
             self,
@@ -122,7 +124,7 @@ class BaseSystem:
                 max_second_axis = y if y > max_second_axis else max_second_axis
                 min_second_axis = y if y < min_second_axis else min_second_axis
 
-            potential_field = self.base_potential
+            potential_field = deepcopy(self._base_potential)
             for body in self.attractive_bodies:
                 potential_field += body.potential
 

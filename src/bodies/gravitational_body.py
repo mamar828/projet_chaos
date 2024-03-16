@@ -48,6 +48,8 @@ class GravitationalBody(Body):
         """
 
         super().__init__(position, velocity, fixed, has_potential)
+        if mass <= 0:
+            raise ValueError("mass must be positive")
         self.mass = mass
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-3)):
@@ -69,10 +71,12 @@ class GravitationalBody(Body):
         t = time_step
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
-        potential = -1 * (potential - self.potential)
+        if self.has_potential:
+            potential -= self.potential
         a_x, a_y, a_z = potential.get_gradient(self._position, epsilon)
-        self._position = Vector(x+v_x*t+a_x/2*t**2, y+v_y*t+a_y/2*t**2, z+v_z*t+a_z/2*t**2)
-        self._velocity = Vector(v_x+a_x*t, v_y+a_y*t, v_z+a_z*t)
+        print(potential.get_gradient(self._position, epsilon))
+        self._position = Vector(x+v_x*t-a_x/2*t**2, y+v_y*t-a_y/2*t**2, z+v_z*t-a_z/2*t**2)
+        self._velocity = Vector(v_x-a_x*t, v_y-a_y*t, v_z-a_z*t)
 
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-3)):
         """
