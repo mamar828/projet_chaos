@@ -7,14 +7,11 @@ class Base_model:
         self.instance = instance
         self.screen = screen
         self.repr = pg.Rect(*position, *scale)
-        self.start_position = position
-        self.position = position
         self.scale = scale
         self.color = color
         self.update()
 
     def move(self, new_position):
-        self.position = new_position
         self.repr.topleft = new_position[0] - self.scale[0] // 2, new_position[1] - self.scale[1] // 2
 
     @staticmethod
