@@ -68,7 +68,6 @@ class BaseSystem:
             defaults to 10**(-3).
         """
         potential_field = deepcopy(self._base_potential)
-        print(len(potential_field.terms))
         for body in self.attractive_bodies:
             potential_field += body.potential
         for body in self.moving_bodies:
