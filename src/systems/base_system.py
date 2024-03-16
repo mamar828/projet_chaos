@@ -9,7 +9,7 @@
 """
 
 from typing import Dict, List, Union, Optional
-from copy import copy, deepcopy
+from copy import deepcopy
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -73,7 +73,7 @@ class BaseSystem:
         for body in self.moving_bodies:
             if body.has_potential:
                 acting_potential = potential_field - body.potential
-            else: 
+            else:
                 acting_potential = potential_field
             body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n))
 
