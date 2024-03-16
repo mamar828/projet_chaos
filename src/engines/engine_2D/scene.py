@@ -25,10 +25,18 @@ class Scene:
                            position=(body.position[0], body.position[1]), instance=body)
     
     def update(self):
-        self.system.update(self.app.delta_time)
+        print("delta time", self.app.delta_time)
+        # print(self.app.delta_time // 5000)
+        # print(self.app.delta_time % 5000)
+        for i in range(self.app.delta_time // 100):
+            self.system.update(100)
+            # print(i)
+        self.system.update(self.app.delta_time % 100)
+        # if self.app.delta_time >= 10000:
+        # self.system.update(self.app.delta_time)
         for obj in self.objects:
             obj.move((obj.instance.position[0], obj.instance.position[1]))
             obj.update()
-            if not obj.instance.fixed:
-                print(obj.instance.position)
-                print(obj.instance.velocity)
+            # if not obj.instance.fixed:
+            #     print(obj.instance.position)
+            #     print(obj.instance.velocity)
