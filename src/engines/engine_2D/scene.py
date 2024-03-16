@@ -26,3 +26,6 @@ class Scene:
         for obj in self.objects:
             obj.move((obj.instance.position[0], obj.instance.position[1]))
             obj.update()
+            if not obj.instance.fixed:
+                print(obj.instance.position)
+                print(obj.instance.velocity)
