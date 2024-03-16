@@ -19,7 +19,7 @@ class Scene:
 
     def load(self, system):
         for body in system.list_of_bodies:
-            s = body.mass*5
+            s = np.round(body.mass/(2*10**30), 0) * 30 + 10
             # s = 2*5*np.arctan(float(body.mass))/np.pi
             self += Circle(screen=self.app.screen, color=Base_model.get_random_color(), scale=(s,s),
                            position=(body.position[0], body.position[1]), instance=body)

@@ -25,7 +25,8 @@ class Engine_2D:
 
         self.clock = pg.time.Clock()
         self.time = 0
-        self.delta_time = 0     # Enables constant camera movement regardless of the framerate
+        self.delta_time = 0
+        self.physics_speed = 1
 
         self.scene = Scene(self, system)
 
@@ -34,6 +35,13 @@ class Engine_2D:
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 pg.quit()
                 sys.exit()
+    
+    def update_physics_speed(self):
+        keys = pg.key.get_pressed()
+        if True in list(keys):
+            for i in range(0,10):
+                if keys[getattr(pg, f"K_{i}")]:
+                    self.physics_speed = 10**i
 
     def render(self):
         self.screen.fill(self.screen_color)
@@ -47,8 +55,9 @@ class Engine_2D:
         while True:
             self.get_time()
             self.check_events()
+            self.update_physics_speed()
             self.render()
-            self.delta_time = self.clock.tick(self.framerate)
+            self.delta_time = self.clock.tick(self.framerate) * self.physics_speed
 
 
 # listi = [
