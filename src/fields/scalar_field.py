@@ -8,7 +8,7 @@
     @Description:       This file contains a class used to create the basic structure of a scalar field.
 """
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import numpy as np
 
