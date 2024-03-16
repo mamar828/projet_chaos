@@ -12,7 +12,7 @@ from src.tools.vector import Vector
 test_system = BaseSystem(
     list_of_bodies=[
         GravitationalBody(position=Vector(250,250,0), mass=2*10**30, fixed=True),
-        GravitationalBody(position=Vector(100,250,0), mass=6*10**24),
+        GravitationalBody(position=Vector(100,250,0), mass=6*10**24, velocity=Vector(0,30e-6,0)),
     ],
     n=9
 )
@@ -20,7 +20,7 @@ test_system = BaseSystem(
 
 app = Engine_2D(
     window_size=(500,500),
-    framerate=5,
+    framerate=30,
     fullscreen=False,
     screen_color=(0,60,60),
     system=test_system
