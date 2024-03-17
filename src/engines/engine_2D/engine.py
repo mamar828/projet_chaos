@@ -4,17 +4,17 @@ import sys
 
 from src.engines.engine_2D.scene import *
 from src.engines.engine_2D.models import *
-from src.systems.base_system import BaseSystem
 
 
 class Engine_2D:
     def __init__(self,
+            simulation,
             window_size: tuple[int]=(1440,900),
             framerate: int=60,
             fullscreen: bool=False,
-            screen_color: tuple=(0,0,0),
-            system: BaseSystem=None
+            screen_color: tuple=(0,0,0)
         ):
+        self.simulation = simulation
         self.window_size = window_size
         self.framerate = framerate
         self.screen_color = screen_color
@@ -28,7 +28,7 @@ class Engine_2D:
         self.delta_time = 0
         self.physics_speed = 1
 
-        self.scene = Scene(self, system)
+        self.scene = Scene(self)
 
     def check_events(self):
         for event in pg.event.get():
@@ -41,7 +41,7 @@ class Engine_2D:
         if True in list(keys):
             for i in range(0,10):
                 if keys[getattr(pg, f"K_{i}")]:
-                    self.physics_speed = 10**i
+                    self.physics_speed = round(i / 9 * 5000 + 1)
 
     def render(self):
         self.screen.fill(self.screen_color)
