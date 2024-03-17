@@ -26,7 +26,7 @@ class Scene:
     
     def update(self):
         # Update system
-        print(self.app.delta_time)
+        # print(self.app.delta_time)
         for i in range(self.app.delta_time // self.app.simulation.maximum_delta_time):
             self.system.update(self.app.simulation.maximum_delta_time)
         self.system.update(self.app.delta_time % self.app.simulation.maximum_delta_time)

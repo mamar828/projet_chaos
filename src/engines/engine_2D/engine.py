@@ -1,5 +1,3 @@
-# import pygame as pg
-import numpy as np
 import sys
 
 from src.engines.engine_2D.scene import *

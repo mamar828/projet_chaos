@@ -18,6 +18,8 @@ from src.bodies.gravitational_body import GravitationalBody
 from src.tools.vector import FakeVector, Vector
 from src.fields.scalar_field import ScalarField
 
+from pickle import dumps, loads
+
 
 class BaseSystem:
     """
@@ -67,20 +69,19 @@ class BaseSystem:
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
             defaults to 10**(-3).
         """
-        potential_field = deepcopy(self._base_potential)
+        potential_field = loads(dumps(self._base_potential))
+        # potential_field = deepcopy(self._base_potential)
         for body in self.attractive_bodies:
             potential_field += body.potential
-        # print(self.attractive_bodies)
-        # print(potential_field.terms)
         if len(potential_field.terms) > 2:
             potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
         for body in self.moving_bodies:
             if body.has_potential:
-                # print("before", potential_field.terms)
-                acting_potential = deepcopy(potential_field) - body.potential
+                acting_potential = loads(dumps(potential_field)) - body.potential
+                # acting_potential = deepcopy(potential_field) - body.potential
             else:
-                acting_potential = deepcopy(potential_field)
-            # print("after", acting_potential.terms)
+                acting_potential = loads(dumps(potential_field))
+                # acting_potential = deepcopy(potential_field)
             body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n))
 
     def show(

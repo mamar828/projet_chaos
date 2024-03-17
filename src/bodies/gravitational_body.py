@@ -68,17 +68,15 @@ class GravitationalBody(Body):
             defaults to 10**(-3).
         """
 
-        t = time_step
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
-        # if self.has_potential:
-        #     potential -= self.potential
         a_x, a_y, a_z = potential.get_gradient(self._position, epsilon)
-        # print("gradient", a_x, a_y, a_z)
-        # print("position", self._position)
-        # print("velocity", self._velocity)
-        self._position = Vector(x+v_x*t-a_x/2*t**2, y+v_y*t-a_y/2*t**2, z+v_z*t-a_z/2*t**2)
-        self._velocity = Vector(v_x-a_x*t, v_y-a_y*t, v_z-a_z*t)
+        self._position = Vector(
+            x+v_x*time_step-a_x/2*time_step**2,
+            y+v_y*time_step-a_y/2*time_step**2,
+            z+v_z*time_step-a_z/2*time_step**2
+        )
+        self._velocity = Vector(v_x-a_x*time_step, v_y-a_y*time_step, v_z-a_z*time_step)
 
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
