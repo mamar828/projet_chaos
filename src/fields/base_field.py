@@ -8,8 +8,6 @@
     @Description:       This file contains a class used to create the basic structure of a field quantity.
 """
 
-from typing import List, Tuple
-
 from src.tools.vector import Vector
 
 

@@ -10,7 +10,7 @@
 
 from typing import Dict, List, Tuple
 
-import numpy as np
+from numpy import sqrt, linspace, zeros, ndarray
 
 from src.tools.vector import Vector
 from src.fields.base_field import Field
@@ -113,7 +113,7 @@ class ScalarField(Field):
         """
         value = 0
         for term in self.terms:
-            relative_distance = np.sqrt((term[2].x-position.x)**2+(term[2].y-position.y)**2+(term[2].z-position.z)**2)
+            relative_distance = sqrt((term[2].x-position.x)**2+(term[2].y-position.y)**2+(term[2].z-position.z)**2)
             value += term[1]*(relative_distance**term[0])
 
         return value
@@ -173,7 +173,7 @@ class ScalarField(Field):
 
         Returns
         -------
-        array : np.ndarray
+        array : ndarray
             The array of the computed function at the specified coordinates.
         """
 
@@ -186,12 +186,12 @@ class ScalarField(Field):
         x_positions, y_positions, z_positions = [origin_position[0]], [origin_position[1]], [origin_position[2]]
         for axis, nb_ticks in nb_ticks_per_axis.items():
             if axis == "x":
-                x_positions = np.linspace(getattr(start, axis), getattr(stop, axis), nb_ticks)
+                x_positions = linspace(getattr(start, axis), getattr(stop, axis), int(nb_ticks))
             if axis == "y":
-                y_positions = np.linspace(getattr(start, axis), getattr(stop, axis), nb_ticks)
+                y_positions = linspace(getattr(start, axis), getattr(stop, axis), int(nb_ticks))
             if axis == "z":
-                z_positions = np.linspace(getattr(start, axis), getattr(stop, axis), nb_ticks)
-        array = np.zeros((len(x_positions), len(y_positions), len(z_positions)))
+                z_positions = linspace(getattr(start, axis), getattr(stop, axis), int(nb_ticks))
+        array = zeros((len(x_positions), len(y_positions), len(z_positions)))
         for i_x, x in enumerate(x_positions):
             for i_y, y in enumerate(y_positions):
                 for i_z, z in enumerate(z_positions):
@@ -205,7 +205,7 @@ class ScalarField(Field):
             stop: Vector,
             nb_ticks_per_axis: Dict[str, int] = None,
             origin_position: Tuple[float, float, float] = None,
-    ) -> np.ndarray:
+    ) -> ndarray:
         """
         Computes the value of the field a grid and returns the result as a numpy array.
 
@@ -225,7 +225,7 @@ class ScalarField(Field):
 
         Returns
         -------
-        array : np.ndarray
+        array : ndarray
             The array of the field's values at the specified coordinates.
         """
 
@@ -243,7 +243,7 @@ class ScalarField(Field):
             stop: Vector,
             nb_ticks_per_axis: Dict[str, int] = None,
             origin_position: Tuple[float, float, float] = None
-    ) -> np.ndarray:
+    ) -> ndarray:
         """
         Computes the gradient of the field a grid and returns the result as a numpy array.
 
@@ -263,7 +263,7 @@ class ScalarField(Field):
 
         Returns
         -------
-        array : np.ndarray
+        array : ndarray
             The array of the field's gradient at the specified coordinates.
         """
 
