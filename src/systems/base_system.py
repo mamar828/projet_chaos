@@ -145,12 +145,12 @@ class BaseSystem:
                 width = (x_max - x_min)
             else:
                 width = (y_max - y_min)
-                setattr(stop, axes_names[0], getattr(start, axes_names[0] + width))
+                setattr(stop, axes_names[0], getattr(start, axes_names[0]) + width)
             if (y_max - y_min) > 0:
                 height = (y_max - y_min)
             else:
                 height = (x_max - x_min)
-                setattr(stop, axes_names[1], getattr(start, axes_names[1] + height))
+                setattr(stop, axes_names[1], getattr(start, axes_names[1]) + height)
             if (y_max - y_min) <= 0 and (x_max - x_min) <= 0:
                 height = 100
                 width = 100
