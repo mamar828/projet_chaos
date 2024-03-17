@@ -141,12 +141,20 @@ class BaseSystem:
             x_max = getattr(stop, axes_names[0])
             y_min = getattr(start, axes_names[1])
             y_max = getattr(stop, axes_names[1])
+            if (x_max - x_min) > 0:
+                width = (x_max - x_min)
+            else:
+                width = (y_max - y_min)
+                setattr(stop, axes_names[0], getattr(start, axes_names[0] + width))
+            if (y_max - y_min) > 0:
+                height = (y_max - y_min)
+            else:
+                height = (x_max - x_min)
+                setattr(stop, axes_names[1], getattr(start, axes_names[1] + height))
+            if (y_max - y_min) <= 0 and (x_max - x_min) <= 0:
+                height = 100
+                width = 100
             for i, body in enumerate(list_of_massive_bodies):
-                width = (x_max-x_min) if (x_max-x_min) > 0 else (y_max-y_min)
-                height = (y_max - y_min) if (y_max - y_min) > 0 else (x_max - x_min)
-                if (y_max-y_min) <= 0 and (x_max - x_min) <= 0:
-                    height = 100
-                    width = 100
                 plt.scatter(
                     (getattr(body.position, axes_names[0]) - x_min)/width*axes_size[0],
                     list(axes.values())[1]-(getattr(body.position, axes_names[1]) - y_min)/height*axes_size[1],
@@ -156,8 +164,8 @@ class BaseSystem:
 
             for i, body in enumerate(list_of_massless_bodies):
                 plt.scatter(
-                    (getattr(body.position, axes_names[0]) - x_min)/(x_max-x_min)*axes_size[0],
-                    list(axes.values())[1]-(getattr(body.position, axes_names[1]) - y_min)/(y_max-y_min)*axes_size[1],
+                    (getattr(body.position, axes_names[0]) - x_min)/width*axes_size[0],
+                    list(axes.values())[1]-(getattr(body.position, axes_names[1]) - y_min)/height*axes_size[1],
                     s=10,
                     c=colours[(i + len(list_of_massive_bodies)) % len(colours)]
                 )
