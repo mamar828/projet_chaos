@@ -8,6 +8,7 @@
     @Description:       This file contains a class used to create the basic structure of a physical body used for
                         simulation.
 """
+from copy import deepcopy
 
 from src.fields.scalar_field import ScalarField
 from src.tools.vector import Vector
@@ -24,7 +25,9 @@ class Body:
             position: Vector,
             velocity: Vector,
             fixed: bool,
-            has_potential: bool
+            has_potential: bool,
+            alive_position_threshold: float=5000,
+            alive_velocity_threshold: float=10
     ):
         """
         Defines required parameters.
@@ -39,12 +42,21 @@ class Body:
             Whether the body is fixed to it's initial position independent of all velocity and potentials.
         has_potential : bool
             Whether the body generates a potential field during simulations.
+        alive_position_threshold : float
+            Maximum position in pixels for which the body is considered alive. Defaults to 5000 pixels.
+        alive_position_threshold : float
+            Maximum velocity for which the body is considered alive. Defaults to 10 units.
         """
 
         self._position = position
         self._velocity = velocity
         self._fixed = fixed
         self._has_potential = has_potential
+        self.initial_position = deepcopy(position)
+        self.initial_velocity = deepcopy(velocity)
+        self.positions = [deepcopy(position)]
+        self.alive_position_threshold = alive_position_threshold
+        self.alive_velocity_threshold = alive_velocity_threshold
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float):
         """
@@ -127,3 +139,21 @@ class Body:
         """
 
         return self._velocity
+    
+    @property
+    def is_dead(self) -> bool:
+        """
+        Gives whether the body is considered dead.
+
+        Returns
+        -------
+        is_dead : bool
+        """
+        return (
+            abs(self.position.x) > self.alive_position_threshold or 
+            abs(self.position.y) > self.alive_position_threshold or 
+            abs(self.position.z) > self.alive_position_threshold or 
+            abs(self.velocity.x / self.initial_velocity.x) > self.alive_velocity_threshold or 
+            abs(self.velocity.y / self.initial_velocity.y) > self.alive_velocity_threshold or 
+            abs(self.velocity.z / self.initial_velocity.z) > self.alive_velocity_threshold
+        )

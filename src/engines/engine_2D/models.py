@@ -3,7 +3,15 @@ import numpy as np
 
 
 class Base_model:
-    def __init__(self, screen, position=(0,0), scale=(1,1), color="white", instance=None, plot_trace: bool=False):
+    def __init__(self,
+            screen,
+            position=(0,0),
+            scale=(1,1),
+            color="white",
+            instance=None,
+            plot_trace: bool=False,
+            max_trace: int=2000
+        ):
         self.instance = instance
         self.screen = screen
         # Reverse the y position because the y axis is inverted in pygame
@@ -11,6 +19,7 @@ class Base_model:
         self.scale = scale
         self.color = color
         self.plot_trace = plot_trace
+        self.max_trace = max_trace
         self.traces = []
         self.trace_repr = pg.Rect(0, 0, 1, 1)
         self.update()
@@ -19,6 +28,8 @@ class Base_model:
         # Reverse the y position because the y axis is inverted in pygame
         self.repr.center = new_position[0], self.screen.get_height() - new_position[1]
         if self.plot_trace:
+            if len(self.traces) > self.max_trace:
+                self.traces.pop(0)
             self.traces.append((new_position[0], self.screen.get_height() - new_position[1]))
 
     def trace(self):

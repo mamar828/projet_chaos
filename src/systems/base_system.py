@@ -46,6 +46,7 @@ class BaseSystem:
         self.fixed_bodies = []
         self.moving_bodies = []
         self.attractive_bodies = []
+        self.dead_bodies = []
         self.list_of_bodies = list_of_bodies
         for body in list_of_bodies:
             if body.fixed:
@@ -54,7 +55,6 @@ class BaseSystem:
                 self.moving_bodies.append(body)
             if body.has_potential:
                 self.attractive_bodies.append(body)
-        print([(body, body.position) for body in self.list_of_bodies])
 
     def update(self, time_step: float, epsilon: float = 10**(-2)):
         """
@@ -67,7 +67,7 @@ class BaseSystem:
             more accurate results.
         epsilon : float
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
-            defaults to 10**(-3).
+            defaults to 10**(-2).
         """
         potential_field = loads(dumps(self._base_potential))
         # potential_field = deepcopy(self._base_potential)
@@ -76,13 +76,25 @@ class BaseSystem:
         if len(potential_field.terms) > 2:
             potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
         for body in self.moving_bodies:
-            if body.has_potential:
-                acting_potential = loads(dumps(potential_field)) - body.potential
-                # acting_potential = deepcopy(potential_field) - body.potential
-            else:
-                acting_potential = loads(dumps(potential_field))
-                # acting_potential = deepcopy(potential_field)
-            body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n))
+            if body is not None:
+                if body.has_potential:
+                    acting_potential = loads(dumps(potential_field)) - body.potential
+                    # acting_potential = deepcopy(potential_field) - body.potential
+                else:
+                    acting_potential = loads(dumps(potential_field))
+                    # acting_potential = deepcopy(potential_field)
+                body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n))
+
+    def remove_dead_bodies(self):
+        """
+        Removes the bodies that are considered to be destroyed or too distant. Checks only for the moving bodies
+        without potentials.
+        """
+        for i, body in enumerate(self.moving_bodies):
+            if body is not None:
+                if not body.has_potential and body.is_dead:
+                    self.dead_bodies.append(body)
+                    self.moving_bodies[i] = None
 
     def show(
             self,

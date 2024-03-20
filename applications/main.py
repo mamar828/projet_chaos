@@ -1,31 +1,54 @@
-from src.engines.engine_2D.engine import Engine_2D
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
+from datetime import datetime
+
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.tools.vector import Vector
 from src.simulator.simulation import Simulation
+from src.simulator.simulation_mother import Simulation_mother
 
 
-test_system = BaseSystem(
-    list_of_bodies=[
-        GravitationalBody(position=Vector(250,250,0), mass=1.989*10**30, fixed=True),
-        GravitationalBody(position=Vector(100,250,0), mass=5.972*10**24,
-                          velocity=Vector(0,-29.78e-6,0), has_potential=False),
-        GravitationalBody(position=Vector(400,250,0), mass=5.972*10**24,
-                          velocity=Vector(0,29.78e-6,0), has_potential=False),
-    ],
-    n=9
-)
+# test_system = BaseSystem(
+#     list_of_bodies=[
+#         GravitationalBody(position=Vector(250,250,1), mass=1.989*10**30, fixed=True),
+#         GravitationalBody(position=Vector(100,250,1), mass=5.972*10**24,
+#                           velocity=Vector(0,-29.78e-6,0), has_potential=False)
+#     ],
+#     n=9
+# )
 # test_system.show(show_potential=True)
 
-sim = Simulation(
-    system=test_system,
-    maximum_delta_time=100
-)
+# sim = Simulation(
+#     system=test_system,
+#     maximum_delta_time=100
+# )
 
-sim.show(
-    window_size=(500,500),
-    framerate=60,
-    fullscreen=False,
-    screen_color=(0,60,60),
-    traces=[False, True, True]
-)
+# sim.show(
+#     window_size=(500,500),
+#     framerate=60,
+#     fullscreen=False,
+#     screen_color=(0,60,60),
+#     traces=[False, True]
+# )
+
+sim_viewer = Simulation.load_from_folder("simulations/test_3")
+sim_viewer.show()
+
+
+# if __name__ == '__main__':
+#     sim_system = BaseSystem(
+#         list_of_bodies=[GravitationalBody(position=Vector(250,250,0), mass=1.989e30, fixed=True)],
+#         n=9
+#     )
+
+#     mommy = Simulation_mother(base_system=sim_system, delta_time=100)
+#     mommy.dispatch(
+#         simulation_count=2,
+#         bodies_per_simulation=2,
+#         body_position_limits=[(200, 300), (200, 300), (0, 0)],
+#         body_velocity_limits=[(-100e-6, 100e-6), (-100e-6, 100e-6), (0, 0)],
+#         save_foldername=f"simulations/test_1",
+#         simulation_duration=10e5
+#     )
