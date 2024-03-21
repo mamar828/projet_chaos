@@ -42,7 +42,7 @@ class Engine_2D:
         if True in list(keys):
             for i in range(0,10):
                 if keys[getattr(pg, f"K_{i}")]:
-                    self.physics_speed = round(i / 9 * 2500000 + 1)
+                    self.physics_speed = round((10**(2.5)*i)**2 + 1)
 
     def render(self):
         self.screen.fill(self.screen_color)

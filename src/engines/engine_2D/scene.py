@@ -37,7 +37,7 @@ class Scene:
             self += Circle(screen=self.app.screen, color=color_func(body), scale=(s,s),
                            position=(body.position[0], body.position[1]), instance=body, plot_trace=plot_trace)
 
-    @staticmethod     
+    @staticmethod
     def format_time(time: int) -> str:
         years = int(time // (3600*24*365))
         days = int(time % (3600*24*365) // (3600*24))
@@ -48,9 +48,6 @@ class Scene:
 
     def update(self):
         # Update system
-        # print(self.app.delta_time)
-        # print(self.app.simulation.maximum_delta_time)
-        # print(f"// {self.app.delta_time // self.app.simulation.maximum_delta_time}, ∆t {self.app.delta_time}, max ∆t {self.app.simulation.maximum_delta_time}, % {self.app.delta_time % self.app.simulation.maximum_delta_time}")
         for i in range(int(self.app.delta_time // self.app.simulation.maximum_delta_time)):
             self.system.update(self.app.simulation.maximum_delta_time)
         self.system.update(self.app.delta_time % self.app.simulation.maximum_delta_time)
