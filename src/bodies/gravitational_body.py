@@ -30,7 +30,7 @@ class GravitationalBody(Body):
             fixed: bool = False,
             has_potential: bool = True,
             alive_position_threshold: float=5000,
-            alive_velocity_threshold: float=10,
+            alive_velocity_threshold: float=10
     ):
         """
         Defines required parameters.
@@ -49,10 +49,8 @@ class GravitationalBody(Body):
             Whether the body generates a potential field during simulations.
         alive_position_threshold : float
             Maximum position in pixels for which the body is considered alive. Defaults to 5000 pixels.
-        alive_position_threshold : float
+        alive_velocity_threshold : float
             Maximum velocity for which the body is considered alive. Defaults to 10 units.
-        positions : list, optional
-            Specifies the positions of the body at every time step.
         """
 
         super().__init__(position, velocity, fixed, has_potential,
@@ -60,6 +58,7 @@ class GravitationalBody(Body):
         if mass <= 0:
             raise ValueError("mass must be positive")
         self.mass = mass
+        self.dead = False   # Whether the body is dead or not and should be removed from the display
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -86,7 +85,6 @@ class GravitationalBody(Body):
             z+v_z*time_step-a_z/2*time_step**2
         )
         self._velocity = Vector(v_x-a_x*time_step, v_y-a_y*time_step, v_z-a_z*time_step)
-        self.positions.append(self._position)
 
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -105,6 +103,12 @@ class GravitationalBody(Body):
         """
 
         self(time_step, potential, epsilon)
+
+    def save_position(self):
+        """
+        Saves the current position of the body to the positions list.
+        """
+        self.positions.append(self._position)
 
     @property
     def potential(self) -> ScalarField:

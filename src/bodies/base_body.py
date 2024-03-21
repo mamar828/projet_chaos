@@ -9,6 +9,8 @@
                         simulation.
 """
 from copy import deepcopy
+from warnings import filterwarnings
+filterwarnings('ignore')
 
 from src.fields.scalar_field import ScalarField
 from src.tools.vector import Vector
@@ -26,7 +28,7 @@ class Body:
             velocity: Vector,
             fixed: bool,
             has_potential: bool,
-            alive_position_threshold: float=5000,
+            alive_position_threshold: float=2500,
             alive_velocity_threshold: float=10
     ):
         """

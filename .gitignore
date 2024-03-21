@@ -2,3 +2,5 @@
 launch.json
 *.DS_Store
 *.idea
+plan.txt
+tests.py

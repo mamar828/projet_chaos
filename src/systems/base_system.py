@@ -26,7 +26,11 @@ class BaseSystem:
     A class used to compute simulations on systems made of multiple bodies.
     """
 
-    def __init__(self, list_of_bodies: List[Body], base_potential: Optional[ScalarField] = None, n: int = 0):
+    def __init__(self,
+            list_of_bodies: List[Body],
+            base_potential: Optional[ScalarField] = None,
+            n: int = 0
+        ):
         """
         Defines the required parameters.
 
@@ -37,7 +41,8 @@ class BaseSystem:
         base_potential : Optional[ScalarField]
             A ScalarField object to define the source-less potential. Defaults to a constant and null potential.
         n : int
-            The log base 10 of the space unit relative to the meter (e.g. 3 means 1000m or km and 6 means 10**6m or Mm).
+            The log base 10 of the space unit relative to the meter (e.g. 3 means 1000m or km and 6 means 10**6m or
+            Mm).
         """
         self.n = n
         if base_potential is None:
@@ -95,6 +100,14 @@ class BaseSystem:
                 if not body.has_potential and body.is_dead:
                     self.dead_bodies.append(body)
                     self.moving_bodies[i] = None
+
+    def save_positions(self):
+        """
+        Save the positions of every body in the system.
+        """
+        for body in self.moving_bodies:
+            if body is not None:
+                body.save_position()
 
     def show(
             self,

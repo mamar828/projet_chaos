@@ -79,5 +79,5 @@ from datetime import datetime
 
 # print(".".join(["a", "b", "c", "d"]))
 
-e = ["ab", "cd", "ef"]
-print(e.index("ab"))
+# e = ["ab", "cd", "ef"]
+# print(e.index("ab"))

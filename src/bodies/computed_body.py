@@ -19,16 +19,19 @@ class ComputedBody(GravitationalBody):
         *args : list
             Arguments to pass to the GravitationalBody constructor.
         """
+        super().__init__(*args, **kwargs)
         self.positions = positions
         self.type = type
-        super().__init__(*args, **kwargs)
 
     def update(self):
         """
         Update the body's position.
         """
-        del self.positions[0]
-        self.position = self.positions[0]
+        if self.positions:
+            self._position = self.positions[0]
+            del self.positions[0]
+        else:
+            self.dead = True
 
     def get_color(self) -> str:
         """
@@ -46,4 +49,4 @@ class ComputedBody(GravitationalBody):
         elif self.type == "dead":
             return "red"
         else:
-            raise ValueError(f"{C.RED+C.BOLD}{self.type} is not a supported type.{C.END}")
+            raise ValueError(f"self.type: {C.RED+C.BOLD}{self.type} is not a supported type.{C.END}")

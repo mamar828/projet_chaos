@@ -18,7 +18,6 @@ from src.simulator.simulation_mother import Simulation_mother
 #     ],
 #     n=9
 # )
-# test_system.show(show_potential=True)
 
 # sim = Simulation(
 #     system=test_system,
@@ -27,28 +26,62 @@ from src.simulator.simulation_mother import Simulation_mother
 
 # sim.show(
 #     window_size=(500,500),
-#     framerate=60,
+#     framerate=30,
 #     fullscreen=False,
 #     screen_color=(0,60,60),
-#     traces=[False, True]
+#     traces=[False, True],
+#     display_clock=True
 # )
 
-sim_viewer = Simulation.load_from_folder("simulations/test_3")
-sim_viewer.show()
 
 
-# if __name__ == '__main__':
-#     sim_system = BaseSystem(
-#         list_of_bodies=[GravitationalBody(position=Vector(250,250,0), mass=1.989e30, fixed=True)],
-#         n=9
-#     )
+if __name__ == '__main__':
+    # sim_system = BaseSystem(
+    #     list_of_bodies=[GravitationalBody(position=Vector(250,250,0), mass=1.989e30, fixed=True)],
+    #     n=9
+    # )
 
-#     mommy = Simulation_mother(base_system=sim_system, delta_time=100)
-#     mommy.dispatch(
-#         simulation_count=2,
-#         bodies_per_simulation=2,
-#         body_position_limits=[(200, 300), (200, 300), (0, 0)],
-#         body_velocity_limits=[(-100e-6, 100e-6), (-100e-6, 100e-6), (0, 0)],
-#         save_foldername=f"simulations/test_1",
-#         simulation_duration=10e5
-#     )
+    # mommy = Simulation_mother(base_system=sim_system, delta_time=100)
+    # foldername = mommy.dispatch(
+    #     simulation_count=8,
+    #     bodies_per_simulation=3,
+    #     body_position_limits=[(200, 300), (200, 300), (0, 0)],
+    #     body_velocity_limits=[(-50e-6, 50e-6), (-50e-6, 50e-6), (0, 0)],
+    #     save_foldername=f"simulations/test_1",
+    #     simulation_duration=10e7,
+    #     positions_saving_frequency=1e2
+    # )
+
+    # input()
+
+    # sim_viewer = Simulation.load_from_folder(foldername)
+    sim_viewer = Simulation.load_from_folder(f"simulations/test_57")
+    # sim_viewer = Simulation.load_from_folder(f"simulations/test_53")
+    sim_viewer.show(
+        window_size=(500,500),
+        framerate=60,
+        fullscreen=False,
+        screen_color=(0,60,60),
+        display_clock=True
+    )
+
+    # CREATE A BaseSystem FROM THE RESULTS OF THE SIMULATION
+    # body = sim_viewer.system.list_of_bodies[3]
+    # gbody = GravitationalBody(
+    #     mass=body.mass,
+    #     position=body.position,
+    #     velocity=body.velocity
+    # )
+
+    # test_sim = Simulation(
+    #     BaseSystem(list_of_bodies=[sim_viewer.system.list_of_bodies[0], gbody], n=9)
+    # )
+    # test_sim.show(
+    #     window_size=(500,500),
+    #     framerate=60,
+    #     fullscreen=False,
+    #     screen_color=(0,60,60),
+    #     display_clock=True
+    # )
+    
+    pass

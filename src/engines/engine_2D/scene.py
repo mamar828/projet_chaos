@@ -1,3 +1,5 @@
+from pygame.font import SysFont
+
 from src.engines.engine_2D.models import *
 from src.systems.computed_system import ComputedSystem
 
@@ -5,9 +7,12 @@ from src.systems.computed_system import ComputedSystem
 
 
 class Scene:
-    def __init__(self, app):
+    def __init__(self, app, display_clock: bool, clock_font: tuple[tuple, str]):
         self.app = app
         self.system = app.simulation.system
+        self.display_clock = display_clock
+        self.clock_sys_font = SysFont(*clock_font[0])
+        self.clock_color = clock_font[1]
         self.objects = []
         self.load()
 
@@ -21,23 +26,42 @@ class Scene:
     def load(self):
         # Determine the displayed colors
         if isinstance(self.system, ComputedSystem):
-            color_func = lambda body: body.get_color
+            color_func = lambda body: body.get_color()
         else:
-            color_func = Base_model.get_random_color
+            # A lambda function is also created only for consistency
+            color_func = lambda body: Base_model.get_random_color()
         
         for body, plot_trace in zip(self.system.list_of_bodies, self.app.simulation.traces):
             s = round(body.mass/(2*10**30), 0) * 30 + 10
             # s = 2*5*arctan(float(body.mass))/pi
-            self += Circle(screen=self.app.screen, color=color_func(), scale=(s,s),
+            self += Circle(screen=self.app.screen, color=color_func(body), scale=(s,s),
                            position=(body.position[0], body.position[1]), instance=body, plot_trace=plot_trace)
-    
+
+    @staticmethod     
+    def format_time(time: int) -> str:
+        years = int(time // (3600*24*365))
+        days = int(time % (3600*24*365) // (3600*24))
+        hours = int(time % (3600*24*365) % (3600*24) // (3600))
+        minutes = int(time % (3600*24*365) % (3600*24) % (3600) // 60)
+        seconds = int(time % (3600*24*365) % (3600*24) % (3600) % 60)
+        return f"{years}y {days}d {hours:02}:{minutes:02}:{seconds:02}"
+
     def update(self):
         # Update system
-        for i in range(self.app.delta_time // self.app.simulation.maximum_delta_time):
+        # print(self.app.delta_time)
+        # print(self.app.simulation.maximum_delta_time)
+        # print(f"// {self.app.delta_time // self.app.simulation.maximum_delta_time}, ∆t {self.app.delta_time}, max ∆t {self.app.simulation.maximum_delta_time}, % {self.app.delta_time % self.app.simulation.maximum_delta_time}")
+        for i in range(int(self.app.delta_time // self.app.simulation.maximum_delta_time)):
             self.system.update(self.app.simulation.maximum_delta_time)
         self.system.update(self.app.delta_time % self.app.simulation.maximum_delta_time)
 
         # Update display
         for obj in self.objects:
-            obj.move((obj.instance.position[0], obj.instance.position[1]))
-            obj.update()
+            if not obj.instance.dead:
+                obj.move((obj.instance.position[0], obj.instance.position[1]))
+                obj.update()
+        
+        # Update clock
+        if self.display_clock:
+            time = self.clock_sys_font.render(f"{self.format_time(self.app.simulation_time)}", True, self.clock_color)
+            self.app.screen.blit(time, (self.app.screen.get_width() - time.get_width() - 10, 10))

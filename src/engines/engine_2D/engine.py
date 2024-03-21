@@ -9,6 +9,8 @@ class Engine_2D:
             simulation,
             window_size: tuple[int]=(1440,900),
             framerate: int=60,
+            display_clock: bool=False,
+            clock_font: tuple[tuple, str]=(("Trebuchet MS", 25), "black"),
             fullscreen: bool=False,
             screen_color: tuple=(0,0,0)
         ):
@@ -23,10 +25,11 @@ class Engine_2D:
 
         self.clock = pg.time.Clock()
         self.time = 0
+        self.simulation_time = 0
         self.delta_time = 0
         self.physics_speed = 1
 
-        self.scene = Scene(self)
+        self.scene = Scene(self, display_clock, clock_font)
 
     def check_events(self):
         for event in pg.event.get():
@@ -39,7 +42,7 @@ class Engine_2D:
         if True in list(keys):
             for i in range(0,10):
                 if keys[getattr(pg, f"K_{i}")]:
-                    self.physics_speed = round(i / 9 * 5000 + 1)
+                    self.physics_speed = round(i / 9 * 2500000 + 1)
 
     def render(self):
         self.screen.fill(self.screen_color)
@@ -55,7 +58,8 @@ class Engine_2D:
             self.check_events()
             self.update_physics_speed()
             self.render()
-            self.delta_time = self.clock.tick(self.framerate) * self.physics_speed
+            self.delta_time = (self.clock.tick(self.framerate) / 1000) * self.physics_speed
+            self.simulation_time += self.delta_time
 
 
 # listi = [
