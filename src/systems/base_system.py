@@ -60,6 +60,7 @@ class BaseSystem:
                 self.moving_bodies.append(body)
             if body.has_potential:
                 self.attractive_bodies.append(body)
+        self.current_potential = None
 
     def update(self, time_step: float, epsilon: float = 10**(-2)):
         """
@@ -83,21 +84,30 @@ class BaseSystem:
         for body in self.moving_bodies:
             if body is not None:
                 if body.has_potential:
-                    acting_potential = loads(dumps(potential_field)) - body.potential
-                    # acting_potential = deepcopy(potential_field) - body.potential
+                    acting_potential = loads(dumps(potential_field)) - body.potential       # equivalent to deepcopy()
                 else:
                     acting_potential = loads(dumps(potential_field))
-                    # acting_potential = deepcopy(potential_field)
                 body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n))
 
-    def remove_dead_bodies(self):
+        self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
+
+    def remove_dead_bodies(self, potential_gradient_limit: int, body_position_limit: tuple[int,int]):
         """
         Removes the bodies that are considered to be destroyed or too distant. Checks only for the moving bodies
         without potentials.
+
+        Parameters
+        ----------
+        potential_gradient_limit: int
+            Limit for the potential gradient on a body to be considered still alive.
+        body_position_limit: tuple[int,int]
+            Specify the position in pixels of a body to be considered still alive.
         """
+        epsilon = 10**(-2)*10**(-self.n)
         for i, body in enumerate(self.moving_bodies):
             if body is not None:
-                if not body.has_potential and body.is_dead:
+                if not body.has_potential and body.is_dead(self.current_potential, epsilon,
+                                                           potential_gradient_limit, body_position_limit):
                     self.dead_bodies.append(body)
                     self.moving_bodies[i] = None
 

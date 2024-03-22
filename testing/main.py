@@ -1,8 +1,6 @@
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
-from datetime import datetime
-
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.tools.vector import Vector
@@ -36,33 +34,35 @@ from src.simulator.simulation_mother import Simulation_mother
 
 
 if __name__ == '__main__':
-    # sim_system = BaseSystem(
-    #     list_of_bodies=[GravitationalBody(position=Vector(250,250,0), mass=1.989e30, fixed=True)],
-    #     n=9
-    # )
+    sim_system = BaseSystem(
+        list_of_bodies=[GravitationalBody(position=Vector(250,250,0), mass=1.989e30, fixed=True)],
+        n=9
+    )
 
-    # mommy = Simulation_mother(base_system=sim_system, delta_time=100)
-    # foldername = mommy.dispatch(
-    #     simulation_count=8,
-    #     bodies_per_simulation=3,
-    #     body_position_limits=[(200, 300), (200, 300), (0, 0)],
-    #     body_velocity_limits=[(-50e-6, 50e-6), (-50e-6, 50e-6), (0, 0)],
-    #     save_foldername=f"simulations/test_1",
-    #     simulation_duration=10e7,
-    #     positions_saving_frequency=1e2
-    # )
+    mommy = Simulation_mother(base_system=sim_system, delta_time=100)
+    foldername = mommy.dispatch(
+        simulation_count=8,
+        bodies_per_simulation=4,
+        body_position_limits=[(200, 300), (200, 300), (0, 0)],
+        body_velocity_limits=[(-50e-6, 50e-6), (-50e-6, 50e-6), (0, 0)],
+        save_foldername=f"simulations/dead_method",
+        simulation_duration=1e8,
+        positions_saving_frequency=5e2,
+        potential_gradient_limit= 5e-10
+    )
 
-    # input()
+    input()
 
     # sim_viewer = Simulation.load_from_folder(foldername)
-    sim_viewer = Simulation.load_from_folder(f"simulations/test_57")
-    # sim_viewer = Simulation.load_from_folder(f"simulations/test_53")
+    sim_viewer = Simulation.load_from_folder(f"simulations/dead_method_10")
+    # sim_viewer = Simulation.load_from_folder(f"simulations/test_53")            # Big one
     sim_viewer.show(
         window_size=(500,500),
         framerate=60,
         fullscreen=False,
         screen_color=(0,60,60),
-        display_clock=True
+        display_clock=True,
+        traces=True
     )
 
     # CREATE A BaseSystem FROM THE RESULTS OF THE SIMULATION

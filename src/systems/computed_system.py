@@ -20,7 +20,7 @@ class ComputedSystem(BaseSystem):
         self.tick_factor = tick_factor
         self.current_tick = 0
 
-    def update(self, delta_time: int):
+    def update(self, delta_time: int=None):
         """
         Updates the position of the bodies within the system according to their pre-computed positions.
 

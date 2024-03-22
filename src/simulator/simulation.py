@@ -71,7 +71,7 @@ class Simulation:
                 dump(body, file)
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq))
 
-    def show(self, *args, traces: list=None, **kwargs):
+    def show(self, *args, traces: list | bool=None, **kwargs):
         """
         Show a simulation.
 
@@ -79,12 +79,16 @@ class Simulation:
         ----------
         args : list
             Parameters to pass to the Engine_2D class.
-        traces : list
-            Optional, specify the bodies which should leave a trace.
+        traces : list or bool
+            Optional, specify the bodies which should leave a trace. If traces is a list of booleans, this controls the
+            trace generation of each body in the provided system, in the same order as the bodies in the system. If
+            traces is a boolean, all bodies in the system will be traced. Defaults to None.
         kwargs : dict
             Parameters to pass to the Engine_2D class.
         """
-        if not traces or len(traces) != len(self.system.list_of_bodies):
+        if isinstance(traces, bool) and traces:
+            self.traces = [True for i in range(len(self.system.list_of_bodies))]
+        elif not traces or len(traces) != len(self.system.list_of_bodies):
             self.traces = [None for i in range(len(self.system.list_of_bodies))]
         else:
             self.traces = traces
@@ -95,7 +99,12 @@ class Simulation:
         )
         app.run()
 
-    def run(self, duration: int, positions_saving_frequency: int) -> dict:
+    def run(self,
+        duration: int,
+        positions_saving_frequency: int,
+        potential_gradient_limit: int,
+        body_position_limits: int
+    ) -> dict:
         """
         Run the simulation.
 
@@ -105,7 +114,11 @@ class Simulation:
             Duration of the simulation in seconds.
         positions_saving_frequency : int
             Sets the number of steps after which the body's positions will be saved. Defaults to 1000.
-
+        potential_gradient_limit: int
+            Limit for the potential gradient on a body to be considered still alive.
+        body_position_limits: tuple[int,int]
+            Specify the position in pixels of a body to be considered still alive.
+            
         Returns
         -------
         results : dict
@@ -117,7 +130,7 @@ class Simulation:
             for i in range(int(positions_saving_frequency)):
                 system.update(self.maximum_delta_time)
             # Check for dead bodies in the system
-            system.remove_dead_bodies()
+            system.remove_dead_bodies(potential_gradient_limit, body_position_limits)
             if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
                 # Check if no bodies remain
                 break

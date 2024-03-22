@@ -4,3 +4,4 @@ launch.json
 *.idea
 plan.txt
 tests.py
+simulations

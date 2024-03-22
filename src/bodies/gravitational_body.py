@@ -10,6 +10,7 @@
 """
 
 from scipy.constants.constants import gravitational_constant
+from numpy.linalg import norm
 
 from src.bodies.base_body import Body
 from src.fields.scalar_field import ScalarField
@@ -122,3 +123,41 @@ class GravitationalBody(Body):
         """
 
         return ScalarField([(-1, -self.mass * gravitational_constant, self._position)])
+    
+    def is_dead(self,
+        potential: ScalarField,
+        epsilon: float,
+        potential_gradient_limit: int,
+        body_position_limit: tuple[int,int]
+    ) -> bool:
+        """
+        Gives whether the body is considered dead by evaluating if the modulus of the acceleration to which the body is
+        subjected. Also checks if the body is too far away from its initial position.
+
+        Parameters
+        ----------
+        potential : ScalarField
+            Potential field to evaluate the body's acceleration.
+        epsilon : float
+            The space interval with which the gradient is computed, a smaller value gives more accurate results,
+        potential_gradient_limit: int
+            Quantity over which the body is considered dead.
+        body_position_limit: tuple[int,int]
+            Specify the position in pixels of a body to be considered still alive.
+            
+        Returns
+        -------
+        is_dead : bool
+            Whether the body is considered dead or not.
+        """
+        condition_2D = (
+            norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit or
+                body_position_limit[0]-0.1 > self.position.x or self.position.x > body_position_limit[1] or 
+                body_position_limit[0]-0.1 > self.position.y or self.position.y > body_position_limit[1]
+        )
+        if self.position.z == 0:
+            return condition_2D
+        else:
+            return (condition_2D or 
+                    body_position_limit[0]-0.1 > self.position.z or self.position.z > body_position_limit[1])
+

@@ -141,21 +141,3 @@ class Body:
         """
 
         return self._velocity
-    
-    @property
-    def is_dead(self) -> bool:
-        """
-        Gives whether the body is considered dead.
-
-        Returns
-        -------
-        is_dead : bool
-        """
-        return (
-            abs(self.position.x) > self.alive_position_threshold or 
-            abs(self.position.y) > self.alive_position_threshold or 
-            abs(self.position.z) > self.alive_position_threshold or 
-            abs(self.velocity.x / self.initial_velocity.x) > self.alive_velocity_threshold or 
-            abs(self.velocity.y / self.initial_velocity.y) > self.alive_velocity_threshold or 
-            abs(self.velocity.z / self.initial_velocity.z) > self.alive_velocity_threshold
-        )
