@@ -1,4 +1,0 @@
-Time: 2024-03-20 00:03:39
-Number of processes: 8
-Duration: 0:00:01.317584alive_position_threshold: 5000
-alive_velocity_threshold: 10

@@ -1,6 +1,0 @@
-Time: 2024-03-20 15:04:58
-Number of processes: 8
-Duration: 0:00:01.256855
-Delta time: 100
-BaseSystem n: 0alive_position_threshold: 5000
-alive_velocity_threshold: 10

@@ -66,9 +66,7 @@ class Simulation:
 
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
         bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
-        with gzip_open("test.gz", "wb") as file:
-            for body in bodies:
-                dump(body, file)
+
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq))
 
     def show(self, *args, traces: list | bool=None, **kwargs):

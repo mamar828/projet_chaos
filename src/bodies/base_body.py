@@ -27,9 +27,7 @@ class Body:
             position: Vector,
             velocity: Vector,
             fixed: bool,
-            has_potential: bool,
-            alive_position_threshold: float=2500,
-            alive_velocity_threshold: float=10
+            has_potential: bool
     ):
         """
         Defines required parameters.
@@ -44,10 +42,6 @@ class Body:
             Whether the body is fixed to it's initial position independent of all velocity and potentials.
         has_potential : bool
             Whether the body generates a potential field during simulations.
-        alive_position_threshold : float
-            Maximum position in pixels for which the body is considered alive. Defaults to 5000 pixels.
-        alive_position_threshold : float
-            Maximum velocity for which the body is considered alive. Defaults to 10 units.
         """
 
         self._position = position
@@ -57,8 +51,6 @@ class Body:
         self.initial_position = deepcopy(position)
         self.initial_velocity = deepcopy(velocity)
         self.positions = [deepcopy(position)]
-        self.alive_position_threshold = alive_position_threshold
-        self.alive_velocity_threshold = alive_velocity_threshold
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float):
         """

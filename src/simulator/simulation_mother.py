@@ -151,9 +151,9 @@ class Simulation_mother:
         ]).transpose().tolist()
 
         print(f"{C.YELLOW+C.BOLD}Simulation starting at {datetime.now().strftime('%H:%M:%S')} with parameters:{C.END}")
-        print(C.YELLOW)
         print(f"\n\tsimulation_count:             {simulation_count}" +
               f"\n\tbodies_per_simulation:        {bodies_per_simulation}" +
+              f"\n\tdelta_time:                   {self.delta_time}" +
               f"\n\tbody_initial_position_limits: {body_initial_position_limits}" +
               f"\n\tbody_initial_velocity_limits: {body_initial_velocity_limits}" +
               f"\n\tpotential_gradient_limit:     {potential_gradient_limit:.0e}" +

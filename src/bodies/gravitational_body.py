@@ -30,8 +30,6 @@ class GravitationalBody(Body):
             velocity: Vector = Vector(0, 0, 0),
             fixed: bool = False,
             has_potential: bool = True,
-            alive_position_threshold: float=5000,
-            alive_velocity_threshold: float=10
     ):
         """
         Defines required parameters.
@@ -48,14 +46,9 @@ class GravitationalBody(Body):
             Whether the body is fixed to it's initial position independent of all velocity and potentials.
         has_potential : bool
             Whether the body generates a potential field during simulations.
-        alive_position_threshold : float
-            Maximum position in pixels for which the body is considered alive. Defaults to 5000 pixels.
-        alive_velocity_threshold : float
-            Maximum velocity for which the body is considered alive. Defaults to 10 units.
         """
 
-        super().__init__(position, velocity, fixed, has_potential,
-                         alive_position_threshold, alive_velocity_threshold)
+        super().__init__(position, velocity, fixed, has_potential)
         if mass <= 0:
             raise ValueError("mass must be positive")
         self.mass = mass
