@@ -13,7 +13,7 @@ if __name__ == '__main__':
     sim_system = BaseSystem(
         list_of_bodies=[GravitationalBody(position=Vector(450,450,0), mass=1.989e30, fixed=True),
                         GravitationalBody(position=Vector(300,450,0),
-                                          velocity=Vector(0,30e-6,0), mass=5.972e26, fixed=False)],
+                                          velocity=Vector(0,30e-6,0), mass=5.972e29, fixed=False)],
         n=9
     )
 
@@ -23,6 +23,7 @@ if __name__ == '__main__':
         bodies_per_simulation=2,
         body_initial_position_limits=[(0, 900), (0, 900), (0, 0)],
         body_initial_velocity_limits=[(-50e-6, 50e-6), (-50e-6, 50e-6), (0, 0)],
+        # save_foldername=f"trash/moving_object_not_showing",
         save_foldername=f"simulations/double_body_tests",
         simulation_duration=1e8,
         positions_saving_frequency=1e2,

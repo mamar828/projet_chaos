@@ -71,17 +71,18 @@ class Simulation_mother:
         
         with gzip_open(filename_base, 'wb') as file:
             for body in self.initial_system.list_of_bodies:
-                dump(
-                    ComputedBody(
-                        positions=body.positions,
-                        type="base_body",
-                        mass=body.mass,
-                        position=body.initial_position,
-                        velocity=body.initial_velocity,
-                        fixed=body.fixed,
-                        has_potential=body.has_potential
-                    ), file
-                )
+                if body.fixed:
+                    dump(
+                        ComputedBody(
+                            positions=body.positions,
+                            type="base_body",
+                            mass=body.mass,
+                            position=body.initial_position,
+                            velocity=body.initial_velocity,
+                            fixed=body.fixed,
+                            has_potential=body.has_potential
+                        ), file
+                    )
 
     def dispatch(self,
         simulation_count: int,
@@ -151,6 +152,7 @@ class Simulation_mother:
         ]).transpose().tolist()
 
         print(f"{C.YELLOW+C.BOLD}Simulation starting at {datetime.now().strftime('%H:%M:%S')} with parameters:{C.END}")
+        print(C.BROWN)
         print(f"\n\tsimulation_count:             {simulation_count}" +
               f"\n\tbodies_per_simulation:        {bodies_per_simulation}" +
               f"\n\tdelta_time:                   {self.delta_time}" +
@@ -165,22 +167,29 @@ class Simulation_mother:
 
         pool = Pool()
         number_of_processes = pool._processes
-        print(f"{C.YELLOW}Number of processes used: {number_of_processes}{C.END}")
+        print(f"{C.BROWN}Number of processes used: {number_of_processes}{C.END}")
         start = datetime.now()
 
         worker_args = [(body_pos, body_velocities, self.initial_system, self.delta_time, simulation_duration,
                         positions_saving_frequency, potential_gradient_limit, body_position_limits)
                        for body_pos in body_positions]
+        
+        # Dispatch a worker simulation to compute the independent movement of attractive moving bodies
+        if self.initial_system.moving_bodies:
+            special_args = [(None, None, self.initial_system, self.delta_time, simulation_duration,
+                             positions_saving_frequency, None, None)]
 
-        results = pool.starmap(worker_simulation, worker_args)
+        results = pool.starmap(worker_simulation, special_args + worker_args)
         stop = datetime.now()
         pool.close()
         time = stop - start
         print(f"\n{C.GREEN}Simulation finished in {time}.{C.END}")
+
         self.save_simulation_parameters(
             save_foldername, number_of_processes=number_of_processes, real_time_duration=time,
             positions_saving_frequency=int(positions_saving_frequency), simulation_duration=int(simulation_duration),
-            potential_gradient_limit=potential_gradient_limit, body_position_limits=body_position_limits)
+            potential_gradient_limit=potential_gradient_limit, body_position_limits=body_position_limits
+            )
         self.save_results(results, save_foldername)
         print(f"{C.GREEN+C.BOLD}Simulation successfully saved at {save_foldername}.{C.END}")
         return save_foldername
@@ -196,22 +205,34 @@ def worker_simulation(
         potential_gradient_limit: int,
         body_position_limits: tuple[int,int]
     ):
-    simulated_system = BaseSystem(
-        list_of_bodies=(
-            system.list_of_bodies + [GravitationalBody(
-                mass=1,
-                position=Vector(*body_position),
-                velocity=Vector(v_x,v_y,v_z),
-                has_potential=False
-            ) for v_x, v_y, v_z in body_velocities]
-        ),
-        n=system.n
-    )
-    simulation = Simulation(
-        system=simulated_system,
-        maximum_delta_time=delta_time
-    )
-    results = simulation.run(simulation_duration, positions_saving_frequency,
-                             potential_gradient_limit, body_position_limits)
-    print(".", end="", flush=True)
+    if body_position == None and body_velocities == None:
+        # Special simulation
+        simulation = Simulation(
+            system=system,
+            maximum_delta_time=delta_time
+        )
+        results = simulation.run_special(simulation_duration, positions_saving_frequency)
+        print(",", end="", flush=True)
+
+    else:
+        # Normal simulation
+        simulated_system = BaseSystem(
+            list_of_bodies=(
+                system.list_of_bodies + [GravitationalBody(
+                    mass=1,
+                    position=Vector(*body_position),
+                    velocity=Vector(v_x,v_y,v_z),
+                    has_potential=False
+                ) for v_x, v_y, v_z in body_velocities]
+            ),
+            n=system.n
+        )
+        simulation = Simulation(
+            system=simulated_system,
+            maximum_delta_time=delta_time
+        )
+        results = simulation.run(simulation_duration, positions_saving_frequency,
+                                potential_gradient_limit, body_position_limits)
+        print(".", end="", flush=True)
+
     return results

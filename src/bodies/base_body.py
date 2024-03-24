@@ -68,7 +68,11 @@ class Body:
         """
 
         raise NotImplementedError
-
+    
+    def __str__(self):
+        return (f"fixed: {self.fixed}, has_potential: {self.has_potential}, " + 
+                f"initial_position: {self.initial_position}, initial_velocity: {self.initial_velocity}")
+    
     @property
     def fixed(self) -> bool:
         """

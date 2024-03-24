@@ -7,9 +7,11 @@ from src.systems.computed_system import ComputedSystem
 
 
 if __name__ == '__main__':
-    sim_viewer = Simulation.load_from_folder(f"simulations/double_body_tests")
+    sim_viewer = Simulation.load_from_folder(f"simulations/gravity_assist")
+    # sim_viewer = Simulation.load_from_folder(f"simulations/double_body_tests_11")
     # sim_viewer = Simulation(system=ComputedSystem(list_of_bodies=sim_viewer.system.list_of_bodies[:6], n=9,
     #                                               tick_factor=sim_viewer.system.tick_factor))
+    # print(sim_viewer.system.list_of_bodies[1].positions)
     sim_viewer.show(
         window_size=(900,900),
         framerate=60,

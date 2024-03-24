@@ -23,6 +23,9 @@ class ComputedBody(GravitationalBody):
         self.positions = positions
         self.type = type
 
+    def __str__(self):
+        return super().__str__() + f"type: {self.type}, len(positions): {len(self.positions)}"
+
     def update(self):
         """
         Update the body's position.
@@ -33,16 +36,16 @@ class ComputedBody(GravitationalBody):
         else:
             self.dead = True
 
-    def get_color(self) -> str:
+    def get_color(self) -> str | tuple[int, int, int]:
         """
         Get the color of the body depending on its type.
 
         Returns
         -------
-        color : str
+        color : str | tuple[int, int, int]
             The color of the body: green if it stays alive, red if not and random for the others.
         """
-        if self.type == "base_body":
+        if self.type == "base_body" or self.type == "attractive_moving":
             return randint(0, 255, 3)
         elif self.type == "alive":
             return "green"

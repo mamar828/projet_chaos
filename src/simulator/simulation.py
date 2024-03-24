@@ -23,6 +23,12 @@ class Simulation:
         self.maximum_delta_time = maximum_delta_time
         self.traces = None
 
+    def __str__(self):
+        returnstr = f"Number of bodies: {len(self.system.list_of_bodies)}\n"
+        for body in self.system.list_of_bodies:
+            returnstr += str(body) + "\n"
+        return returnstr
+
     @staticmethod
     def load_pickle_file(filename: str) -> list:
         """
@@ -116,7 +122,7 @@ class Simulation:
             Limit for the potential gradient on a body to be considered still alive.
         body_position_limits: tuple[int,int]
             Specify the position in pixels of a body to be considered still alive.
-            
+
         Returns
         -------
         results : dict
@@ -136,5 +142,29 @@ class Simulation:
         return {
             "alive": [body for body in system.list_of_bodies if body not in system.attractive_bodies 
                                                             and body not in system.dead_bodies],
-            "dead": system.dead_bodies
+            "dead": system.dead_bodies,
         }
+    
+    def run_special(self, duration: int, positions_saving_frequency: int) -> list:
+        """ 
+        Run the simulation only for the attractive moving bodies of the system.
+
+        Parameters
+        ----------
+        duration : int
+            Duration of the simulation in seconds.
+        positions_saving_frequency : int
+            Sets the number of steps after which the body's positions will be saved. Defaults to 1000.
+
+        Returns
+        -------
+        results : dict
+            The body objects with their positions attributes completed. Contains only the "attractive_moving" keyword.
+        """
+        total_iterations = duration // self.maximum_delta_time
+        system = self.system
+        for i in range(int(total_iterations // positions_saving_frequency)):
+            for i in range(int(positions_saving_frequency)):
+                system.update(self.maximum_delta_time)
+            system.save_positions()
+        return {"attractive_moving": [body for body in system.list_of_bodies if body in system.moving_bodies]}
