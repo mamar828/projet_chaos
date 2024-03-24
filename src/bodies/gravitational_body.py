@@ -49,10 +49,12 @@ class GravitationalBody(Body):
             Whether the body generates a potential field during simulations.
         integrator : str
             The type of integrator to use when updating the position of the body. Defaults to "euler". Currently
-            implemented integrators are: "euler", "leapfrog", "kick-drift-kick", "yoshida"
+            implemented integrators are: "euler", "leapfrog", "kick-drift-kick", "yoshida" and "runge-kutta
         """
 
-        assert integrator in ["euler", "leapfrog", "kick-drift-kick", "yoshida"], 'The currently implemented integrators are: "euler", "leapfrog", "kick-drift-kick", "yoshida"'
+        assert integrator in ["euler", "leapfrog", "kick-drift-kick", "yoshida", "runge-kutta"], \
+            ('The currently implemented integrators are:'
+             ' "euler", "leapfrog", "kick-drift-kick", "yoshida", "runge-kutta"')
         self.integrator = integrator
         if integrator == "leapfrog":
             self.set_up_step = True
@@ -144,6 +146,54 @@ class GravitationalBody(Body):
 
             self._position = Vector(x + c_4 * v_x * time_step, y + c_4 * v_y * time_step, z + c_4 * v_z * time_step)
             self._velocity = Vector(v_x, v_y, v_z)
+
+        elif self.integrator == "runge-kutta":
+            v_x_1, v_y_1, v_z_1 = v_x, v_y, v_z
+            a_x_1, a_y_1, a_z_1 = a_x, a_y, a_z
+
+            v_x_2, v_y_2, v_z_2 = (
+                v_x + a_x_1 * 0.5 * time_step,
+                v_y + a_y_1 * 0.5 * time_step,
+                v_z + a_z_1 * 0.5 * time_step
+            )
+            a_x_2, a_y_2, a_z_2 = potential.get_acceleration(Vector(
+                x + v_x_1 * 0.5 * time_step,
+                y + v_y_1 * 0.5 * time_step,
+                z + v_z_1 * 0.5 * time_step
+            ), epsilon)
+
+            v_x_3, v_y_3, v_z_3 = (
+                v_x + a_x_2 * 0.5 * time_step,
+                v_y + a_y_2 * 0.5 * time_step,
+                v_z + a_z_2 * 0.5 * time_step
+            )
+            a_x_3, a_y_3, a_z_3 = potential.get_acceleration(Vector(
+                x + v_x_2 * 0.5 * time_step,
+                y + v_y_2 * 0.5 * time_step,
+                z + v_z_2 * 0.5 * time_step
+            ), epsilon)
+
+            v_x_4, v_y_4, v_z_4 = (
+                v_x + a_x_3 * time_step,
+                v_y + a_y_3 * time_step,
+                v_z + a_z_3 * time_step
+            )
+            a_x_4, a_y_4, a_z_4 = potential.get_acceleration(Vector(
+                x + v_x_3 * 0.5 * time_step,
+                y + v_y_3 * 0.5 * time_step,
+                z + v_z_3 * 0.5 * time_step
+            ), epsilon)
+
+            self._position = Vector(
+                x + (v_x_1 + 2 * v_x_2 + 2 * v_x_3 + v_x_4) / 6 * time_step,
+                y + (v_y_1 + 2 * v_y_2 + 2 * v_y_3 + v_y_4) / 6 * time_step,
+                z + (v_z_1 + 2 * v_z_2 + 2 * v_z_3 + v_z_4) / 6 * time_step
+            )
+            self._velocity = Vector(
+                v_x + (a_x_1 + 2 * a_x_2 + 2 * a_x_3 + a_x_4) / 6 * time_step,
+                v_y + (a_y_1 + 2 * a_y_2 + 2 * a_y_3 + a_y_4) / 6 * time_step,
+                v_z + (a_z_1 + 2 * a_z_2 + 2 * a_z_3 + a_z_4) / 6 * time_step
+            )
 
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
