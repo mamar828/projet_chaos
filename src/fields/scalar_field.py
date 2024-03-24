@@ -143,6 +143,31 @@ class ScalarField(Field):
             (self(Vector(x, y, z + epsilon/2)) - self(Vector(x, y, z - epsilon/2)))/epsilon,
         )
 
+    def get_acceleration(self, position: Vector, epsilon: float = 10**(-2)) -> Vector:
+        """
+        Computes the gradient of the scalar field at a given position using a step of size epsilon.
+
+        Parameters
+        ----------
+        position : Vector
+            The position where the gradient should be evaluated
+        epsilon : float
+            The space interval with which the gradient is computed, a smaller value gives more accurate results,
+            defaults to 10**(-3).
+
+        Returns
+        -------
+        gradient : Vector
+            The gradient at the desired position.
+        """
+
+        x, y, z = position
+        return Vector(
+            -(self(Vector(x + epsilon/2, y, z)) - self(Vector(x - epsilon/2, y, z)))/epsilon,
+            -(self(Vector(x, y + epsilon/2, z)) - self(Vector(x, y - epsilon/2, z)))/epsilon,
+            -(self(Vector(x, y, z + epsilon/2)) - self(Vector(x, y, z - epsilon/2)))/epsilon,
+        )
+
     def _compute_field_wide_operations(
             self,
             start: Vector,
