@@ -49,12 +49,12 @@ class GravitationalBody(Body):
             Whether the body generates a potential field during simulations.
         integrator : str
             The type of integrator to use when updating the position of the body. Defaults to "euler". Currently
-            implemented integrators are: "euler", "leapfrog", "kick-drift-kick", "yoshida" and "runge-kutta
+            implemented integrators are: "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"
         """
 
-        assert integrator in ["euler", "leapfrog", "kick-drift-kick", "yoshida", "runge-kutta"], \
+        assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"], \
             ('The currently implemented integrators are:'
-             ' "euler", "leapfrog", "kick-drift-kick", "yoshida", "runge-kutta"')
+             ' "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"')
         self.integrator = integrator
         if integrator == "leapfrog":
             self.set_up_step = True
@@ -99,7 +99,7 @@ class GravitationalBody(Body):
             )
             self._velocity = Vector(v_x+a_x*time_step, v_y+a_y*time_step, v_z+a_z*time_step)
 
-        elif self.integrator == "LeapFrog":
+        elif self.integrator == "leapfrog":
             if self.set_up_step:
                 v_x, v_y, v_z = self._velocity
                 v_x, v_y, v_z = v_x - a_x * time_step / 2, v_y - a_y * time_step / 2, v_z - a_z * time_step / 2
@@ -123,7 +123,7 @@ class GravitationalBody(Body):
             )
 
         elif self.integrator == "kick-drift-kick":
-            v_x, v_x, v_y = v_x + a_x * time_step / 2, v_y + a_y * time_step / 2, v_z + a_z * time_step / 2
+            v_x, v_y, v_z = v_x + a_x * time_step / 2, v_y + a_y * time_step / 2, v_z + a_z * time_step / 2
             self._position = Vector(x + v_x * time_step, y + v_y * time_step, z + v_z * time_step)
             a_x, a_y, a_z = potential.get_acceleration(self._position, epsilon)
             self._velocity = Vector(v_x + a_x * time_step / 2, v_y + a_y * time_step / 2, v_z + a_z * time_step / 2)
