@@ -145,8 +145,6 @@ class GravitationalBody(Body):
             self._position = Vector(x + c_4 * v_x * time_step, y + c_4 * v_y * time_step, z + c_4 * v_z * time_step)
             self._velocity = Vector(v_x, v_y, v_z)
 
-
-
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
         Updates the position and velocity of the body according to a potential and time step.
@@ -212,8 +210,8 @@ class GravitationalBody(Body):
             Whether the body is considered dead or not.
         """
         condition_2D = (
-            norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit or
-                body_position_limit[0]-0.1 > self.position.x or self.position.x > body_position_limit[1] or 
+                norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit or
+                body_position_limit[0]-0.1 > self.position.x or self.position.x > body_position_limit[1] or
                 body_position_limit[0]-0.1 > self.position.y or self.position.y > body_position_limit[1]
         )
         if self.position.z == 0:
