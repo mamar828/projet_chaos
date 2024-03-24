@@ -184,11 +184,12 @@ class GravitationalBody(Body):
 
         return ScalarField([(-1, -self.mass * gravitational_constant, self._position)])
     
-    def is_dead(self,
-        potential: ScalarField,
-        epsilon: float,
-        potential_gradient_limit: int,
-        body_position_limit: tuple[int,int]
+    def is_dead(
+            self,
+            potential: ScalarField,
+            epsilon: float,
+            potential_gradient_limit: int,
+            body_position_limit: tuple[int,int]
     ) -> bool:
         """
         Gives whether the body is considered dead by evaluating if the modulus of the acceleration to which the body is
