@@ -146,11 +146,82 @@ class Surface_VBO(Base_vertex_buffer_object):
         self.format = "2f"
         self.attribs = ["in_position"]
 
-    def get_vertex_data(self):
-        vertices = [(-1, -1), (1, -1), (1, 1), (-1, 1), (-1, -1), (1, 1)]
-        vertex_data = struct.pack(f'{len(vertices) * len(vertices[0])}f', *sum(vertices, ()))
-        return vertex_data
+    @staticmethod
+    def get_data(vertices, indices):
+        return np.array([vertices[i] for triangle in indices for i in triangle], dtype="f4")
 
+    def get_vertex_data(self):
+        vertices = [
+            (-1,-1, 1), ( 1,-1, 1), ( 1, 1, 1), (-1, 1, 1), # front
+            (-1, 1,-1), (-1,-1,-1), ( 1,-1,-1), ( 1, 1,-1)  # back
+        ]
+        indices = [
+            (0, 2, 3), (0, 1, 2),
+            (1, 7, 2), (1, 6, 7),
+            (6, 5, 4), (4, 7, 6),
+            (3, 4, 5), (3, 5, 0),
+            (3, 7, 4), (3, 2, 7),
+            (0, 6, 1), (0, 5, 6)
+        ]
+
+        vertex_data = self.get_data(vertices, indices)
+
+        # Texture related data
+        tex_coord_vertices = [(0,0), (1,0), (1,1), (0,1)]
+        tex_coord_indices = [
+            (0,2,3), (0,1,2),
+            (0,2,3), (0,1,2),
+            (0,1,2), (2,3,0),
+            (2,3,0), (2,0,1),
+            (0,2,3), (0,1,2),
+            (3,1,2), (3,0,1)
+        ]
+        tex_coord_data = self.get_data(tex_coord_vertices, tex_coord_indices)
+
+        # Lighting on all the different faces
+        normals = np.array(
+            [( 0, 0, 1) * 6,
+             ( 1, 0, 0) * 6,
+             ( 0, 0,-1) * 6,
+             (-1, 0, 0) * 6,
+             ( 0, 1, 0) * 6,
+             ( 0,-1, 0) * 6],
+             dtype="f4"
+        ).reshape(36,3)
+
+        return np.hstack([tex_coord_data, normals, vertex_data])
+    # def get_vertex_data(self):
+    #     self.amplitude = 100
+    #     self.frequency = 10
+    #     self.resolution = (300,300)
+    #     vertices = []
+    #     normals = []
+
+    #     # Generate vertices and normals
+    #     for i in range(self.resolution[0]):
+    #         for j in range(self.resolution[1]):
+    #             # Calculate x, y, z coordinates based on sine function parameters
+    #             x = i / (self.resolution[0] - 1) * 2 - 1
+    #             y = j / (self.resolution[1] - 1) * 2 - 1
+    #             z = self.amplitude * np.sin(self.frequency * (x + y))
+    #             vertices.extend([x, y, z])
+
+    #             # Calculate normals (approximation using neighboring vertices)
+    #             dx = self.amplitude * self.frequency * np.cos(self.frequency * (x + y))
+    #             dy = self.amplitude * self.frequency * np.cos(self.frequency * (x + y))
+    #             dz = 1.0
+    #             length = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+    #             normals.extend([dx / length, dy / length, dz / length])
+
+    #     return np.array(vertices + normals, dtype="f4")
+    
+    # def get_vao(self):
+    #     return self.context.vertex_array(self.shader_program, [(self.vbo, "3f 3f", "in_position", "in_normal")])
+
+    #     vertices = [(-1, -1), (1, -1), (1, 1), (-1, 1), (-1, -1), (1, 1)]
+    #     vertex_data = struct.pack(f'{len(vertices) * len(vertices[0])}f', *sum(vertices, ()))
+    #     return vertex_data
+    
 
 
 

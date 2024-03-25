@@ -8,14 +8,14 @@ class Shader_program:
             "default" : self.get_program("default"),
             "skybox" : self.get_program("skybox"),
             "shadow_map" : self.get_program("shadow_map"),
-            "surface" : self.get_program("surface/vertex", extensions=("glsl", "glsl"))
+            "surface" : self.get_program("surface")
         }
 
     def get_program(self, shader_program_name, extensions: tuple[str,str]=("vert", "frag")):
         with open(get_path(f"shaders/{shader_program_name}.{extensions[0]}")) as file:
             vertex_shader = file.read()
 
-        if shader_program_name.startswith("surface"): shader_program_name = "surface/fragment"
+        # if shader_program_name.startswith("surface"): shader_program_name = "surface/fragment"
         
         with open(get_path(f"shaders/{shader_program_name}.{extensions[1]}")) as file:
             fragment_shader = file.read()

@@ -12,7 +12,9 @@ class Scene_renderer:
         self.depth_frame_buffer_object.clear()
         self.depth_frame_buffer_object.use()
         for obj in self.scene.objects:
-            obj.render_shadow()
+            try:
+                obj.render_shadow()
+            except Exception: pass
 
     def main_render(self):
         self.context.screen.use()

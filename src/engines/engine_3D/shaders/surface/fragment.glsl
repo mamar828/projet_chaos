@@ -8,9 +8,21 @@ const float MAX_DIST = 1000.0;
 const float STEPS = 300.0;
 const float PI = acos(-1.0);
 
+float noise(vec2 p) {
+    return sin(p[0]) + sin(p[1]);
+}
+
+float getTerrain(vec3 p) {
+    float d = 0;
+    d += noise(p.xz);
+    d += p.y + 2.0;
+    return d;
+}
+
+
 float map(vec3 p) {
     float d = 0.0;
-    d += length(p) - 0.5;
+    d += getTerrain(p);
     return d;
 }
 
