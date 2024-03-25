@@ -8,7 +8,7 @@ class Scene:
         self.objects = []
         self.load(scene_objects)
         self.skybox = Skybox(app)
-        self += Surface(app=self.app, texture_id="skybox")
+        self += Surface(app=self.app, texture_id="filix")
         self.function = None
         if plot_function:
             self.plot_function()

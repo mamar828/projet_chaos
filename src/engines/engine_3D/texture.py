@@ -18,6 +18,7 @@ class Texture:
         self.textures["depth_texture"] = self.get_depth_texture()
         self.textures["cat"] = self.get_texture(get_path("objects/cat/20430_cat_diff_v1.jpg"))
         self.textures["floor"] = self.get_texture(get_path("textures/floor_test.png"))
+        self.textures["filix"] = self.get_texture(get_path("textures/filix.png"))
         for color in ["green", "red", "blue", "yellow", "orange", "cyan", "magenta", "white", "black", "purple",
                       "brown", "grey"]:
             self.textures[color] = self.get_color(color)

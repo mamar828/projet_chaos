@@ -32,6 +32,9 @@ class Vertex_array_object:
             "surface" : self.get_vertex_array_object(
                     program=self.program.programs["surface"],
                     vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["surface"])
+        #     "shadow_surface" : self.get_vertex_array_object(
+        #             program=self.program.programs["shadow_surface"],
+        #             vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["surface"])
         }
         # A shadow instance must be added for every object
 

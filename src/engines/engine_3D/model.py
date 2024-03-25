@@ -30,7 +30,8 @@ class Base_model:
 
     def update(self):
         self.texture.use(location=0)
-        self.program["camPos"].write(self.camera.position)
+        try: self.program["camPos"].write(self.camera.position)
+        except Exception: pass
         self.program["m_view"].write(self.camera.m_view)
         self.program["m_model"].write(self.m_model)
 
@@ -42,7 +43,8 @@ class Base_model:
         self.shadow_vertex_array_object.render()
     
     def on_init(self):
-        self.program["m_view_light"].write(self.app.light.m_view_light)
+        try: self.program["m_view_light"].write(self.app.light.m_view_light)
+        except Exception: pass
         # resolution
         # self.program["u_resolution"].write(glm.vec2(self.app.window_size))        # Used for shadow smoothing
         # depth texture
@@ -70,10 +72,12 @@ class Base_model:
         self.program["m_view"].write(self.camera.m_view)
         self.program["m_model"].write(self.m_model)
         # light
-        self.program["light.position"].write(self.app.light.position)
-        self.program["light.Ia"].write(self.app.light.Ia)
-        self.program["light.Id"].write(self.app.light.Id)
-        self.program["light.Is"].write(self.app.light.Is)
+        try:
+            self.program["light.position"].write(self.app.light.position)
+            self.program["light.Ia"].write(self.app.light.Ia)
+            self.program["light.Id"].write(self.app.light.Id)
+            self.program["light.Is"].write(self.app.light.Is)
+        except Exception: pass
 
     def get_model_matrix(self):
         # translation
@@ -137,9 +141,9 @@ class Surface(Animated_model):
     def __init__(self,
             app,
             texture_id,
-            position=(0,10,0),
+            position=(0,20,0),
             rotation=(0,0,0),
-            scale=(5,5,5),
+            scale=(1,1,1),
             instance=None
         ):
         super().__init__(app, "surface", texture_id, position, rotation, scale, instance)

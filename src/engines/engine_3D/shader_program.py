@@ -9,6 +9,7 @@ class Shader_program:
             "skybox" : self.get_program("skybox"),
             "shadow_map" : self.get_program("shadow_map"),
             "surface" : self.get_program("surface")
+            # "shadow_surface" : self.get_program("shadow_surface")
         }
 
     def get_program(self, shader_program_name, extensions: tuple[str,str]=("vert", "frag")):

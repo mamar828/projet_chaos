@@ -123,7 +123,7 @@ class Graphics_engine:
             self.get_time()
             self.check_events()
             self.camera.update()
-            # self.update
+            # self.updates
             self.render()
             self.delta_time = self.clock.tick(self.framerate)
 
