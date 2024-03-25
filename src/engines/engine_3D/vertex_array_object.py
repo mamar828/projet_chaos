@@ -28,9 +28,12 @@ class Vertex_array_object:
                     vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"]),
             "shadow_cat" : self.get_vertex_array_object(
                     program=self.program.programs["shadow_map"],
-                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"])
+                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"]),
+            "surface" : self.get_vertex_array_object(
+                    program=self.program.programs["surface"],
+                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["surface"])
         }
-        # A shadow instance must be added for every objects
+        # A shadow instance must be added for every object
 
     def get_vertex_array_object(self, program, vertex_buffer_object):
         vbo = vertex_buffer_object

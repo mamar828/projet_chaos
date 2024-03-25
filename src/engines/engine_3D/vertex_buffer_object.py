@@ -1,6 +1,8 @@
 import numpy as np
 import moderngl as mgl
 import pywavefront
+import struct
+
 from relative_paths import get_path
 
 
@@ -10,7 +12,8 @@ class Vertex_buffer_object:
             "cube" : Cube_VBO(context),
             "sphere" : Sphere_VBO(context),
             "skybox" : Skybox_VBO(context),
-            "cat" : Cat_VBO(context)
+            "cat" : Cat_VBO(context),
+            "surface" : Surface_VBO(context)
         }
 
     def destroy(self):
@@ -135,3 +138,48 @@ class Sphere_VBO(External_VBO):
 class Cat_VBO(External_VBO):
     def get_vertex_data(self):
         return super().get_vertex_data(get_path("objects/cat/20430_Cat_v1_NEW.obj"))
+
+
+class Surface_VBO(Base_vertex_buffer_object):
+    def __init__(self, context):
+        super().__init__(context)
+        self.format = "2f"
+        self.attribs = ["in_position"]
+
+    def get_vertex_data(self):
+        vertices = [(-1, -1), (1, -1), (1, 1), (-1, 1), (-1, -1), (1, 1)]
+        vertex_data = struct.pack(f'{len(vertices) * len(vertices[0])}f', *sum(vertices, ()))
+        return vertex_data
+
+
+
+
+
+# class Skybox_VBO(Base_vertex_buffer_object):
+#     def __init__(self, context):
+#         super().__init__(context)
+#         self.format = "3f"
+#         self.attribs = ["in_position"]
+    
+#     @staticmethod
+#     def get_data(vertices, indices):
+#         return np.array([vertices[i] for triangle in indices for i in triangle], dtype="f4")
+
+#     def get_vertex_data(self):
+#         vertices = [
+#             (-1,-1, 1), ( 1,-1, 1), ( 1, 1, 1), (-1, 1, 1), # front
+#             (-1, 1,-1), (-1,-1,-1), ( 1,-1,-1), ( 1, 1,-1)  # back
+#         ]
+#         indices = [
+#             (0, 2, 3), (0, 1, 2),
+#             (1, 7, 2), (1, 6, 7),
+#             (6, 5, 4), (4, 7, 6),
+#             (3, 4, 5), (3, 5, 0),
+#             (3, 7, 4), (3, 2, 7),
+#             (0, 6, 1), (0, 5, 6)
+#         ]
+
+#         vertex_data = self.get_data(vertices, indices)
+#         vertex_data = np.flip(vertex_data, 1).copy(order="C")
+
+#         return vertex_data

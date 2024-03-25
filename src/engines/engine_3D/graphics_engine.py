@@ -2,6 +2,7 @@ import pygame as pg
 import numpy as np
 import moderngl as mgl
 import sys
+from struct import pack
 
 from model import *
 from camera import Camera
@@ -9,7 +10,8 @@ from light import Light
 from mesh import Mesh
 from scene import *
 from scene_renderer import Scene_renderer
-from tests import *
+from tests import Floor, Planet, Mode7
+from relative_paths import get_path
 
 
 class Graphics_engine:
@@ -30,7 +32,8 @@ class Graphics_engine:
             camera_far_render_distance: float=100000000000000000000.,
             camera_yaw: float=-90.,
             camera_pitch: float=0.,
-            scene_elements: list=None
+            scene_elements: list=None,
+            plot_function: bool=False
         ):
         self.window_size = window_size
         self.framerate = framerate
@@ -52,27 +55,49 @@ class Graphics_engine:
         self.time = 0
         self.delta_time = 0     # Enables constant camera movement regardless of the framerate
 
-        self.light = Light(
-            position=light_position, 
-            color=light_color,
-            ambient_intensity=light_ambient_intensity,
-            diffuse_intensity=light_diffuse_intensity,
-            specular_intensity=light_specular_intensity
-        )
-        self.camera = Camera(
-            app=self,
-            position=camera_origin,
-            speed=camera_speed,
-            sensitivity=camera_sensitivity,
-            fov=camera_fov,
-            near_render_distance=camera_near_render_distance,
-            far_render_distance=camera_far_render_distance,
-            yaw=camera_yaw,
-            pitch=camera_pitch
-        )
-        self.mesh = Mesh(self)
-        self.scene = Scene(self, scene_elements)
-        self.scene_renderer = Scene_renderer(self)
+        # self.light = Light(
+        #     position=light_position, 
+        #     color=light_color,
+        #     ambient_intensity=light_ambient_intensity,
+        #     diffuse_intensity=light_diffuse_intensity,
+        #     specular_intensity=light_specular_intensity
+        # )
+        # self.camera = Camera(
+        #     app=self,
+        #     position=camera_origin,
+        #     speed=camera_speed,
+        #     sensitivity=camera_sensitivity,
+        #     fov=camera_fov,
+        #     near_render_distance=camera_near_render_distance,
+        #     far_render_distance=camera_far_render_distance,
+        #     yaw=camera_yaw,
+        #     pitch=camera_pitch
+        # )
+        # self.mesh = Mesh(self)
+        # self.scene = Scene(self, scene_elements)#, plot_function=plot_function)
+        # self.scene_renderer = Scene_renderer(self)
+
+        with open(get_path("shaders/surface/vertex.glsl")) as f:
+            vertex = f.read()
+        with open(get_path("shaders/surface/fragment.glsl")) as f:
+            fragment = f.read()
+        self.program = self.context.program(vertex_shader=vertex, fragment_shader=fragment)
+        
+        vertices = [(-1,-1),(1,-1),(1,1),(-1,1),(-1,-1),(1,1)]
+        vertex_data = pack(f"{len(vertices) * len(vertices[0])}f", *sum(vertices, ()))
+        self.vbo = self.context.buffer(vertex_data)
+        self.vao = self.context.vertex_array(self.program, [(self.vbo, "2f", "in_position")])
+        self.set_uniform("u_resolution", self.window_size)
+
+    def update(self):
+        # self.program["camPos"].write(self.camera.position)
+        self.set_uniform("u_time", self.time)
+
+    def set_uniform(self, u_name, u_value):
+        try:
+            self.program[u_name] = u_value
+        except KeyError:
+            pass
 
     def check_events(self):
         for event in pg.event.get():
@@ -83,7 +108,8 @@ class Graphics_engine:
 
     def render(self):
         self.context.clear(color=(0.08, 0.16, 0.18))
-        self.scene_renderer.render()
+        self.vao.render()
+        # self.scene_renderer.render()
         pg.display.flip()
 
     def get_time(self):
@@ -93,7 +119,8 @@ class Graphics_engine:
         while True:
             self.get_time()
             self.check_events()
-            self.camera.update()
+            # self.camera.update()
+            self.update
             self.render()
             self.delta_time = self.clock.tick(self.framerate)
 
@@ -112,6 +139,7 @@ if __name__ ==  "__main__":
         fullscreen=True,
         light_position=(100,30,30),
         light_color=(1,1,1),
-        scene_elements=listi
+        scene_elements=listi,
+        plot_function=True
     )
     app.run()

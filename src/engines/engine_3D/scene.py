@@ -1,12 +1,16 @@
 from model import *
+from relative_paths import get_path
 
 
 class Scene:
-    def __init__(self, app, scene_objects):
+    def __init__(self, app, scene_objects, plot_function=False):
         self.app = app
         self.objects = []
         self.load(scene_objects)
         self.skybox = Skybox(app)
+        self.function = None
+        if plot_function:
+            self.plot_function()
 
     def add_object(self, object):
         self.objects.append(object)
@@ -25,6 +29,12 @@ class Scene:
             if obj.instance:
                 obj.instance.update(self.app.delta_time)
                 obj.position = obj.instance.get_position()
+    
+    def destroy(self):
+        del self
+    
+    def plot_function(self):
+        self.function = Surface(app=self.app, texture_id="green")
 
 
 
