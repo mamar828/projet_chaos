@@ -143,9 +143,9 @@ class BaseSystem:
             Whether to show the bodies. Defaults to False.
         show_potential_null_slope_points : bool
             Whether to show the approximate places where the potentials are at the extremum. Defaults to False.
-        axes : Optional[List[str]]
-            A list of the two axes to plot, defaults to x and y with 110% of the distance between the origin and the
-            furthest point.
+        axes : Optional[Dict[str, int]]
+            A dictionary of the two axes to plot as keys and the size in pixels of the region to plot as their
+            respective values, defaults to x and y with 110% of the distance between the origin and the furthest point.
         """
 
         if axes is None:
@@ -174,20 +174,22 @@ class BaseSystem:
             max_second_axis = y if y > max_second_axis else max_second_axis
             min_second_axis = y if y < min_second_axis else min_second_axis
 
+        if len(axes_size) == 0:
+            axes_size = [max_first_axis * 1.1, max_second_axis * 1.1]
+
         if show_potential or show_potential_null_slope_points:
             potential_field = deepcopy(self._base_potential)
             for body in self.attractive_bodies:
                 potential_field += body.potential
 
             stop = FakeVector(0, 0, 0)
-            setattr(stop, axes_names[0], max_first_axis*1.1)
-            setattr(stop, axes_names[1], max_second_axis*1.1)
-            if len(axes_size) == 0:
-                axes_size = [max_first_axis*1.1, max_second_axis*1.1]
+            setattr(stop, axes_names[0], axes_size[0])
+            setattr(stop, axes_names[1], axes_size[1])
+
             potential_array = potential_field.get_potential_field(
                 Vector(0, 0, 0),
                 stop.vectorise(),
-                {k: v*5 for k in axes_names for v in axes_size},
+                {k: v for k in axes_names for v in axes_size},
                 (0, 0, 0)
             )
 
@@ -214,8 +216,8 @@ class BaseSystem:
 
         if show_bodies:
             ax = gca()
-            ax.set_xlim([0, max_first_axis*1.1])
-            ax.set_ylim([0, max_second_axis*1.1])
+            ax.set_xlim([0, axes_size[0]])
+            ax.set_ylim([0, axes_size[1]])
             for i, body in enumerate(list_of_massive_bodies):
                 scatter(
                     getattr(body.position, axes_names[0]),

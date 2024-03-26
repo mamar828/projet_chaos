@@ -30,6 +30,7 @@ class GravitationalBody(Body):
             velocity: Vector = Vector(0, 0, 0),
             fixed: bool = False,
             has_potential: bool = True,
+            integrator: str = "euler"
     ):
         """
         Defines required parameters.
@@ -46,7 +47,22 @@ class GravitationalBody(Body):
             Whether the body is fixed to it's initial position independent of all velocity and potentials.
         has_potential : bool
             Whether the body generates a potential field during simulations.
+        integrator : str
+            The type of integrator to use when updating the position of the body. Defaults to "euler". Currently
+            implemented integrators are: "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"
         """
+
+        assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"], \
+            ('The currently implemented integrators are:'
+             ' "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"')
+        self.integrator = integrator
+        if integrator == "leapfrog":
+            self.set_up_step = True
+        elif integrator == "yoshida":
+            w_0 = -2 ** (1 / 3) / (2 - 2 ** (1 / 3))
+            w_1 = 1 / (2 - 2 ** (1 / 3))
+            self.yoshida_c_constants = (w_1 / 2, (w_0 + w_1) / 2, (w_0 + w_1) / 2, w_1 / 2)
+            self.yoshida_d_constants = (w_1, w_0, w_1)
 
         super().__init__(position, velocity, fixed, has_potential)
         if mass <= 0:
@@ -72,13 +88,112 @@ class GravitationalBody(Body):
 
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
-        a_x, a_y, a_z = potential.get_gradient(self._position, epsilon)
-        self._position = Vector(
-            x+v_x*time_step-a_x/2*time_step**2,
-            y+v_y*time_step-a_y/2*time_step**2,
-            z+v_z*time_step-a_z/2*time_step**2
-        )
-        self._velocity = Vector(v_x-a_x*time_step, v_y-a_y*time_step, v_z-a_z*time_step)
+        if self.integrator != "yoshida":
+            a_x, a_y, a_z = potential.get_acceleration(self._position, epsilon)
+
+        if self.integrator == "euler":
+            self._position = Vector(
+                x+v_x*time_step+a_x/2*time_step**2,
+                y+v_y*time_step+a_y/2*time_step**2,
+                z+v_z*time_step+a_z/2*time_step**2
+            )
+            self._velocity = Vector(v_x+a_x*time_step, v_y+a_y*time_step, v_z+a_z*time_step)
+
+        elif self.integrator == "leapfrog":
+            if self.set_up_step:
+                v_x, v_y, v_z = self._velocity
+                v_x, v_y, v_z = v_x - a_x * time_step / 2, v_y - a_y * time_step / 2, v_z - a_z * time_step / 2
+                self._velocity = Vector(v_x, v_y, v_z)
+                self.set_up_step = False
+
+            self._velocity = Vector(v_x + a_x * time_step, v_y + a_y * time_step, v_z + a_z * time_step)
+            self._position = Vector(x + v_x * time_step, y + v_y * time_step, z + v_z * time_step)
+
+        elif self.integrator == "synchronous":
+            self._position = Vector(
+                x+v_x*time_step+a_x/2*time_step**2,
+                y+v_y*time_step+a_y/2*time_step**2,
+                z+v_z*time_step+a_z/2*time_step**2
+            )
+            new_a_x, new_a_y, new_a_z = potential.get_acceleration(self._position, epsilon)
+            self._velocity = Vector(
+                v_x + (a_x + new_a_x) * time_step / 2,
+                v_y + (a_y + new_a_y) * time_step / 2,
+                v_z + (a_z + new_a_z) * time_step / 2
+            )
+
+        elif self.integrator == "kick-drift-kick":
+            v_x, v_y, v_z = v_x + a_x * time_step / 2, v_y + a_y * time_step / 2, v_z + a_z * time_step / 2
+            self._position = Vector(x + v_x * time_step, y + v_y * time_step, z + v_z * time_step)
+            a_x, a_y, a_z = potential.get_acceleration(self._position, epsilon)
+            self._velocity = Vector(v_x + a_x * time_step / 2, v_y + a_y * time_step / 2, v_z + a_z * time_step / 2)
+
+        elif self.integrator == "yoshida":
+            c_1, c_2, c_3, c_4 = self.yoshida_c_constants
+            d_1, d_2, d_3 = self.yoshida_d_constants
+
+            x, y, z = x + c_1 * v_x * time_step, y + c_1 * v_y * time_step, z + c_1 * v_z * time_step
+            a_x, a_y, a_z = potential.get_acceleration(Vector(x, y, z), epsilon)
+            v_x, v_y, v_z = v_x + d_1 * a_x * time_step, v_y + d_1 * a_y * time_step, v_z + d_1 * a_z * time_step
+
+            x, y, z = x + c_2 * v_x * time_step, y + c_2 * v_y * time_step, z + c_2 * v_z * time_step
+            a_x, a_y, a_z = potential.get_acceleration(Vector(x, y, z), epsilon)
+            v_x, v_y, v_z = v_x + d_2 * a_x * time_step, v_y + d_2 * a_y * time_step, v_z + d_2 * a_z * time_step
+
+            x, y, z = x + c_3 * v_x * time_step, y + c_3 * v_y * time_step, z + c_3 * v_z * time_step
+            a_x, a_y, a_z = potential.get_acceleration(Vector(x, y, z), epsilon)
+            v_x, v_y, v_z = v_x + d_3 * a_x * time_step, v_y + d_3 * a_y * time_step, v_z + d_3 * a_z * time_step
+
+            self._position = Vector(x + c_4 * v_x * time_step, y + c_4 * v_y * time_step, z + c_4 * v_z * time_step)
+            self._velocity = Vector(v_x, v_y, v_z)
+
+        elif self.integrator == "runge-kutta":
+            v_x_1, v_y_1, v_z_1 = v_x, v_y, v_z
+            a_x_1, a_y_1, a_z_1 = a_x, a_y, a_z
+
+            v_x_2, v_y_2, v_z_2 = (
+                v_x + a_x_1 * 0.5 * time_step,
+                v_y + a_y_1 * 0.5 * time_step,
+                v_z + a_z_1 * 0.5 * time_step
+            )
+            a_x_2, a_y_2, a_z_2 = potential.get_acceleration(Vector(
+                x + v_x_1 * 0.5 * time_step,
+                y + v_y_1 * 0.5 * time_step,
+                z + v_z_1 * 0.5 * time_step
+            ), epsilon)
+
+            v_x_3, v_y_3, v_z_3 = (
+                v_x + a_x_2 * 0.5 * time_step,
+                v_y + a_y_2 * 0.5 * time_step,
+                v_z + a_z_2 * 0.5 * time_step
+            )
+            a_x_3, a_y_3, a_z_3 = potential.get_acceleration(Vector(
+                x + v_x_2 * 0.5 * time_step,
+                y + v_y_2 * 0.5 * time_step,
+                z + v_z_2 * 0.5 * time_step
+            ), epsilon)
+
+            v_x_4, v_y_4, v_z_4 = (
+                v_x + a_x_3 * time_step,
+                v_y + a_y_3 * time_step,
+                v_z + a_z_3 * time_step
+            )
+            a_x_4, a_y_4, a_z_4 = potential.get_acceleration(Vector(
+                x + v_x_3 * 0.5 * time_step,
+                y + v_y_3 * 0.5 * time_step,
+                z + v_z_3 * 0.5 * time_step
+            ), epsilon)
+
+            self._position = Vector(
+                x + (v_x_1 + 2 * v_x_2 + 2 * v_x_3 + v_x_4) / 6 * time_step,
+                y + (v_y_1 + 2 * v_y_2 + 2 * v_y_3 + v_y_4) / 6 * time_step,
+                z + (v_z_1 + 2 * v_z_2 + 2 * v_z_3 + v_z_4) / 6 * time_step
+            )
+            self._velocity = Vector(
+                v_x + (a_x_1 + 2 * a_x_2 + 2 * a_x_3 + a_x_4) / 6 * time_step,
+                v_y + (a_y_1 + 2 * a_y_2 + 2 * a_y_3 + a_y_4) / 6 * time_step,
+                v_z + (a_z_1 + 2 * a_z_2 + 2 * a_z_3 + a_z_4) / 6 * time_step
+            )
 
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -117,11 +232,12 @@ class GravitationalBody(Body):
 
         return ScalarField([(-1, -self.mass * gravitational_constant, self._position)])
     
-    def is_dead(self,
-        potential: ScalarField,
-        epsilon: float,
-        potential_gradient_limit: int,
-        body_position_limit: tuple[int,int]
+    def is_dead(
+            self,
+            potential: ScalarField,
+            epsilon: float,
+            potential_gradient_limit: int,
+            body_position_limit: tuple[int,int]
     ) -> bool:
         """
         Gives whether the body is considered dead by evaluating if the modulus of the acceleration to which the body is
@@ -144,8 +260,8 @@ class GravitationalBody(Body):
             Whether the body is considered dead or not.
         """
         condition_2D = (
-            norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit or
-                body_position_limit[0]-0.1 > self.position.x or self.position.x > body_position_limit[1] or 
+                norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit or
+                body_position_limit[0]-0.1 > self.position.x or self.position.x > body_position_limit[1] or
                 body_position_limit[0]-0.1 > self.position.y or self.position.y > body_position_limit[1]
         )
         if self.position.z == 0:
