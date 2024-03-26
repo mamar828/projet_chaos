@@ -1,10 +1,10 @@
-import sys
+from sys import exit
 
 from src.engines.engine_2D.scene import *
 from src.engines.engine_2D.models import *
 
 
-class Engine_2D:
+class Engine2D:
     def __init__(self,
             simulation,
             window_size: tuple[int]=(1440,900),
@@ -35,7 +35,7 @@ class Engine_2D:
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 pg.quit()
-                sys.exit()
+                exit()
     
     def update_physics_speed(self):
         keys = pg.key.get_pressed()
@@ -67,7 +67,7 @@ class Engine_2D:
 #     {"object_instance": Flat_earth(position=(849,51)), "model": Circle, "color": "yellow", "scale": (100,100)},
 #     {"object_instance": t(position=(700,600)), "model": Circle, "color": "orange", "scale": (80,150)}
 # ]
-# app = Engine_2D(
+# app = Engine2D(
 #     window_size=(1440,900),
 #     framerate=60,
 #     fullscreen=True,

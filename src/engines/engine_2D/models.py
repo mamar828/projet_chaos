@@ -1,8 +1,8 @@
 import pygame as pg
-import numpy as np
+from numpy.random import randint
 
 
-class Base_model:
+class BaseModel:
     def __init__(self,
             screen,
             position=(0,0),
@@ -40,17 +40,17 @@ class Base_model:
 
     @staticmethod
     def get_random_color():
-        return np.random.randint(0, 255, 3)
+        return randint(0, 255, 3)
 
 
-class Rectangle(Base_model):
+class Rectangle(BaseModel):
     def update(self):
         pg.draw.rect(surface=self.screen, color=self.color, rect=self.repr)
         if self.plot_trace:
             self.trace()
 
 
-class Circle(Base_model):
+class Circle(BaseModel):
     def update(self):
         pg.draw.ellipse(surface=self.screen, color=self.color, rect=self.repr)
         if self.plot_trace:

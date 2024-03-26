@@ -1,8 +1,8 @@
-from pickle import load, dump
+from pickle import load
 from gzip import open as gzip_open
 
 from src.systems.base_system import BaseSystem
-from src.engines.engine_2D.engine import Engine_2D
+from src.engines.engine_2D.engine import Engine2D
 from src.systems.computed_system import ComputedSystem
 
 
@@ -82,13 +82,13 @@ class Simulation:
         Parameters
         ----------
         args : list
-            Parameters to pass to the Engine_2D class.
+            Parameters to pass to the Engine2D class.
         traces : list or bool
             Optional, specify the bodies which should leave a trace. If traces is a list of booleans, this controls the
             trace generation of each body in the provided system, in the same order as the bodies in the system. If
             traces is a boolean, all bodies in the system will be traced. Defaults to None.
         kwargs : dict
-            Parameters to pass to the Engine_2D class.
+            Parameters to pass to the Engine2D class.
         """
         if isinstance(traces, bool) and traces:
             self.traces = [True for i in range(len(self.system.list_of_bodies))]
@@ -96,7 +96,7 @@ class Simulation:
             self.traces = [None for i in range(len(self.system.list_of_bodies))]
         else:
             self.traces = traces
-        app = Engine_2D(
+        app = Engine2D(
             simulation=self,
             *args,
             **kwargs

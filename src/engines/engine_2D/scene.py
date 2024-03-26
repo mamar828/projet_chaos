@@ -29,7 +29,7 @@ class Scene:
             color_func = lambda body: body.get_color()
         else:
             # A lambda function is also created only for consistency
-            color_func = lambda body: Base_model.get_random_color()
+            color_func = lambda body: BaseModel.get_random_color()
         
         for body, plot_trace in zip(self.system.list_of_bodies, self.app.simulation.traces):
             s = round(body.mass/(2*10**30), 0) * 30 + 10

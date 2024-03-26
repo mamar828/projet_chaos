@@ -4,7 +4,7 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.tools.vector import Vector
-from src.simulator.simulation_mother import Simulation_mother
+from src.simulator.simulation_mother import SimulationMother
 from src.simulator.simulation import Simulation
 
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         n=9
     )
 
-    mommy = Simulation_mother(base_system=sim_system, delta_time=100)
+    mommy = SimulationMother(base_system=sim_system, delta_time=100)
     foldername = mommy.dispatch(
         simulation_count=8,
         bodies_per_simulation=2,

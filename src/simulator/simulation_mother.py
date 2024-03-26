@@ -3,7 +3,7 @@ import numpy as np
 from pickle import dump
 from gzip import open as gzip_open
 from multiprocessing import Pool
-from datetime import datetime, timedelta
+from datetime import datetime
 from os.path import exists
 from os import makedirs
 from eztcolors import Colors as C
@@ -15,7 +15,7 @@ from src.bodies.computed_body import ComputedBody
 from src.tools.vector import Vector
 
 
-class Simulation_mother:
+class SimulationMother:
     def __init__(self, base_system: BaseSystem, delta_time: float=100):
         self.initial_system = base_system
         self.delta_time = delta_time
@@ -93,7 +93,7 @@ class Simulation_mother:
         simulation_duration: float=1e8,
         positions_saving_frequency: int=1e2,
         potential_gradient_limit: int=5e-10,
-        body_position_limits: tuple[int,int]=(0,2000)
+        body_position_limits: tuple[int,int]=(-1000,2000)
     ) -> str:
         """
         Start a simulation and dispatch to Simulation objects.
@@ -121,7 +121,7 @@ class Simulation_mother:
         potential_gradient_limit: int
             Limit for the potential gradient on a body to be considered still alive. Defaults to 5e-10.
         body_position_limit: tuple[int,int]
-            Specify the position in pixels of a body to be considered still alive. Defaults to (0,2000).
+            Specify the position in pixels of a body to be considered still alive. Defaults to (-1000,2000).
         
         Returns
         -------
