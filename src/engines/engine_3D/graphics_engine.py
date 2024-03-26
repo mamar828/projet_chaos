@@ -2,19 +2,19 @@ import pygame as pg
 import numpy as np
 import moderngl as mgl
 import sys
-from struct import pack
 
 from model import *
 from camera import Camera
 from light import Light
 from mesh import Mesh
 from scene import *
-from scene_renderer import Scene_renderer
+from scene_renderer import SceneRenderer
+from plot_elements import Object3D, Function3D
 from tests import Floor, Planet, Mode7
 from relative_paths import get_path
 
 
-class Graphics_engine:
+class GraphicsEngine:
     def __init__(self,
             window_size: tuple[int]=(1440,900),
             framerate: int=60,
@@ -32,8 +32,8 @@ class Graphics_engine:
             camera_far_render_distance: float=100000000000000000000.,
             camera_yaw: float=-90.,
             camera_pitch: float=0.,
-            scene_elements: list=None,
-            plot_function: bool=False
+            scene_elements: list[Object3D]=None,
+            functions: list[Function3D]=None
         ):
         self.window_size = window_size
         self.framerate = framerate
@@ -73,34 +73,10 @@ class Graphics_engine:
             yaw=camera_yaw,
             pitch=camera_pitch
         )
+        self.functions = functions
         self.mesh = Mesh(self)
-        self.scene = Scene(self, scene_elements)#, plot_function=plot_function)
-        self.scene_renderer = Scene_renderer(self)
-
-        # with open(get_path("shaders/surface_2/vertex.glsl")) as f:
-        #     vertex = f.read()
-        # with open(get_path("shaders/surface_2/fragment.glsl")) as f:
-        #     fragment = f.read()
-        # self.program = self.context.program(vertex_shader=vertex, fragment_shader=fragment)
-        # self.program["m_proj"] = self.camera.m_proj
-        # self.update()
-
-        # vertices = [(-1,-1),(1,-1),(1,1),(-1,1),(-1,-1),(1,1)]
-        # vertex_data = pack(f"{len(vertices) * len(vertices[0])}f", *sum(vertices, ()))
-        # self.vbo = self.context.buffer(vertex_data)
-        # self.vao = self.context.vertex_array(self.program, [(self.vbo, "2f", "in_position")])
-        # self.set_uniform("u_resolution", self.window_size)
-
-    def update(self):
-        self.program["camPos"] = self.camera.position
-        self.set_uniform("u_time", self.time)
-        self.program["m_view"] = self.camera.m_view
-
-    def set_uniform(self, u_name, u_value):
-        try:
-            self.program[u_name] = u_value
-        except KeyError:
-            pass
+        self.scene = Scene(self, scene_elements)
+        self.scene_renderer = SceneRenderer(self)
 
     def check_events(self):
         for event in pg.event.get():
@@ -111,7 +87,6 @@ class Graphics_engine:
 
     def render(self):
         self.context.clear(color=(0.08, 0.16, 0.18))
-        # self.vao.render()
         self.scene_renderer.render()
         pg.display.flip()
 
@@ -123,26 +98,32 @@ class Graphics_engine:
             self.get_time()
             self.check_events()
             self.camera.update()
-            # self.updates
             self.render()
             self.delta_time = self.clock.tick(self.framerate)
 
 
-listi = [
-    {"object_instance": Planet(position=(2,2,-50)), "model": Sphere, "color": "blue", "scale": (2,1,1)},
-    {"object_instance": Floor(position=(0,0,0)), "model": Cube, "color": 3, "scale": (50,1,50)}
+elements = [
+    Object3D(instance=Planet(position=(2,2,-50)), model=Sphere, texture="blue", scale=(2,1,1)),
+    Object3D(instance=Floor(position=(0,0,0)), model=Cube, texture=3, scale=(50,1,50))
+]
+
+functions = [
+    Function3D(function=lambda x, y: 3000 * np.exp(-(x**2+y**2)/1000) + 10, texture="filix", rotation=(45,0,0)),
+    Function3D(function=lambda x, y: 3000 * np.exp(-(x**2+y**2)/1000) + 10, texture="spacetime", rotation=(-45,0,0)),
+    Function3D(function=lambda x, y: np.sin(x)*np.sin(y) * 2, x_limits=(-100,200), resolution=(1500,1500), texture=0, rotation=(0,0,45), save_filename=get_path("vertex_data_cache/sines2.gz")),
+    Function3D(function=lambda x, y: np.sin(x)*np.sin(y) * 2, x_limits=(-100,200), resolution=(200,200), texture=0, rotation=(0,0,-45))
 ]
 
 
 if __name__ ==  "__main__":
     # Create the graphics engine object
-    app = Graphics_engine(
+    app = GraphicsEngine(
         window_size=(1440,900),
         framerate=60,
         fullscreen=True,
         light_position=(0,30,100),
         light_color=(1,1,1),
-        scene_elements=listi,
-        plot_function=True
+        scene_elements=elements,
+        functions=functions
     )
     app.run()

@@ -1,12 +1,12 @@
-from vertex_buffer_object import Vertex_buffer_object
-from shader_program import Shader_program
+from vertex_buffer_object import VertexBufferObject
+from shader_program import ShaderProgram
 
 
-class Vertex_array_object:
-    def __init__(self, context):
-        self.context =  context
-        self.vertex_buffer_object = Vertex_buffer_object(context)
-        self.program = Shader_program(context)
+class VertexArrayObject:
+    def __init__(self, app):
+        self.context =  app.context
+        self.vertex_buffer_object = VertexBufferObject(app)
+        self.program = ShaderProgram(self.context)
         self.vertex_array_objects = {
             "skybox" : self.get_vertex_array_object(
                     program=self.program.programs["skybox"],
@@ -28,15 +28,12 @@ class Vertex_array_object:
                     vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"]),
             "shadow_cat" : self.get_vertex_array_object(
                     program=self.program.programs["shadow_map"],
-                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"]),
-            "surface" : self.get_vertex_array_object(
-                    program=self.program.programs["surface"],
-                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["surface"])
-        #     "shadow_surface" : self.get_vertex_array_object(
-        #             program=self.program.programs["shadow_surface"],
-        #             vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["surface"])
+                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"])
         }
-        # A shadow instance must be added for every object
+        for i in range(len(app.functions)):
+            self.vertex_array_objects[f"surface_{i}"] = self.get_vertex_array_object(
+                    program=self.program.programs[f"surface"],
+                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects[f"surface_{i}"])
 
     def get_vertex_array_object(self, program, vertex_buffer_object):
         vbo = vertex_buffer_object

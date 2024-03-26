@@ -1,5 +1,5 @@
 import pygame as pg
-import moderngl as mgl
+from moderngl import NEAREST as mglNEAREST
 from relative_paths import get_path
 
 
@@ -14,11 +14,13 @@ class Texture:
             3 : self.get_texture(path=get_path("textures/boxy.jpg")),
             4 : self.get_texture(path=get_path("textures/boxy_2.png"))
         }
-        self.textures["skybox"] = self.get_texture_cube(get_path("textures/skybox_1"))
+        self.textures["skybox"] = self.get_texture_cube(get_path("textures/skybox"))
         self.textures["depth_texture"] = self.get_depth_texture()
         self.textures["cat"] = self.get_texture(get_path("objects/cat/20430_cat_diff_v1.jpg"))
         self.textures["floor"] = self.get_texture(get_path("textures/floor_test.png"))
         self.textures["filix"] = self.get_texture(get_path("textures/filix.png"))
+        self.textures["spacetime"] = self.get_texture(get_path("textures/spacetime.png"))
+        
         for color in ["green", "red", "blue", "yellow", "orange", "cyan", "magenta", "white", "black", "purple",
                       "brown", "grey"]:
             self.textures[color] = self.get_color(color)
@@ -54,7 +56,7 @@ class Texture:
         # texture.fill("green")
         texture = self.context.texture(size=texture.get_size(), components=3, data=pg.image.tostring(texture, "RGB"))
         # mipmaps activation (correction for high distance objects)
-        texture.filter = (mgl.NEAREST, mgl.NEAREST)
+        texture.filter = (mglNEAREST, mglNEAREST)
         # texture.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)       # alternative mipmap
         texture.build_mipmaps()
         texture.anisotropy = 32.0
@@ -65,7 +67,7 @@ class Texture:
         color_texture.fill(color)
         color_texture = self.context.texture(size=color_texture.get_size(), components=3,
                                              data=pg.image.tostring(color_texture, "RGB"))
-        color_texture.filter = (mgl.NEAREST, mgl.NEAREST)
+        color_texture.filter = (mglNEAREST, mglNEAREST)
         color_texture.build_mipmaps()
         color_texture.anisotropy = 32.0
         return color_texture

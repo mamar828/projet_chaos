@@ -1,6 +1,5 @@
 import glm
 import pygame as pg
-import numpy as np
 
 
 class Camera:

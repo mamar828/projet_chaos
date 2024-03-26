@@ -1,4 +1,4 @@
-class Scene_renderer:
+class SceneRenderer:
     def __init__(self, app):
         self.app = app
         self.context = app.context
@@ -12,14 +12,17 @@ class Scene_renderer:
         self.depth_frame_buffer_object.clear()
         self.depth_frame_buffer_object.use()
         for obj in self.scene.objects:
-            try:
+            if obj.shadow_program:
                 obj.render_shadow()
-            except Exception: pass
 
     def main_render(self):
         self.context.screen.use()
-        for obj in self.scene.objects:
-            obj.render()
+        if self.scene.objects:
+            for obj in self.scene.objects:
+                obj.render()
+        if self.scene.surfaces:
+            for surface in self.scene.surfaces:
+                surface.render()
         self.scene.skybox.render()
 
     def render(self):
