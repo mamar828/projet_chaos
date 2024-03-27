@@ -81,3 +81,5 @@ from datetime import datetime
 
 # e = ["ab", "cd", "ef"]
 # print(e.index("ab"))
+
+print("allo".split(","))

@@ -1,4 +1,5 @@
 from numpy.random import randint
+from random import choice
 from eztcolors import Colors as C
 
 from src.bodies.gravitational_body import GravitationalBody
@@ -36,9 +37,14 @@ class ComputedBody(GravitationalBody):
         else:
             self.dead = True
 
-    def get_color(self) -> str | tuple[int, int, int]:
+    def get_color(self, random_tuple=True) -> str | tuple[int, int, int]:
         """
         Get the color of the body depending on its type.
+
+        Parameters
+        ----------
+        random_tuple : bool, optional
+            Wether the function is allowed to return a tuple of ints or should always return a named color.
 
         Returns
         -------
@@ -46,7 +52,12 @@ class ComputedBody(GravitationalBody):
             The color of the body: green if it stays alive, red if not and random for the others.
         """
         if self.type == "base_body" or self.type == "attractive_moving":
-            return randint(0, 255, 3)
+            if random_tuple:
+                return randint(0, 255, 3)
+            else:
+                # red and green are not present
+                return choice(["blue", "yellow", "orange", "cyan", "magenta", "white", "black", "purple", "brown",
+                               "grey"])
         elif self.type == "alive":
             return "green"
         elif self.type == "dead":

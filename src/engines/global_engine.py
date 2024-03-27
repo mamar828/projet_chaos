@@ -72,6 +72,10 @@ class GlobalEngine:
             if event.key == pg.K_m:
                 self.key_mode = "manual"
                 self.key_string = ""
+
+            if event.key == pg.K_c:
+                self.key_mode = "camera"
+                self.key_string = ""
             
             self.pressed_keys.add(event.key)
 

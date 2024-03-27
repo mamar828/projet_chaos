@@ -1,4 +1,4 @@
-from relative_paths import get_path
+from src.engines.engine_3D.relative_paths import get_path
 
 
 class ShaderProgram:

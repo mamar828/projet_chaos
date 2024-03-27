@@ -52,7 +52,7 @@ sim = Simulation(
     maximum_delta_time=100000
 )
 
-sim.show(
+sim.show_2D(
     window_size=(600,600),
     framerate=60,
     fullscreen=False,

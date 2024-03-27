@@ -1,3 +1,5 @@
+from numpy import argmax
+
 from src.systems.base_system import BaseSystem
 
 
@@ -19,15 +21,13 @@ class ComputedSystem(BaseSystem):
         super().__init__(*args, **kwargs)
         self.tick_factor = tick_factor
         self.current_tick = 0
+        # Find origin
+        masses = [body.mass for body in self.list_of_bodies]
+        self.origin = tuple(self.list_of_bodies[argmax(masses)].position)
 
-    def update(self, delta_time: int=None):
+    def update(self, *args, **kwargs):
         """
         Updates the position of the bodies within the system according to their pre-computed positions.
-
-        Parameters
-        ----------
-        delta_time : int
-            Is not used in this class, but kept for compatibility.
         """
         self.current_tick += 1
         if self.current_tick == self.tick_factor:

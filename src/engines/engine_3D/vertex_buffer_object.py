@@ -4,7 +4,7 @@ from gzip import open as gzip_open
 from os.path import exists
 from pickle import dump, load
 
-from relative_paths import get_path
+from src.engines.engine_3D.relative_paths import get_path
 
 
 class VertexBufferObject:
@@ -17,8 +17,9 @@ class VertexBufferObject:
             "skybox" : SkyboxVBO(self.context),
             "cat" : CatVBO(self.context)
         }
-        for i, plot_func in enumerate(app.functions):
-            self.vertex_buffer_objects[f"surface_{i}"] = SurfaceVBO(self.context, plot_func)
+        if app.functions:
+            for i, plot_func in enumerate(app.functions):
+                self.vertex_buffer_objects[f"surface_{i}"] = SurfaceVBO(self.context, plot_func)
 
     def destroy(self):
         [vbo.destroy() for vbo in self.vertex_buffer_objects.values()]

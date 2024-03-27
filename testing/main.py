@@ -56,7 +56,7 @@ if __name__ == '__main__':
     # sim_viewer = Simulation.load_from_folder(foldername)
     sim_viewer = Simulation.load_from_folder(f"simulations/dead_method_10")
     # sim_viewer = Simulation.load_from_folder(f"simulations/test_53")            # Big one
-    sim_viewer.show(
+    sim_viewer.show_2D(
         window_size=(500,500),
         framerate=60,
         fullscreen=False,

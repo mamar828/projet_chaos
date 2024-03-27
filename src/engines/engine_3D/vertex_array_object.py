@@ -1,5 +1,5 @@
-from vertex_buffer_object import VertexBufferObject
-from shader_program import ShaderProgram
+from src.engines.engine_3D.vertex_buffer_object import VertexBufferObject
+from src.engines.engine_3D.shader_program import ShaderProgram
 
 
 class VertexArrayObject:
@@ -30,10 +30,11 @@ class VertexArrayObject:
                     program=self.program.programs["shadow_map"],
                     vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"])
         }
-        for i in range(len(app.functions)):
-            self.vertex_array_objects[f"surface_{i}"] = self.get_vertex_array_object(
-                    program=self.program.programs[f"surface"],
-                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects[f"surface_{i}"])
+        if app.functions:
+            for i in range(len(app.functions)):
+                self.vertex_array_objects[f"surface_{i}"] = self.get_vertex_array_object(
+                        program=self.program.programs[f"surface"],
+                        vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects[f"surface_{i}"])
 
     def get_vertex_array_object(self, program, vertex_buffer_object):
         vbo = vertex_buffer_object

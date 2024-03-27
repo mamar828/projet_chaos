@@ -34,7 +34,7 @@ class Object3D(Element3D):
             Rotation to apply to the object. Defaults to (0,0,0).
         scale : tuple[int,int,int], optional
             Scale to apply to the object. Defaults to (1,1,1).
-        instance : object with a .update method.
+        instance : object with a .update method
             Function that determines the object's movement in the scene. Defaults to None.
         model : str, optional
             Specify the object's 3D model that should be used.

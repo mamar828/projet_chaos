@@ -16,13 +16,6 @@ class Scene:
         self.objects = []
         self.load()
 
-    def add_object(self, object):
-        self.objects.append(object)
-
-    def __iadd__(self, object):
-        self.add_object(object)
-        return self
-
     def load(self):
         # Determine the displayed colors
         if isinstance(self.system, ComputedSystem):
@@ -34,8 +27,8 @@ class Scene:
         for body, plot_trace in zip(self.system.list_of_bodies, self.app.simulation.traces):
             s = round(body.mass/(2*10**30), 0) * 30 + 10
             # s = 2*5*arctan(float(body.mass))/pi
-            self += Circle(screen=self.app.screen, color=color_func(body), scale=(s,s),
-                           position=(body.position[0], body.position[1]), instance=body, plot_trace=plot_trace)
+            self.objects.append(Circle(screen=self.app.screen, color=color_func(body), scale=(s,s),
+                                position=(body.position[0], body.position[1]), instance=body, plot_trace=plot_trace))
 
     @staticmethod
     def format_time(time: int) -> str:
@@ -57,6 +50,9 @@ class Scene:
             if not obj.instance.dead:
                 obj.move((obj.instance.position[0], obj.instance.position[1]))
                 obj.update()
+            else:
+                obj.destroy()
+                self.objects.remove(obj)
         
         # Update clock
         if self.display_clock:

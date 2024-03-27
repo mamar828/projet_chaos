@@ -1,9 +1,11 @@
 from numpy import array as nparray
+from random import choice
 import glm
 
 
-class Base_model:
-    def __init__(self, 
+class BaseModel:
+    def __init__(
+            self, 
             app,
             vertex_array_object_name,
             texture_id,
@@ -68,8 +70,8 @@ class Base_model:
         self.program["light.Is"].write(self.app.light.Is)
 
     def get_model_matrix(self):
-        # translation
-        t_model = glm.translate(glm.mat4(), self.position)
+        # translation (Consider the transformation between usual coordinates and these ones)
+        t_model = glm.translate(glm.mat4(), (-self.position[0], self.position[2], -self.position[1]))
         # rotation
         r_model = glm.rotate(t_model, self.rotation.x, glm.vec3(1,0,0))
         r_model = glm.rotate(r_model, self.rotation.y, glm.vec3(0,1,0))
@@ -82,8 +84,19 @@ class Base_model:
         self.update()
         self.vertex_array_object.render()
 
+    def move(self, position: tuple[float,float,float]):
+        self.position = position
 
-class Skybox(Base_model):
+    def destroy(self):
+        del self
+    
+    @staticmethod
+    def get_random_color():
+        return choice(["green", "red", "blue", "yellow", "orange", "cyan", "magenta", "white", "black", "purple",
+                       "brown", "grey"])
+
+
+class Skybox(BaseModel):
     def __init__(
             self,
             app,
@@ -108,13 +121,13 @@ class Skybox(Base_model):
         self.program["m_view"].write(glm.mat4(glm.mat3(self.camera.m_view)))
 
 
-class Animated_model(Base_model):
+class AnimatedModel(BaseModel):
     def update(self):
         self.m_model = self.get_model_matrix()
         super().update()
 
 
-class Cube(Animated_model):
+class Cube(AnimatedModel):
     def __init__(
             self,
             app,
@@ -127,7 +140,7 @@ class Cube(Animated_model):
         super().__init__(app, "cube", texture_id, position, rotation, scale, instance)
 
 
-class Surface(Base_model):
+class Surface(BaseModel):
     def __init__(
             self,
             app,
@@ -158,7 +171,7 @@ class Surface(Base_model):
 
 
 
-class Sphere(Animated_model):
+class Sphere(AnimatedModel):
     def __init__(
             self,
             app,
@@ -175,7 +188,7 @@ class Sphere(Animated_model):
         return tuple(nparray(scale)*0.009095)
 
 
-class Cat(Base_model):
+class Cat(BaseModel):
     def __init__(
             self,
             app,

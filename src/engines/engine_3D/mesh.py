@@ -1,5 +1,5 @@
-from vertex_array_object import VertexArrayObject
-from texture import Texture
+from src.engines.engine_3D.vertex_array_object import VertexArrayObject
+from src.engines.engine_3D.texture import Texture
 
 
 class Mesh:

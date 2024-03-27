@@ -84,17 +84,18 @@ class SimulationMother:
                         ), file
                     )
 
-    def dispatch(self,
-        simulation_count: int,
-        bodies_per_simulation: int,
-        body_initial_position_limits: list[tuple[float, float]],
-        body_initial_velocity_limits: list[tuple[float, float]],
-        save_foldername: str,
-        simulation_duration: float=1e8,
-        positions_saving_frequency: int=1e2,
-        potential_gradient_limit: int=5e-10,
-        body_position_limits: tuple[int,int]=(-1000,2000)
-    ) -> str:
+    def dispatch(
+            self,
+            simulation_count: int,
+            bodies_per_simulation: int,
+            body_initial_position_limits: list[tuple[float, float]],
+            body_initial_velocity_limits: list[tuple[float, float]],
+            save_foldername: str,
+            simulation_duration: float=1e8,
+            positions_saving_frequency: int=1e2,
+            potential_gradient_limit: int=5e-10,
+            body_position_limits: tuple[int,int]=(-1000,2000)
+        ) -> str:
         """
         Start a simulation and dispatch to Simulation objects.
 
@@ -206,12 +207,12 @@ def worker_simulation(
         body_position_limits: tuple[int,int]
     ):
     if body_position == None and body_velocities == None:
-        # Special simulation
+        # Special simulation, occuring only once
         simulation = Simulation(
             system=system,
             maximum_delta_time=delta_time
         )
-        results = simulation.run_special(simulation_duration, positions_saving_frequency)
+        results = simulation.run_attractive_bodies(simulation_duration, positions_saving_frequency)
         print(",", end="", flush=True)
 
     else:

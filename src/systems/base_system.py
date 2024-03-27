@@ -76,7 +76,6 @@ class BaseSystem:
             defaults to 10**(-2).
         """
         potential_field = loads(dumps(self._base_potential))
-        # potential_field = deepcopy(self._base_potential)
         for body in self.attractive_bodies:
             potential_field += body.potential
         if len(potential_field.terms) > 2:

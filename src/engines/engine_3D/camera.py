@@ -3,7 +3,8 @@ import pygame as pg
 
 
 class Camera:
-    def __init__(self,
+    def __init__(
+            self,
             app,
             position=(0,0,0),
             speed=0.025,
@@ -21,7 +22,7 @@ class Camera:
         self.NEAR = near_render_distance
         self.FAR = far_render_distance
         self.aspect_ratio = app.window_size[0] / app.window_size[1]
-        self.position = glm.vec3(position)
+        self.position = glm.vec3((-position[0], position[2], -position[1]))
         self.up = glm.vec3(0, 1, 0)
         self.right = glm.vec3(1,0,0)
         self.forward = glm.vec3(0,0,-1)
@@ -38,7 +39,7 @@ class Camera:
         self.pitch -= rel_y * self.sensitivity
 
         # Key controls
-        rotation_speed = self.sensitivity * self.app.delta_time
+        rotation_speed = self.sensitivity * self.app.camera_delta_time
         keys = pg.key.get_pressed()
         if keys[pg.K_l]:
             self.yaw += rotation_speed
@@ -70,7 +71,7 @@ class Camera:
         self.m_view = self.get_view_matrix()
 
     def move(self):
-        velocity = self.speed * self.app.delta_time * self.current_speed_modifier
+        velocity = self.speed * self.app.camera_delta_time * self.current_speed_modifier
         keys = pg.key.get_pressed()
         if True in list(keys):
             if keys[pg.K_w]:
@@ -94,12 +95,13 @@ class Camera:
         return glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR, self.FAR)
     
     def update_speed_modifier(self):
-        keys = pg.key.get_pressed()
-        if True in list(keys):
-            for i in range(1,10):
-                if keys[getattr(pg, f"K_{i}")]:
-                    if i <= 5:
-                        self.current_speed_modifier = 1 / 5**3 * i**3
-                    else:
-                        self.current_speed_modifier = 1 / 5**6 * i**6
-                    break
+        if self.app.key_mode == "camera":
+            keys = pg.key.get_pressed()
+            if True in list(keys):
+                for i in range(1,10):
+                    if keys[getattr(pg, f"K_{i}")]:
+                        if i <= 5:
+                            self.current_speed_modifier = 1 / 5**3 * i**3
+                        else:
+                            self.current_speed_modifier = 1 / 5**6 * i**6
+                        break

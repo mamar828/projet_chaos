@@ -37,7 +37,9 @@ class BaseModel:
         for trace in self.traces:
             self.trace_repr.center = trace[0], trace[1]
             pg.draw.ellipse(surface=self.screen, color=self.color, rect=self.trace_repr)
-
+        
+    def destroy(self):
+        del self
 
     @staticmethod
     def get_random_color():

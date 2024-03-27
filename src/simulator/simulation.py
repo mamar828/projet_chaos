@@ -3,6 +3,7 @@ from gzip import open as gzip_open
 
 from src.systems.base_system import BaseSystem
 from src.engines.engine_2D.engine import Engine2D
+from src.engines.engine_3D.engine import Engine3D
 from src.systems.computed_system import ComputedSystem
 
 
@@ -75,9 +76,9 @@ class Simulation:
 
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq))
 
-    def show(self, *args, traces: list | bool=None, **kwargs):
+    def show_2D(self, *args, traces: list | bool=None, **kwargs):
         """
-        Show a simulation.
+        Show a simulation in 2D with pygame.
 
         Parameters
         ----------
@@ -103,12 +104,31 @@ class Simulation:
         )
         app.run()
 
-    def run(self,
-        duration: int,
-        positions_saving_frequency: int,
-        potential_gradient_limit: int,
-        body_position_limits: int
-    ) -> dict:
+    def show_3D(self, *args, **kwargs):
+        """
+        Show a simulation in 3D with pygame and moderngl.
+
+        Parameters
+        ----------
+        args : list
+            Parameters to pass to the Engine3D class.
+        kwargs : dict
+            Parameters to pass to the Engine3D class.
+        """
+        app = Engine3D(
+            simulation=self,
+            *args,
+            **kwargs
+        )
+        app.run()
+
+    def run(
+            self,
+            duration: int,
+            positions_saving_frequency: int,
+            potential_gradient_limit: int,
+            body_position_limits: int
+        ) -> dict:
         """
         Run the simulation.
 
@@ -145,7 +165,7 @@ class Simulation:
             "dead": system.dead_bodies,
         }
     
-    def run_special(self, duration: int, positions_saving_frequency: int) -> list:
+    def run_attractive_bodies(self, duration: int, positions_saving_frequency: int) -> list:
         """ 
         Run the simulation only for the attractive moving bodies of the system.
 
