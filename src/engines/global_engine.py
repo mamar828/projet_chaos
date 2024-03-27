@@ -54,6 +54,8 @@ class GlobalEngine:
                                 self.physics_speed /= number
                         except Exception: pass
                         self.key_string = ""
+                    else:
+                        self.key_string = ""
                 else:
                     if event.key == pg.K_x and pg.K_x not in self.pressed_keys:
                         self.key_string += "*"

@@ -1,7 +1,7 @@
 from sys import exit
+import pygame as pg
 
-from src.engines.engine_2D.scene import *
-from src.engines.engine_2D.models import *
+from src.engines.engine_2D.scene import Scene
 from src.engines.global_engine import GlobalEngine
 
 
@@ -34,6 +34,7 @@ class Engine2D(GlobalEngine):
             self.check_events()
             self.render()
             self.delta_time = (self.clock.tick(self.framerate) / 1000) * self.physics_speed
+            pg.display.set_caption(f"Current physics speed : x{self.physics_speed:.2e}")
             self.simulation_time += self.delta_time
 
 
