@@ -1,6 +1,9 @@
 from numpy import argmax
+from pickle import loads, dumps
 
 from src.systems.base_system import BaseSystem
+from src.fields.scalar_field import ScalarField
+from src.tools.vector import Vector
 
 
 class ComputedSystem(BaseSystem):
@@ -35,3 +38,20 @@ class ComputedSystem(BaseSystem):
             for body in self.moving_bodies:
                 if not body.dead:
                     body.update()
+
+    def get_potential_function(self) -> ScalarField:
+        """ 
+        Give the callable representing the potential function.
+
+        Returns
+        -------
+        potential_function : ScalarField
+            Function of three variables giving the potential value at the specified position.
+        """
+        potential_field = loads(dumps(self._base_potential))
+        for body in self.attractive_bodies:
+            potential_field += body.potential
+        if len(potential_field.terms) > 2:
+            potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+
+        return loads(dumps(potential_field))*(10**(-self.n))**3

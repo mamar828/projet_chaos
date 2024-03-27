@@ -150,7 +150,8 @@ class Surface(BaseModel):
             rotation=(0,0,0),
             scale=(1,1,1)
         ):
-        super().__init__(app, vertex_array_object_name, texture_id, position, rotation, scale)
+        super().__init__(app, vertex_array_object_name, texture_id, position, 
+                         (rotation[0], rotation[1]+180, rotation[2]), scale)
 
     def on_init(self):
         self.depth_texture = self.app.mesh.texture.textures["depth_texture"]

@@ -160,15 +160,15 @@ class SurfaceVBO(BaseVertexBufferObject):
             x_space = np.linspace(x_start, x_end, x_num)
             y_space = np.linspace(y_start, y_end, y_num)
             x, y = np.meshgrid(x_space, y_space)
-            z_array = self.plot_func.function(x, y)
+            z_array = self.plot_func.function(y, x)
 
             vertices = []       # List of every points of the screen (which will be linked together to form triangles)
             indices = []        # List of the vertices that should be connected to form triangles
             for i in range(x_num):
                 for j in range(y_num):
                     zero = i + j*x_num
-                    vertices.append((i/(x_num-1) * (x_end - x_start) + x_start, z_array[i,j],
-                                    j/(y_num-1) * (y_end - y_start) + y_start))
+                    vertices.append(((i/(x_num-1) * (x_end - x_start) + x_start), z_array[i,j],
+                                    (j/(y_num-1) * (y_end - y_start) + y_start))) # Minus signs correct for reflection
                     if i < x_num-1 and j < y_num-1:
                         # Create first side
                         # Indices must be given in clockwise order to be viewed from the front

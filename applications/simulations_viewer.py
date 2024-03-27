@@ -6,6 +6,7 @@ import numpy as np
 from src.simulator.simulation import Simulation
 from src.systems.computed_system import ComputedSystem
 from src.engines.engine_3D.elements import Function3D
+from src.tools.vector import Vector
 
 
 
@@ -17,12 +18,13 @@ if __name__ == '__main__':
     sim.show_3D(
         functions=[Function3D(
             texture="spacetime",
-            position=sim.system.origin,
-            resolution=(500,500),
-            x_limits=(-450,450),
-            y_limits=(-450,450),
-            function=lambda x, y: np.exp(-(x**2+y**2)/1000)*2000,
-            # save_filename=("src/engines/engine_3D/vertex_data_cache/test_3.gz")
+            position=(0,0,0),
+            resolution=(200,200),
+            x_limits=(0,900),
+            y_limits=(0,900),
+            # function=lambda x, y: np.exp(-(x**2+y**2)/1000)*2000,
+            function=lambda x, y: sim.system.get_potential_function()(Vector(x,y,0)) * 1e10
+            # save_filename=("src/engines/engine_3D/vertex_data_cache/test_4.gz")
         )]
     )
     # sim.show_2D(
