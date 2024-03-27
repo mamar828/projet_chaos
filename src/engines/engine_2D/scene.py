@@ -62,3 +62,6 @@ class Scene:
         if self.display_clock:
             time = self.clock_sys_font.render(f"{self.format_time(self.app.simulation_time)}", True, self.clock_color)
             self.app.screen.blit(time, (self.app.screen.get_width() - time.get_width() - 10, 10))
+
+    def destroy(self):
+        del self

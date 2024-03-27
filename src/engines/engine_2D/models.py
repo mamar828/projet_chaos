@@ -3,7 +3,8 @@ from numpy.random import randint
 
 
 class BaseModel:
-    def __init__(self,
+    def __init__(
+            self,
             screen,
             position=(0,0),
             scale=(1,1),
