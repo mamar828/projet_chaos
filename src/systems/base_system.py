@@ -10,7 +10,7 @@
 from typing import Dict, List, Union, Optional
 from copy import deepcopy
 
-from numpy import abs, gradient, ones_like, rot90, zeros_like
+from numpy import abs, gradient, ones_like, rot90, zeros_like, argmax
 from matplotlib.pyplot import close, colorbar, imshow, gca, scatter, show
 
 from src.bodies.base_body import Body
@@ -61,6 +61,9 @@ class BaseSystem:
             if body.has_potential:
                 self.attractive_bodies.append(body)
         self.current_potential = None
+        # Find origin for plotting the potential
+        masses = [body.mass for body in self.list_of_bodies]
+        self.origin = tuple(self.list_of_bodies[argmax(masses)].position)
 
     def update(self, time_step: float, epsilon: float = 10**(-2)):
         """
@@ -236,3 +239,20 @@ class BaseSystem:
         if show_bodies or show_potential_null_slope_points or show_potential:
             show()
             close()
+
+    def get_potential_function(self) -> ScalarField:
+        """ 
+        Gives the ScalarField of the potential function.
+
+        Returns
+        -------
+        potential_function : ScalarField
+            Function of three variables giving the potential value at the specified position.
+        """
+        potential_field = loads(dumps(self._base_potential))
+        for body in self.attractive_bodies:
+            potential_field += body.potential
+        if len(potential_field.terms) > 2:
+            potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+
+        return loads(dumps(potential_field))*(10**(-self.n))**3

@@ -22,7 +22,7 @@ class Camera:
         self.NEAR = near_render_distance
         self.FAR = far_render_distance
         self.aspect_ratio = app.window_size[0] / app.window_size[1]
-        self.position = glm.vec3((-position[0], position[2], -position[1]))
+        self.position = glm.vec3((position[0], position[2], -position[1]))
         self.up = glm.vec3(0, 1, 0)
         self.right = glm.vec3(1,0,0)
         self.forward = glm.vec3(0,0,-1)

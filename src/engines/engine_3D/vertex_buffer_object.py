@@ -18,8 +18,8 @@ class VertexBufferObject:
             "cat" : CatVBO(self.context)
         }
         if app.functions:
-            for i, plot_func in enumerate(app.functions):
-                self.vertex_buffer_objects[f"surface_{i}"] = SurfaceVBO(self.context, plot_func)
+            for i, function in enumerate(app.functions):
+                self.vertex_buffer_objects[f"surface_{i}"] = SurfaceVBO(self.context, function)
 
     def destroy(self):
         [vbo.destroy() for vbo in self.vertex_buffer_objects.values()]
@@ -140,44 +140,47 @@ class CatVBO(External_VBO):
 
 
 class SurfaceVBO(BaseVertexBufferObject):
-    def __init__(self, context, plot_func):
-        self.plot_func = plot_func
+    def __init__(self, context, function):
+        self.function = function
         super().__init__(context)
         self.format = "2f 3f"
         self.attribs = ["in_texcoord_0", "in_position"]
 
     def get_vertex_data(self):
         # Check if the data has previously been saved
-        if self.plot_func.save_filename and exists(self.plot_func.save_filename):
+        if self.function.save_filename and exists(self.function.save_filename):
             return self.load_data()
         else:
             # Set parameters
-            x_num, y_num = self.plot_func.resolution
-            x_start, x_end = self.plot_func.x_limits
-            y_start, y_end = self.plot_func.y_limits
+            x_num, y_num = self.function.resolution
+            x_start, x_end = self.function.x_limits
+            y_start, y_end = self.function.y_limits
 
             # Setup array indicating the z value at every (x,y) coordinates
             x_space = np.linspace(x_start, x_end, x_num)
             y_space = np.linspace(y_start, y_end, y_num)
             x, y = np.meshgrid(x_space, y_space)
-            z_array = self.plot_func.function(y, x)
+            z_array = self.function.function(x, y).T    # Transpose to format the array so the indices are given [x,y]
+            # print(z_array[33,100], self.function.i)
 
             vertices = []       # List of every points of the screen (which will be linked together to form triangles)
             indices = []        # List of the vertices that should be connected to form triangles
             for i in range(x_num):
                 for j in range(y_num):
-                    zero = i + j*x_num
-                    vertices.append(((i/(x_num-1) * (x_end - x_start) + x_start), z_array[i,j],
-                                    (j/(y_num-1) * (y_end - y_start) + y_start))) # Minus signs correct for reflection
+                    current_i = i + j*x_num
+                    vertices.append(((i/(x_num-1) * (x_end - x_start) + x_start), 
+                                    z_array[i,j],
+                                    -(j/(y_num-1) * (y_end - y_start) + y_start)))
                     if i < x_num-1 and j < y_num-1:
                         # Create first side
                         # Indices must be given in clockwise order to be viewed from the front
-                        indices.append((zero, zero + x_num+1, zero + x_num))
-                        indices.append((zero, zero + 1,  zero + x_num+1))
+                        indices.append((current_i, current_i + x_num+1, current_i + x_num))
+                        indices.append((current_i, current_i + 1,  current_i + x_num+1))
                         # Create other side
                         # Indices must be given in counter-clockwise order to be viewed from the front
-                        indices.append((zero, zero + x_num, zero + x_num+1))
-                        indices.append((zero, zero + x_num+1, zero + 1))
+                        indices.append((current_i, current_i + x_num, current_i + x_num+1))
+                        indices.append((current_i, current_i + x_num+1, current_i + 1))
+
 
             vertex_data = self.get_data(vertices, indices)
 
@@ -187,17 +190,20 @@ class SurfaceVBO(BaseVertexBufferObject):
             tex_coord_indices = [(0,2,3), (0,1,2), (0,3,2), (0,2,1)] * int((len(indices) / 4))
             tex_coord_data = self.get_data(tex_coord_vertices, tex_coord_indices)
             
-            if self.plot_func.save_filename:
+            if self.function.save_filename:
                 self.save_data(np.hstack([tex_coord_data, vertex_data]))
 
             return np.hstack([tex_coord_data, vertex_data])
     
     def save_data(self, array):
-        with gzip_open(self.plot_func.save_filename, "wb") as file:
+        with gzip_open(self.function.save_filename, "wb") as file:
             dump(array, file)
 
     def load_data(self) -> np.ndarray:
-        with gzip_open(self.plot_func.save_filename, "rb") as file:
+        with gzip_open(self.function.save_filename, "rb") as file:
             array = load(file)
 
         return array
+    
+    def update(self):
+        self.vertex_buffer_object = self.get_vertex_buffer_object()

@@ -12,7 +12,7 @@ class Light:
         ):
         # Light positioning should be made for the camera to be able to see the whole scene at the light position for
         # shadows to correctly work
-        self.position = vec3((-position[0], position[2], -position[1]))
+        self.position = vec3((position[0], position[2], -position[1]))
         self.color = vec3(color)
         self.direction = vec3(0,0,0)
         # Intensities of different lights

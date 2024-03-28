@@ -31,11 +31,13 @@ class Engine3D(GlobalEngine):
             camera_far_render_distance: float=1e20,
             camera_yaw: float=-90.,
             camera_pitch: float=0.,
-            scene_elements: list[Object3D]=None,
-            functions: list[Function3D]=None
+            objects: list[Object3D]=None,
+            functions: list[Function3D]=None,
+            simulation_presets_allowed: bool=True
         ):
         # Default parameters for camera origin and light position
-        if simulation:
+        if simulation and simulation_presets_allowed:
+            print(simulation.system.origin)
             camera_origin = simulation.system.origin
             light_position = simulation.system.origin
 
@@ -76,7 +78,7 @@ class Engine3D(GlobalEngine):
         )
         self.functions = functions
         self.mesh = Mesh(self)
-        self.scene = Scene(self, scene_elements)
+        self.scene = Scene(self, objects)
         self.scene_renderer = SceneRenderer(self)
 
     def render(self):

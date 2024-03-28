@@ -70,14 +70,15 @@ class BaseModel:
         self.program["light.Is"].write(self.app.light.Is)
 
     def get_model_matrix(self):
-        # translation (Consider the transformation between usual coordinates and these ones)
-        t_model = glm.translate(glm.mat4(), (-self.position[0], self.position[2], -self.position[1]))
+        # translation 
+        # Account for the fact that usal coords are (x,y,z) but model ones should be (x,z,y)
+        t_model = glm.translate(glm.mat4(), (self.position[0], self.position[2], -self.position[1]))
         # rotation
         r_model = glm.rotate(t_model, self.rotation.x, glm.vec3(1,0,0))
-        r_model = glm.rotate(r_model, self.rotation.y, glm.vec3(0,1,0))
-        r_model = glm.rotate(r_model, self.rotation.z, glm.vec3(0,0,1))
+        r_model = glm.rotate(r_model, self.rotation.y, glm.vec3(0,0,1))
+        r_model = glm.rotate(r_model, self.rotation.z, glm.vec3(0,1,0))
         # scale
-        s_model = glm.scale(r_model, self.scale)
+        s_model = glm.scale(r_model, (self.scale[0], self.scale[2], self.scale[1]))
         return s_model
     
     def render(self):
@@ -148,10 +149,10 @@ class Surface(BaseModel):
             texture_id,
             position=(0,0,0),
             rotation=(0,0,0),
-            scale=(1,1,1)
+            scale=(1,1,1),
+            instance=None
         ):
-        super().__init__(app, vertex_array_object_name, texture_id, position, 
-                         (rotation[0], rotation[1]+180, rotation[2]), scale)
+        super().__init__(app, vertex_array_object_name, texture_id, position, rotation, scale, instance)
 
     def on_init(self):
         self.depth_texture = self.app.mesh.texture.textures["depth_texture"]

@@ -44,23 +44,27 @@ class GlobalEngine:
             elif self.key_mode == "manual":
                 if event.key == pg.K_RETURN:
                     k = self.key_string
-                    if (((len(k.split("*")) == 1) != (len(k.split("/")) == 1)) and   # Check if only one * or /
-                        ((k[0] == "*") != (k[0] == "/"))):        # Check that the first character is * or /
-                        try:
-                            number = int(k[1:])
-                            if k[0] == "*":
-                                self.physics_speed *= number
-                            elif k[0] == "/":
-                                self.physics_speed /= number
-                        except Exception: pass
-                        self.key_string = ""
-                    else:
-                        self.key_string = ""
+                    if self.is_int(k[1:]):
+                        number = int(k[1:])
+                        if k[0] == "*":
+                            self.physics_speed *= number
+                        elif k[0] == "/":
+                            self.physics_speed /= number
+                        elif k[0] == "+":
+                            self.physics_speed += number
+                        elif k[0] == "-":
+                            self.physics_speed -= number
+                    self.key_string = ""
                 else:
                     if event.key == pg.K_x and pg.K_x not in self.pressed_keys:
                         self.key_string += "*"
                     if event.key == pg.K_SLASH and pg.K_SLASH not in self.pressed_keys:
                         self.key_string += "/"
+                    if (event.key == pg.K_EQUALS and (pg.K_LSHIFT in self.pressed_keys or 
+                                        pg.K_RSHIFT in self.pressed_keys) and pg.K_EQUALS not in self.pressed_keys):
+                        self.key_string += "+"
+                    if event.key == pg.K_MINUS and pg.K_MINUS not in self.pressed_keys:
+                        self.key_string += "-"
                     for i in range(0,10):
                         if event.key == getattr(pg, f"K_{i}") and getattr(pg, f"K_{i}") not in self.pressed_keys:
                             self.key_string += str(i)
@@ -81,6 +85,14 @@ class GlobalEngine:
 
         elif event.type == pg.KEYUP and event.key in self.pressed_keys:
             self.pressed_keys.remove(event.key)
+
+    @staticmethod
+    def is_int(value):
+        try:
+            int(value)
+            return True
+        except ValueError:
+            return False
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
