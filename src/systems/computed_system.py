@@ -24,13 +24,19 @@ class ComputedSystem(BaseSystem):
         self.tick_factor = tick_factor
         self.current_tick = 0
 
-    def update(self, *args, **kwargs):
+    def update(self, time_step: float):
         """
         Updates the position of the bodies within the system according to their pre-computed positions.
+
+        Parameters
+        ----------
+        time_step : float
+            The time step during which the acceleration and velocity are considered constant, a smaller values gives
+            more accurate results.
         """
-        self.current_tick += 1
-        if self.current_tick == self.tick_factor:
-            self.current_tick = 0
+        self.current_tick += time_step
+        if self.current_tick > self.tick_factor:
+            self.current_tick -= self.tick_factor
             for body in self.moving_bodies:
                 if not body.dead:
                     body.update()

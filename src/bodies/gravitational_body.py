@@ -30,7 +30,7 @@ class GravitationalBody(Body):
             velocity: Vector = Vector(0, 0, 0),
             fixed: bool = False,
             has_potential: bool = True,
-            integrator: str = "euler"
+            integrator: str = "synchronous"
     ):
         """
         Defines required parameters.
@@ -48,8 +48,9 @@ class GravitationalBody(Body):
         has_potential : bool
             Whether the body generates a potential field during simulations.
         integrator : str
-            The type of integrator to use when updating the position of the body. Defaults to "euler". Currently
-            implemented integrators are: "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"
+            The type of integrator to use when updating the position of the body. Defaults to "synchronous". Currently
+            implemented integrators are: "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", 
+            "runge-kutta"
         """
 
         assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"], \
@@ -269,4 +270,3 @@ class GravitationalBody(Body):
         else:
             return (condition_2D or 
                     body_position_limit[0]-0.1 > self.position.z or self.position.z > body_position_limit[1])
-

@@ -11,22 +11,23 @@ from src.simulator.simulation import Simulation
 
 if __name__ == '__main__':
     sim_system = BaseSystem(
-        list_of_bodies=[GravitationalBody(position=Vector(450,450,0), mass=1.989e30, fixed=True),
-                        GravitationalBody(position=Vector(300,450,0),
-                                          velocity=Vector(0,30e-6,0), mass=5.972e29, fixed=False)],
+        list_of_bodies=[GravitationalBody(position=Vector(450,450,0), mass=1.989e30, fixed=True,
+                                          integrator="synchronous"),
+                        GravitationalBody(position=Vector(300,450,0), velocity=Vector(0,30e-6,0), mass=5.972e27,
+                                          fixed=False, integrator="synchronous")],
         n=9
     )
 
-    mommy = SimulationMother(base_system=sim_system, delta_time=100)
+    mommy = SimulationMother(base_system=sim_system)
     foldername = mommy.dispatch(
-        simulation_count=8,
-        bodies_per_simulation=2,
-        body_initial_position_limits=[(0, 900), (0, 900), (0, 0)],
+        simulation_count=400,
+        delta_time=5000,
+        bodies_per_simulation=50,
+        body_initial_position_limits=[(280, 320), (430, 470), (0, 0)],
         body_initial_velocity_limits=[(-50e-6, 50e-6), (-50e-6, 50e-6), (0, 0)],
-        # save_foldername=f"trash/moving_object_not_showing",
-        save_foldername=f"simulations/double_body_tests",
-        simulation_duration=1e8,
-        positions_saving_frequency=1e2,
+        save_foldername=f"simulations/double_body",
+        simulation_duration=3e8,
+        positions_saving_frequency=1,
         potential_gradient_limit= 5e-10,
-        body_position_limits=(0,900)
+        body_position_limits=(250,650)
     )

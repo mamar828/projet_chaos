@@ -16,9 +16,8 @@ from src.tools.vector import Vector
 
 
 class SimulationMother:
-    def __init__(self, base_system: BaseSystem, delta_time: float=100):
+    def __init__(self, base_system: BaseSystem):
         self.initial_system = base_system
-        self.delta_time = delta_time
 
     @staticmethod
     def save_results(results: list, save_foldername: str):
@@ -44,7 +43,8 @@ class SimulationMother:
                                 position=body.initial_position,
                                 velocity=body.initial_velocity,
                                 fixed=body.fixed,
-                                has_potential=body.has_potential
+                                has_potential=body.has_potential,
+                                integrator=body.integrator
                             ), file
                         )
 
@@ -64,7 +64,6 @@ class SimulationMother:
 
         with open(filename_info, 'w') as file:
             file.write(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            file.write(f"Delta time: {self.delta_time}\n")
             file.write(f"BaseSystem n: {self.initial_system.n}\n")
             for key, value in kwargs.items():
                 file.write(f"{key}: {value}\n")
@@ -92,9 +91,11 @@ class SimulationMother:
             body_initial_velocity_limits: list[tuple[float, float]],
             save_foldername: str,
             simulation_duration: float=1e8,
+            delta_time: float=5000,
             positions_saving_frequency: int=1e2,
             potential_gradient_limit: int=5e-10,
-            body_position_limits: tuple[int,int]=(-1000,2000)
+            body_position_limits: tuple[int,int]=(-1000,2000),
+            integrator: str="synchronous"
         ) -> str:
         """
         Start a simulation and dispatch to Simulation objects.
@@ -116,6 +117,8 @@ class SimulationMother:
         simulation_duration : float
             Duration of the simulation in seconds. Defaults to 1e8 seconds (≈ 3 years). Use multiples of 10 for better
             results.
+        delta_time : float
+            Delta time between of each step. Defaults to 1000.
         positions_saving_frequency : int
             Sets the number of steps after which the body's positions will be saved. Defaults to 1e2. Use multiples of
             10 for better results. Also sets the frequency at which the bodies' state will be checked (dead/alive)
@@ -123,6 +126,9 @@ class SimulationMother:
             Limit for the potential gradient on a body to be considered still alive. Defaults to 5e-10.
         body_position_limit: tuple[int,int]
             Specify the position in pixels of a body to be considered still alive. Defaults to (-1000,2000).
+        integrator : str
+            Integrator to use for computing the body positions. Supported integrators can be found in 
+            src.bodies.gravitational_bodies.__call__. Defaults to "synchronous".
         
         Returns
         -------
@@ -156,7 +162,7 @@ class SimulationMother:
         print(C.BROWN)
         print(f"\n\tsimulation_count:             {simulation_count}" +
               f"\n\tbodies_per_simulation:        {bodies_per_simulation}" +
-              f"\n\tdelta_time:                   {self.delta_time}" +
+              f"\n\tdelta_time:                   {delta_time}" +
               f"\n\tbody_initial_position_limits: {body_initial_position_limits}" +
               f"\n\tbody_initial_velocity_limits: {body_initial_velocity_limits}" +
               f"\n\tpotential_gradient_limit:     {potential_gradient_limit:.0e}" +
@@ -164,6 +170,7 @@ class SimulationMother:
               f"\n\tsystem_n:                     {self.initial_system.n}" +
               f"\n\tsimulation_duration:          {simulation_duration:.0e}" +
               f"\n\tpositions_saving_frequency:   {positions_saving_frequency:.0e}" +
+              f"\n\tintegrator:                   {integrator}" +
               f"\n\tsave_foldername:              {save_foldername}{C.END}\n")
 
         pool = Pool()
@@ -171,14 +178,14 @@ class SimulationMother:
         print(f"{C.BROWN}Number of processes used: {number_of_processes}{C.END}")
         start = datetime.now()
 
-        worker_args = [(body_pos, body_velocities, self.initial_system, self.delta_time, simulation_duration,
-                        positions_saving_frequency, potential_gradient_limit, body_position_limits)
+        worker_args = [(body_pos, body_velocities, self.initial_system, delta_time, simulation_duration,
+                        positions_saving_frequency, potential_gradient_limit, body_position_limits, integrator)
                        for body_pos in body_positions]
         
         # Dispatch a worker simulation to compute the independent movement of attractive moving bodies
         if self.initial_system.moving_bodies:
-            special_args = [(None, None, self.initial_system, self.delta_time, simulation_duration,
-                             positions_saving_frequency, None, None)]
+            special_args = [(None, None, self.initial_system, delta_time, simulation_duration,
+                             positions_saving_frequency, None, None, integrator)]
 
         results = pool.starmap(worker_simulation, special_args + worker_args)
         stop = datetime.now()
@@ -189,8 +196,9 @@ class SimulationMother:
         self.save_simulation_parameters(
             save_foldername, number_of_processes=number_of_processes, real_time_duration=time,
             positions_saving_frequency=int(positions_saving_frequency), simulation_duration=int(simulation_duration),
-            potential_gradient_limit=potential_gradient_limit, body_position_limits=body_position_limits
-            )
+            delta_time=delta_time, integrator=integrator, potential_gradient_limit=potential_gradient_limit, 
+            body_position_limits=body_position_limits
+        )
         self.save_results(results, save_foldername)
         print(f"{C.GREEN+C.BOLD}Simulation successfully saved at {save_foldername}.{C.END}")
         return save_foldername
@@ -204,7 +212,8 @@ def worker_simulation(
         simulation_duration: float,
         positions_saving_frequency: int,
         potential_gradient_limit: int,
-        body_position_limits: tuple[int,int]
+        body_position_limits: tuple[int,int],
+        integrator: str
     ):
     if body_position == None and body_velocities == None:
         # Special simulation, occuring only once
@@ -223,7 +232,8 @@ def worker_simulation(
                     mass=1,
                     position=Vector(*body_position),
                     velocity=Vector(v_x,v_y,v_z),
-                    has_potential=False
+                    has_potential=False,
+                    integrator=integrator
                 ) for v_x, v_y, v_z in body_velocities]
             ),
             n=system.n

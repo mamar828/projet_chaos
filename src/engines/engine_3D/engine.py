@@ -37,7 +37,6 @@ class Engine3D(GlobalEngine):
         ):
         # Default parameters for camera origin and light position
         if simulation and simulation_presets_allowed:
-            print(simulation.system.origin)
             camera_origin = simulation.system.origin
             light_position = simulation.system.origin
 

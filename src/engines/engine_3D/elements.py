@@ -116,4 +116,4 @@ class Function3D(Element3D):
 
     def update(self):
         # self.i += 1
-        self.function = lambda x, y: self.instance.get_potential_function()(Vector(x,y,0)) * 1e11# + self.i
+        self.function = lambda x, y: self.instance.get_potential_function()(Vector(x,y,0)) * 1e10# + self.i

@@ -5,10 +5,11 @@ from src.systems.base_system import BaseSystem
 from src.engines.engine_2D.engine import Engine2D
 from src.engines.engine_3D.engine import Engine3D
 from src.systems.computed_system import ComputedSystem
+from src.engines.engine_3D.elements import Function3D
 
 
 class Simulation:
-    def __init__(self, system: BaseSystem, maximum_delta_time: float=100):
+    def __init__(self, system: BaseSystem, maximum_delta_time: int=5000):
         """
         Initialize a Simulation object.
 
@@ -17,8 +18,8 @@ class Simulation:
         system : BaseSystem
             System on which to base the simulation. If a simulation is to be only computed, contains the reference
             bodies but not the added bodies.
-        maximum_delta_time : float
-            Maximum delta time in seconds accepted for the simulation's time steps.
+        maximum_delta_time : int
+            Maximum delta time in seconds accepted for the simulation's time steps. Defaults to 5000.
         """
         self.system = system
         self.maximum_delta_time = maximum_delta_time
@@ -70,11 +71,13 @@ class Simulation:
                 n = int(line.split(" ")[-1])
             elif line.startswith("positions_saving_frequency:"):
                 save_freq = int(line.split(" ")[-1])
+            elif line.startswith("delta_time:"):
+                delta_time = int(line.split(" ")[-1])
 
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
         bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
 
-        return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq))
+        return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time))
 
     def show_2D(self, *args, traces: list | bool=None, **kwargs):
         """
@@ -104,7 +107,7 @@ class Simulation:
         )
         app.run()
 
-    def show_3D(self, *args, **kwargs):
+    def show_3D(self, *args, show_potential: bool=False, **kwargs):
         """
         Show a simulation in 3D with pygame and moderngl.
 
@@ -112,9 +115,32 @@ class Simulation:
         ----------
         args : list
             Parameters to pass to the Engine3D class.
+        show_potential : bool
+            If True, the potential function is passed directly to the Engine3D class. This eases the plotting of the 
+            potential field. Defaults to False.
         kwargs : dict
             Parameters to pass to the Engine3D class.
         """
+        if show_potential:
+            if "functions" in kwargs.keys():
+                kwargs["functions"].append(Function3D(
+                    texture="spacetime",
+                    position=(0,0,0),
+                    resolution=(200,200),
+                    x_limits=(0,900),
+                    y_limits=(0,900),
+                    instance=self.system
+                ))
+            else:
+                kwargs["functions"] = [Function3D(
+                    texture="spacetime",
+                    position=(0,0,0),
+                    resolution=(200,200),
+                    x_limits=(0,900),
+                    y_limits=(0,900),
+                    instance=self.system
+                )]
+
         app = Engine3D(
             simulation=self,
             *args,
