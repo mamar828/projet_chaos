@@ -32,6 +32,9 @@ class Camera:
         self.m_proj = self.get_projection_matrix()  # projection_matrix
         self.current_speed_modifier = 1
 
+    def __str__(self):
+        return f"Camera position: {self.position.x:.3f}, {-self.position.z:.3f}, {self.position.y:.3f}"
+
     def rotate(self):
         # Mouse controls
         rel_x, rel_y = pg.mouse.get_rel()

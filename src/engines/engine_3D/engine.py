@@ -33,7 +33,8 @@ class Engine3D(GlobalEngine):
             camera_pitch: float=0.,
             objects: list[Object3D]=None,
             functions: list[Function3D]=None,
-            simulation_presets_allowed: bool=True
+            simulation_presets_allowed: bool=True,
+            print_camera_coordinates: bool=False
         ):
         # Default parameters for camera origin and light position
         if simulation and simulation_presets_allowed:
@@ -55,7 +56,8 @@ class Engine3D(GlobalEngine):
 
         self.context = mgl.create_context()
         self.context.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE)       # Allows for depth testing (z-buffering)
-        self.camera_delta_time = 0
+        self.camera_delta_time = 0                                   # Used for constant camera speed regardless of fps
+        self.print_camera_coordinates = print_camera_coordinates
 
         self.light = Light(
             position=light_position, 
@@ -81,7 +83,7 @@ class Engine3D(GlobalEngine):
         self.scene_renderer = SceneRenderer(self)
 
     def render(self):
-        self.context.clear()#color=(0.08, 0.16, 0.18))
+        self.context.clear()
         self.scene_renderer.render()
         pg.display.flip()
 
@@ -95,6 +97,8 @@ class Engine3D(GlobalEngine):
             self.camera_delta_time = self.clock.tick(self.framerate)
             pg.display.set_caption(f"Current physics speed : x{self.physics_speed:.2e}")
             self.simulation_time += self.delta_time
+            if self.print_camera_coordinates:
+                print(self.camera)
 
 
 

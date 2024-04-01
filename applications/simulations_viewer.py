@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # sim = Simulation(system=ComputedSystem(list_of_bodies=sim.system.list_of_bodies[:6], n=9,
     #                                               tick_factor=sim.system.tick_factor))
 
-    sim.show_3D(show_potential=True)
+    sim.show_3D(show_potential=True, print_camera_coordinates=True)
     # sim.show_2D(
     #     window_size=(900,900),
     #     framerate=60,
