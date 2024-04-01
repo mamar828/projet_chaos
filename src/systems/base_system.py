@@ -62,8 +62,12 @@ class BaseSystem:
                 self.attractive_bodies.append(body)
         self.current_potential = None
         # Find origin for plotting the potential
-        masses = [body.mass for body in self.list_of_bodies]
+        masses = loads(dumps([body.mass for body in self.list_of_bodies]))
         self.origin = tuple(self.list_of_bodies[argmax(masses)].position)
+        if len(self.list_of_bodies) > 1:
+            # Reference the second largest body to be the body to track
+            masses[argmax(masses)] = 0
+            self.tracked_body = self.list_of_bodies[argmax(masses)]
 
     def update(self, time_step: float, epsilon: float = 10**(-2)):
         """

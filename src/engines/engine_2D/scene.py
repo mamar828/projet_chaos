@@ -50,6 +50,7 @@ class Scene:
             if not obj.instance.dead:
                 obj.move((obj.instance.position[0], obj.instance.position[1]))
                 obj.update()
+                # if abs(obj.instance.position[1] - 450) < 0.01 and not obj.instance.fixed: print(self.format_time(self.app.simulation_time))
             else:
                 obj.destroy()
                 self.objects.remove(obj)

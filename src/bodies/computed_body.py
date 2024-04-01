@@ -55,9 +55,8 @@ class ComputedBody(GravitationalBody):
             if random_tuple:
                 return randint(0, 255, 3)
             else:
-                # red and green are not present
-                return choice(["blue", "yellow", "orange", "cyan", "magenta", "white", "black", "purple", "brown",
-                               "grey"])
+                # red, green and black are not present
+                return choice(["blue", "yellow", "orange", "cyan", "magenta", "white", "purple", "brown", "grey"])
         elif self.type == "alive":
             return "green"
         elif self.type == "dead":

@@ -1,4 +1,5 @@
 from pygame.font import SysFont
+from astropy.constants import M_sun, M_earth, R_sun, R_earth
 
 from src.engines.engine_3D.models import *
 from src.engines.engine_3D.relative_paths import get_path
@@ -46,7 +47,14 @@ class Scene:
             color_func = lambda body: BaseModel.get_random_color()
         
         for body in self.system.list_of_bodies:
-            s = (round(body.mass/(2*10**30), 0) * 30 + 10) / 10
+            if self.app.model_size_type == "exaggerated":
+                s = (round(body.mass/(2*10**30), 0) * 30 + 10) / 10
+                if body.mass == 1:
+                    s *= 0.5
+            else:
+                if abs(body.mass - M_sun.value) < 1e28: s = R_sun.value / 10**(self.app.simulation.system.n)
+                elif abs(body.mass == M_earth.value) < 1e22: s = R_earth.value / 10**(self.app.simulation.system.n)
+                else: s = R_earth.value / 10**(self.app.simulation.system.n) / 10
             self.objects.append(Sphere(app=self.app, texture_id=color_func(body), scale=(s,s,s), instance=body,
                                        position=tuple(body.position), saturated=True))
 
@@ -66,7 +74,7 @@ class Scene:
                         obj.destroy()
                         self.objects.remove(obj)
 
-            # Update surfaces on display only once every 10 updates
+            # # Update surfaces on display only once every 10 updates
             # self.current_i += 1
             # if self.current_i > 10:
             #     self.current_i = 0

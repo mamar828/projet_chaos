@@ -1,6 +1,5 @@
 import pygame as pg
 import moderngl as mgl
-from glm import vec3
 
 from src.engines.engine_3D.camera import Camera
 from src.engines.engine_3D.light import Light
@@ -27,15 +26,21 @@ class Engine3D(GlobalEngine):
             camera_speed: float=0.025,
             camera_sensitivity: float=0.1,
             camera_fov: float=50.,
-            camera_near_render_distance: float=0.1,
+            camera_near_render_distance: float=0.05,
             camera_far_render_distance: float=1e20,
             camera_yaw: float=-90.,
             camera_pitch: float=0.,
+            camera_mode: str="free",
             objects: list[Object3D]=None,
             functions: list[Function3D]=None,
             simulation_presets_allowed: bool=True,
-            print_camera_coordinates: bool=False
+            print_camera_coordinates: bool=False,
+            model_size_type: str="exaggerated",
         ):
+        """ 
+        Supported camera_modes are "free" and "following".
+        Supported model_size_types are "exaggerated" and "realistic".
+        """
         # Default parameters for camera origin and light position
         if simulation and simulation_presets_allowed:
             camera_origin = simulation.system.origin
@@ -58,6 +63,7 @@ class Engine3D(GlobalEngine):
         self.context.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE)       # Allows for depth testing (z-buffering)
         self.camera_delta_time = 0                                   # Used for constant camera speed regardless of fps
         self.print_camera_coordinates = print_camera_coordinates
+        self.model_size_type = model_size_type
 
         self.light = Light(
             position=light_position, 
@@ -75,7 +81,8 @@ class Engine3D(GlobalEngine):
             near_render_distance=camera_near_render_distance,
             far_render_distance=camera_far_render_distance,
             yaw=camera_yaw,
-            pitch=camera_pitch
+            pitch=camera_pitch,
+            mode=camera_mode
         )
         self.functions = functions
         self.mesh = Mesh(self)
@@ -83,6 +90,9 @@ class Engine3D(GlobalEngine):
         self.scene_renderer = SceneRenderer(self)
 
     def render(self):
+        # Update scene and camera before to prevent flickering
+        self.scene.update()
+        self.camera.update()
         self.context.clear()
         self.scene_renderer.render()
         pg.display.flip()
@@ -91,7 +101,7 @@ class Engine3D(GlobalEngine):
         while True:
             self.get_time()
             self.check_events()
-            self.camera.update()
+            # self.camera.update()
             self.render()
             self.delta_time = (self.clock.tick(self.framerate) / 1000) * self.physics_speed
             self.camera_delta_time = self.clock.tick(self.framerate)

@@ -9,10 +9,10 @@ class Engine2D(GlobalEngine):
     def __init__(
             self,
             simulation,#=Simulation                 Cannot provide type due to circular imports
-            window_size: tuple[int,int]=(1440,900),
+            window_size: tuple[int,int]=(900,900),
             framerate: int=60,
             display_clock: bool=False,
-            clock_font: tuple[tuple[str,int], str]=(("Trebuchet MS", 25), "black"),
+            clock_font: tuple[tuple[str,int], str]=(("Trebuchet MS", 25), "white"),
             fullscreen: bool=False,
             screen_color: tuple[int,int,int]=(0,0,0)
         ):
