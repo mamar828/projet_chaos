@@ -28,12 +28,21 @@ class VertexArrayObject:
                     vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"]),
             "shadow_cat" : self.get_vertex_array_object(
                     program=self.program.programs["shadow_map"],
+                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"]),
+            "saturated_cube" : self.get_vertex_array_object(
+                    program=self.program.programs["saturated"],
+                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cube"]),
+            "saturated_sphere" : self.get_vertex_array_object(
+                    program=self.program.programs["saturated"],
+                    vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["sphere"]),
+            "saturated_cat" : self.get_vertex_array_object(
+                    program=self.program.programs["saturated"],
                     vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects["cat"])
         }
         if app.functions:
             for i in range(len(app.functions)):
                 self.vertex_array_objects[f"surface_{i}"] = self.get_vertex_array_object(
-                        program=self.program.programs["surface"],
+                        program=self.program.programs["saturated"],
                         vertex_buffer_object=self.vertex_buffer_object.vertex_buffer_objects[f"surface_{i}"])
 
     def get_vertex_array_object(self, program, vertex_buffer_object):

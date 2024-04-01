@@ -47,9 +47,8 @@ class Scene:
         
         for body in self.system.list_of_bodies:
             s = (round(body.mass/(2*10**30), 0) * 30 + 10) / 10
-            # s = 2*5*arctan(float(body.mass))/pi
             self.objects.append(Sphere(app=self.app, texture_id=color_func(body), scale=(s,s,s), instance=body,
-                                       position=tuple(body.position)))
+                                       position=tuple(body.position), saturated=True))
 
     def update(self):
         if self.system:

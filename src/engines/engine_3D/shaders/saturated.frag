@@ -9,7 +9,6 @@ uniform sampler2D u_texture_0;
 uniform vec2 u_resolution;
 
 
-
 void main() {
     vec3 color = texture(u_texture_0, uv_0).rgb;
 

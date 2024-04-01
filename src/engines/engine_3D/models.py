@@ -12,8 +12,12 @@ class BaseModel:
             position,
             rotation,
             scale,
-            instance=None
+            instance=None,
+            saturated=False
         ):
+        if saturated and not vertex_array_object_name.startswith("surface"):
+
+            vertex_array_object_name = f"saturated_{vertex_array_object_name}"
         self.app = app
         self.position = position
         self.rotation = glm.vec3([glm.radians(angle) for angle in rotation])  # Convert angles from degrees to radians
@@ -25,11 +29,12 @@ class BaseModel:
         self.program = self.vertex_array_object.program
         self.camera = self.app.camera
         self.instance = instance
+        self.saturated = saturated
         self.on_init()
 
     def update(self):
         self.texture.use(location=0)
-        self.program["camPos"].write(self.camera.position)
+        if not self.saturated: self.program["camPos"].write(self.camera.position)
         self.program["m_view"].write(self.camera.m_view)
         self.program["m_model"].write(self.m_model)
 
@@ -41,20 +46,29 @@ class BaseModel:
         self.shadow_vertex_array_object.render()
     
     def on_init(self):
-        self.program["m_view_light"].write(self.app.light.m_view_light)
-        # resolution
-        # self.program["u_resolution"].write(glm.vec2(self.app.window_size))        # Used for shadow smoothing
-        # depth texture
+        self.shadow_program = None
+        if not self.saturated:
+            # Initialize shadow and light concerned parameters
+            self.program["m_view_light"].write(self.app.light.m_view_light)
+            self.program["shadow_map"] = 1
+            # resolution
+            # self.program["u_resolution"].write(glm.vec2(self.app.window_size))        # Used for shadow smoothing
+            # depth texture
+            # shadow
+            self.shadow_vertex_array_object = self.app.mesh.vertex_array_object.vertex_array_objects[
+                                                                            f"shadow_{self.vertex_array_object_name}"]
+            self.shadow_program = self.shadow_vertex_array_object.program
+            self.shadow_program["m_proj"].write(self.camera.m_proj)
+            self.shadow_program["m_view_light"].write(self.app.light.m_view_light)
+            self.shadow_program["m_model"].write(self.m_model)
+            # light
+            self.program["light.position"].write(self.app.light.position)
+            self.program["light.Ia"].write(self.app.light.Ia)
+            self.program["light.Id"].write(self.app.light.Id)
+            self.program["light.Is"].write(self.app.light.Is)
+
         self.depth_texture = self.app.mesh.texture.textures["depth_texture"]
-        self.program["shadow_map"] = 1
         self.depth_texture.use(location=1)
-        # shadow
-        self.shadow_vertex_array_object = self.app.mesh.vertex_array_object.vertex_array_objects[
-                                                                        f"shadow_{self.vertex_array_object_name}"]
-        self.shadow_program = self.shadow_vertex_array_object.program
-        self.shadow_program["m_proj"].write(self.camera.m_proj)
-        self.shadow_program["m_view_light"].write(self.app.light.m_view_light)
-        self.shadow_program["m_model"].write(self.m_model)
         # texture
         self.texture = self.app.mesh.texture.textures[self.texture_id]
         self.program["u_texture_0"] = 0
@@ -63,11 +77,6 @@ class BaseModel:
         self.program["m_proj"].write(self.camera.m_proj)
         self.program["m_view"].write(self.camera.m_view)
         self.program["m_model"].write(self.m_model)
-        # light
-        self.program["light.position"].write(self.app.light.position)
-        self.program["light.Ia"].write(self.app.light.Ia)
-        self.program["light.Id"].write(self.app.light.Id)
-        self.program["light.Is"].write(self.app.light.Is)
 
     def get_model_matrix(self):
         # translation 
@@ -136,9 +145,10 @@ class Cube(AnimatedModel):
             position=(0,0,0),
             rotation=(0,0,0),
             scale=(1,1,1),
-            instance=None
+            instance=None,
+            saturated=False
         ):
-        super().__init__(app, "cube", texture_id, position, rotation, scale, instance)
+        super().__init__(app, "cube", texture_id, position, rotation, scale, instance, saturated)
 
 
 class Surface(BaseModel):
@@ -152,25 +162,24 @@ class Surface(BaseModel):
             scale=(1,1,1),
             instance=None
         ):
-        super().__init__(app, vertex_array_object_name, texture_id, position, rotation, scale, instance)
+        super().__init__(app, vertex_array_object_name, texture_id, position, rotation, scale, instance, True)
 
-    def on_init(self):
-        self.depth_texture = self.app.mesh.texture.textures["depth_texture"]
-        self.depth_texture.use(location=1)
-        # texture
-        self.texture = self.app.mesh.texture.textures[self.texture_id]
-        self.program["u_texture_0"] = 0
-        self.texture.use(location=0)
-        # mvp matrices
-        self.program["m_proj"].write(self.camera.m_proj)
-        self.program["m_view"].write(self.camera.m_view)
-        self.program["m_model"].write(self.m_model)
+    # def on_init(self):
+    #     self.depth_texture = self.app.mesh.texture.textures["depth_texture"]
+    #     self.depth_texture.use(location=1)
+    #     # texture
+    #     self.texture = self.app.mesh.texture.textures[self.texture_id]
+    #     self.program["u_texture_0"] = 0
+    #     self.texture.use(location=0)
+    #     # mvp matrices
+    #     self.program["m_proj"].write(self.camera.m_proj)
+    #     self.program["m_view"].write(self.camera.m_view)
+    #     self.program["m_model"].write(self.m_model)
 
-    def update(self):
-        self.texture.use(location=0)
-        self.program["m_view"].write(self.camera.m_view)
-        self.program["m_model"].write(self.m_model)
-
+    # def update(self):
+    #     self.texture.use(location=0)
+    #     self.program["m_view"].write(self.camera.m_view)
+    #     self.program["m_model"].write(self.m_model)
 
 
 class Sphere(AnimatedModel):
@@ -181,9 +190,10 @@ class Sphere(AnimatedModel):
             position=(0,0,0),
             rotation=(0,0,0),
             scale=(1,1,1),
-            instance=None
+            instance=None,
+            saturated=False
         ):
-        super().__init__(app, "sphere", texture_id, position, rotation, self.convert_scale(scale), instance)
+        super().__init__(app, "sphere", texture_id, position, rotation, self.convert_scale(scale), instance, saturated)
     
     def convert_scale(self, scale):
         # Convert the object's scale in the default dimensions
@@ -197,6 +207,7 @@ class Cat(BaseModel):
             position=(0,0,0),
             rotation=(0,0,0),
             scale=(1,1,1),
-            instance=None
+            instance=None,
+            saturated=False
         ):
-        super().__init__(app, "cat", "cat", position, rotation, scale, instance)
+        super().__init__(app, "cat", "cat", position, rotation, scale, instance, saturated)

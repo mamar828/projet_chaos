@@ -77,7 +77,8 @@ class Simulation:
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
         bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
 
-        return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time))
+        return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time),
+                   maximum_delta_time=delta_time)
 
     def show_2D(self, *args, traces: list | bool=None, **kwargs):
         """

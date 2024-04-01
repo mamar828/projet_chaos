@@ -8,7 +8,7 @@ class ShaderProgram:
             "default" : self.get_program("default"),
             "skybox" : self.get_program("skybox"),
             "shadow_map" : self.get_program("shadow_map"),
-            "surface" : self.get_program("surface")
+            "saturated" : self.get_program("saturated")
         }
 
     def get_program(self, shader_program_name):
