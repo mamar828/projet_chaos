@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     mommy = SimulationMother(base_system=sim_system)
     foldername = mommy.dispatch(
-        simulation_count=100,
+        simulation_count=230,
         delta_time=5000,
         bodies_per_simulation=50,
         body_initial_position_limits=[(earth.position.x+1.5-0.1, earth.position.x+1.5+0.1),

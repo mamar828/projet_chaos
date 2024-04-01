@@ -6,8 +6,10 @@ from multiprocessing import Pool
 from datetime import datetime
 from os.path import exists
 from os import makedirs
+from tqdm import tqdm
 from eztcolors import Colors as C
 
+import src.simulator.istarmap
 from src.simulator.simulation import Simulation
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
@@ -187,7 +189,11 @@ class SimulationMother:
             special_args = [(None, None, self.initial_system, delta_time, simulation_duration,
                              positions_saving_frequency, None, None, integrator)]
 
-        results = pool.starmap(worker_simulation, special_args + worker_args)
+        total_args = special_args + worker_args
+        results = []
+        mapped_pool = pool.imap(self.worker_simulation_star, total_args)
+        for result in tqdm(mapped_pool, total=len(total_args)):
+            results.append(result)
         stop = datetime.now()
         pool.close()
         time = stop - start
@@ -202,6 +208,10 @@ class SimulationMother:
         self.save_results(results, save_foldername)
         print(f"{C.GREEN+C.BOLD}Simulation successfully saved at {save_foldername}.{C.END}")
         return save_foldername
+    
+    @staticmethod
+    def worker_simulation_star(args):
+        return worker_simulation(*args)
 
 
 def worker_simulation(
@@ -222,7 +232,7 @@ def worker_simulation(
             maximum_delta_time=delta_time
         )
         results = simulation.run_attractive_bodies(simulation_duration, positions_saving_frequency)
-        print(",", end="", flush=True)
+        # print(",", end="", flush=True)
 
     else:
         # Normal simulation
@@ -244,6 +254,6 @@ def worker_simulation(
         )
         results = simulation.run(simulation_duration, positions_saving_frequency,
                                 potential_gradient_limit, body_position_limits)
-        print(".", end="", flush=True)
+        # print(".", end="", flush=True)
 
     return results
