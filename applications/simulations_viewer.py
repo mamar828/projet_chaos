@@ -14,7 +14,7 @@ from src.tools.vector import Vector
 
 
 if __name__ == '__main__':
-    sim = Simulation.load_from_folder(f"simulations/L1_3", iterations_survived=1000)
+    sim = Simulation.load_from_folder(f"simulations/L1_5", iterations_survived=4000)
     # sim = Simulation(system=ComputedSystem(list_of_bodies=sim.system.list_of_bodies[:6], n=9,
     #                                               tick_factor=sim.system.tick_factor))
 

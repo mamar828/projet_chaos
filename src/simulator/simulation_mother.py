@@ -205,7 +205,8 @@ class SimulationMother:
 
         self.save_simulation_parameters(
             save_foldername, number_of_processes=number_of_processes, real_time_duration=time,
-            positions_saving_frequency=int(positions_saving_frequency), simulation_duration=f"{simulation_duration:e}",
+            positions_saving_frequency=int(positions_saving_frequency),
+            simulation_duration=f"{simulation_duration:.3e}",
             delta_time=delta_time, integrator=integrator, potential_gradient_limit=potential_gradient_limit,
             body_alive_func=str(body_alive_func)
         )

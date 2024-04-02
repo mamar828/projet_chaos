@@ -81,8 +81,7 @@ class Simulation:
         bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
         if iterations_survived:
             bodies = [body for body in bodies if body.iterations_survived >= iterations_survived]
-        print(len(bodies))
-        print(bodies[0].iterations_survived)
+
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time),
                    maximum_delta_time=delta_time)
 
