@@ -1,8 +1,6 @@
 from pickle import loads, dumps
 
 from src.systems.base_system import BaseSystem
-from src.fields.scalar_field import ScalarField
-from src.tools.vector import Vector
 
 
 class ComputedSystem(BaseSystem):

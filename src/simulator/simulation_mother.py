@@ -34,6 +34,7 @@ class SimulationMother:
         save_foldername : str
             Name of the folder in which to save the results.
         """
+        print(C.LIGHT_PURPLE, end="")
         with gzip_open(f"{save_foldername}/bodies.gz", "wb") as file:
             for listi in tqdm(results, desc="Saving", miniters=1, mininterval=0.001):
                 for key, value in listi.items():
@@ -51,6 +52,7 @@ class SimulationMother:
                                 iterations_survived=body.iterations_survived
                             ), file
                         )
+        print(C.END, end="")
 
     def save_simulation_parameters(self, save_foldername: str, **kwargs):
         """
@@ -150,8 +152,9 @@ class SimulationMother:
                     save_foldername = f"{save_foldername}_1"
             else:
                 save_foldername = f"{save_foldername}_1"
-
-        makedirs(save_foldername)
+        
+        body_initial_position_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_position_limits]
+        body_initial_velocity_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_velocity_limits]
 
         body_positions = np.array([
             np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
@@ -196,19 +199,27 @@ class SimulationMother:
         total_args = special_args + worker_args
         results = []
         mapped_pool = pool.imap(self.worker_simulation_star, total_args)
+        print(C.LIGHT_PURPLE, end="")
         for result in tqdm(mapped_pool, total=len(total_args), desc="Simulating", miniters=1, mininterval=0.001):
             results.append(result)
+        print(C.END, end="")
         stop = datetime.now()
         pool.close()
         time = stop - start
         print(f"\n{C.GREEN}Simulation finished in {time}.{C.END}")
 
+        makedirs(save_foldername)
+
+        max_iterations_survived = self.get_max_iterations_from_results(results)
         self.save_simulation_parameters(
             save_foldername, number_of_processes=number_of_processes, real_time_duration=time,
+            simulation_count=simulation_count, bodies_per_simulation=bodies_per_simulation,
+            body_initial_position_limits=body_initial_position_limits,
+            body_initial_velocity_limits=body_initial_velocity_limits,
             positions_saving_frequency=int(positions_saving_frequency),
             simulation_duration=f"{simulation_duration:.3e}",
             delta_time=delta_time, integrator=integrator, potential_gradient_limit=potential_gradient_limit,
-            body_alive_func=str(body_alive_func)
+            body_alive_func=str(body_alive_func), max_iterations_survived=max_iterations_survived
         )
         self.save_results(results, save_foldername)
         print(f"{C.GREEN+C.BOLD}Simulation successfully saved at {save_foldername}.{C.END}")
@@ -216,7 +227,40 @@ class SimulationMother:
     
     @staticmethod
     def worker_simulation_star(args):
+        """
+        Makes multiprocessing.pool.map -> multiprocessing.pool.starmap.
+        """
         return worker_simulation(*args)
+    
+    @staticmethod
+    def get_max_iterations_from_results(results: list) -> int:
+        """ 
+        Get the maximum number of iterations a body has survived during simulating.
+
+        Parameters
+        ----------
+        results : list
+            Results in the format outputted by the worker_simulation function.
+        
+        Returns
+        -------
+        max_iterations_survived : int
+            Maximum number of iterations survived.
+        """
+        max_number = 0
+        for listi in results[1:]:           # Remove first value has it corresponds to the attractive body simulation
+            for key, value in listi.items():
+                if key == "alive" and value:
+                    max_number = value[0].iterations_survived
+                    break
+                else:
+                    for body in value:
+                        max_number = max(max_number, body.iterations_survived)
+            else:
+                continue
+            break
+        return max_number
+
 
 
 def worker_simulation(

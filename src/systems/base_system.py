@@ -261,3 +261,15 @@ class BaseSystem:
             potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
 
         return loads(dumps(potential_field))*(10**(-self.n))**3
+
+    def get_best_body(self) -> GravitationalBody:
+        """
+        Returns the body who survived the most iterations by looking at the iterations_survived variable.
+
+        Returns
+        -------
+        best_body : ComputedBody
+            The best body in the system.
+        """
+        simulated_bodies = list(set(self.moving_bodies) - set(self.attractive_bodies))
+        return simulated_bodies[argmax([body.iterations_survived for body in simulated_bodies])]

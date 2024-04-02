@@ -1,5 +1,7 @@
 from pickle import load
 from gzip import open as gzip_open
+from os.path import exists
+from eztcolors import Colors as C
 
 from src.systems.base_system import BaseSystem
 from src.engines.engine_2D.engine import Engine2D
@@ -57,7 +59,7 @@ class Simulation:
         return bodies
 
     @classmethod
-    def load_from_folder(cls, foldername: str, iterations_survived: int=None):
+    def load_from_folder(cls, foldername: str, min_iterations_survived: int=None):
         """
         Load a simulation from a folder containing details of a previously rendered simulation.
 
@@ -65,9 +67,10 @@ class Simulation:
         ----------
         foldername : str
             Name of the folder containing the simulation details.
-        iterations_survived : int
-            Minimum number of iterations every body has survived. Defaults to None.
+        min_iterations_survived : int
+            Minimum number of iterations a body survived to be displayed. Defaults to None.
         """
+        assert exists(foldername), f"{C.RED+C.BOLD}Provided foldername ({foldername}) does not exist.{C.END}"
         info = open(f"{foldername}/info.txt", "r").readlines()
         for line in info:
             if line.startswith("BaseSystem n"):
@@ -79,8 +82,8 @@ class Simulation:
         
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
         bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
-        if iterations_survived:
-            bodies = [body for body in bodies if body.iterations_survived >= iterations_survived]
+        if min_iterations_survived:
+            bodies = [body for body in bodies if body.iterations_survived >= min_iterations_survived]
 
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time),
                    maximum_delta_time=delta_time)
