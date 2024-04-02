@@ -7,8 +7,7 @@
 
     @Description:       This file contains a class used to create the basic structure of a many body system.
 """
-from typing import Dict, List, Union, Optional
-from copy import deepcopy
+from typing import Dict, List, Union, Optional, Callable
 
 from numpy import abs, gradient, ones_like, rot90, zeros_like, argmax
 from matplotlib.pyplot import close, colorbar, imshow, gca, scatter, show
@@ -17,6 +16,7 @@ from src.bodies.base_body import Body
 from src.bodies.gravitational_body import GravitationalBody
 from src.tools.vector import FakeVector, Vector
 from src.fields.scalar_field import ScalarField
+from src.simulator.lambda_func import Lambda
 
 from pickle import dumps, loads
 
@@ -97,23 +97,24 @@ class BaseSystem:
 
         self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
 
-    def remove_dead_bodies(self, potential_gradient_limit: int, body_position_limit: tuple[int,int]):
+    def remove_dead_bodies(self, potential_gradient_limit: float, body_alive_func: Lambda):
         """
         Removes the bodies that are considered to be destroyed or too distant. Checks only for the moving bodies
         without potentials.
 
         Parameters
         ----------
-        potential_gradient_limit: int
+        potential_gradient_limit: float
             Limit for the potential gradient on a body to be considered still alive.
-        body_position_limit: tuple[int,int]
-            Specify the position in pixels of a body to be considered still alive.
+        body_alive_func: Lambda
+            Lambda function specifying the conditions a body must respect to stay alive.
         """
         epsilon = 10**(-2)*10**(-self.n)
         for i, body in enumerate(self.moving_bodies):
             if body is not None:
                 if not body.has_potential and body.is_dead(self.current_potential, epsilon,
-                                                           potential_gradient_limit, body_position_limit):
+                                                           potential_gradient_limit, body_alive_func,
+                                                           self.tracked_body):
                     self.dead_bodies.append(body)
                     self.moving_bodies[i] = None
 
@@ -184,7 +185,7 @@ class BaseSystem:
             axes_size = [max_first_axis * 1.1, max_second_axis * 1.1]
 
         if show_potential or show_potential_null_slope_points:
-            potential_field = deepcopy(self._base_potential)
+            potential_field = loads(dumps((self._base_potential)))
             for body in self.attractive_bodies:
                 potential_field += body.potential
 

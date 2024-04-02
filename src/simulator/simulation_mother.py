@@ -7,9 +7,11 @@ from datetime import datetime
 from os.path import exists
 from os import makedirs
 from tqdm import tqdm
+from typing import Callable
 from eztcolors import Colors as C
 
 from src.simulator.simulation import Simulation
+from src.simulator.lambda_func import Lambda
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.bodies.computed_body import ComputedBody
@@ -33,7 +35,7 @@ class SimulationMother:
             Name of the folder in which to save the results.
         """
         with gzip_open(f"{save_foldername}/bodies.gz", "wb") as file:
-            for listi in tqdm(results, desc="Saving", miniters=1):
+            for listi in tqdm(results, desc="Saving", miniters=1, mininterval=0.001):
                 for key, value in listi.items():
                     for body in value:
                         dump(
@@ -45,7 +47,8 @@ class SimulationMother:
                                 velocity=body.initial_velocity,
                                 fixed=body.fixed,
                                 has_potential=body.has_potential,
-                                integrator=body.integrator
+                                integrator=body.integrator,
+                                iterations_survived=body.iterations_survived
                             ), file
                         )
 
@@ -94,8 +97,8 @@ class SimulationMother:
             simulation_duration: float=1e8,
             delta_time: float=5000,
             positions_saving_frequency: int=1e2,
-            potential_gradient_limit: int=5e-10,
-            body_position_limits: tuple[int,int]=(-1000,2000),
+            potential_gradient_limit: float=5e-10,
+            body_alive_func: Lambda=Lambda("lambda x,y,z: (0 < x < 900) and (0 < y < 900)", 3),
             integrator: str="synchronous"
         ) -> str:
         """
@@ -123,10 +126,12 @@ class SimulationMother:
         positions_saving_frequency : int
             Sets the number of steps after which the body's positions will be saved. Defaults to 1e2. Use multiples of
             10 for better results. Also sets the frequency at which the bodies' state will be checked (dead/alive)
-        potential_gradient_limit: int
+        potential_gradient_limit: float
             Limit for the potential gradient on a body to be considered still alive. Defaults to 5e-10.
-        body_position_limit: tuple[int,int]
-            Specify the position in pixels of a body to be considered still alive. Defaults to (-1000,2000).
+        body_alive_func: Lambda
+            Lambda function specifying the conditions a body must respect to stay alive. Defaults to :
+            Lambda("lambda x,y,z: (0<x<900) and (0<y<900)", 3), which only keeps body's whose x and y values are
+            between 0 and 900.
         integrator : str
             Integrator to use for computing the body positions. Supported integrators can be found in 
             src.bodies.gravitational_bodies.__call__. Defaults to "synchronous".
@@ -167,7 +172,7 @@ class SimulationMother:
               f"\n\tbody_initial_position_limits: {body_initial_position_limits}" +
               f"\n\tbody_initial_velocity_limits: {body_initial_velocity_limits}" +
               f"\n\tpotential_gradient_limit:     {potential_gradient_limit:.0e}" +
-              f"\n\tbody_position_limits:         {body_position_limits}" +
+              f"\n\tbody_alive_func:              {True if body_alive_func else False}" +
               f"\n\tsystem_n:                     {self.initial_system.n}" +
               f"\n\tsimulation_duration:          {simulation_duration:.0e}" +
               f"\n\tpositions_saving_frequency:   {positions_saving_frequency:.0f}" +
@@ -180,7 +185,7 @@ class SimulationMother:
         start = datetime.now()
 
         worker_args = [(body_pos, body_velocities, self.initial_system, delta_time, simulation_duration,
-                        positions_saving_frequency, potential_gradient_limit, body_position_limits, integrator)
+                        positions_saving_frequency, potential_gradient_limit, body_alive_func, integrator)
                        for body_pos in body_positions]
         
         # Dispatch a worker simulation to compute the independent movement of attractive moving bodies
@@ -191,7 +196,7 @@ class SimulationMother:
         total_args = special_args + worker_args
         results = []
         mapped_pool = pool.imap(self.worker_simulation_star, total_args)
-        for result in tqdm(mapped_pool, total=len(total_args), desc="Simulating", miniters=1):
+        for result in tqdm(mapped_pool, total=len(total_args), desc="Simulating", miniters=1, mininterval=0.001):
             results.append(result)
         stop = datetime.now()
         pool.close()
@@ -200,9 +205,9 @@ class SimulationMother:
 
         self.save_simulation_parameters(
             save_foldername, number_of_processes=number_of_processes, real_time_duration=time,
-            positions_saving_frequency=int(positions_saving_frequency), simulation_duration=int(simulation_duration),
-            delta_time=delta_time, integrator=integrator, potential_gradient_limit=potential_gradient_limit, 
-            body_position_limits=body_position_limits
+            positions_saving_frequency=int(positions_saving_frequency), simulation_duration=f"{simulation_duration:e}",
+            delta_time=delta_time, integrator=integrator, potential_gradient_limit=potential_gradient_limit,
+            body_alive_func=str(body_alive_func)
         )
         self.save_results(results, save_foldername)
         print(f"{C.GREEN+C.BOLD}Simulation successfully saved at {save_foldername}.{C.END}")
@@ -221,7 +226,7 @@ def worker_simulation(
         simulation_duration: float,
         positions_saving_frequency: int,
         potential_gradient_limit: int,
-        body_position_limits: tuple[int,int],
+        body_alive_func: tuple[int,int],
         integrator: str
     ):
     if body_position == None and body_velocities == None:
@@ -230,8 +235,7 @@ def worker_simulation(
             system=system,
             maximum_delta_time=delta_time
         )
-        results = simulation.run_attractive_bodies(simulation_duration, positions_saving_frequency)
-        # print(",", end="", flush=True)
+        result = simulation.run_attractive_bodies(simulation_duration, positions_saving_frequency)
 
     else:
         # Normal simulation
@@ -251,8 +255,6 @@ def worker_simulation(
             system=simulated_system,
             maximum_delta_time=delta_time
         )
-        results = simulation.run(simulation_duration, positions_saving_frequency,
-                                potential_gradient_limit, body_position_limits)
-        # print(".", end="", flush=True)
-
-    return results
+        result = simulation.run(simulation_duration, positions_saving_frequency,
+                                potential_gradient_limit, body_alive_func)
+    return result

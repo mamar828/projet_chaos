@@ -6,6 +6,7 @@ from src.engines.engine_2D.engine import Engine2D
 from src.engines.engine_3D.engine import Engine3D
 from src.systems.computed_system import ComputedSystem
 from src.engines.engine_3D.elements import Function3D
+from src.simulator.lambda_func import Lambda
 
 
 class Simulation:
@@ -56,7 +57,7 @@ class Simulation:
         return bodies
 
     @classmethod
-    def load_from_folder(cls, foldername: str):
+    def load_from_folder(cls, foldername: str, iterations_survived: int=None):
         """
         Load a simulation from a folder containing details of a previously rendered simulation.
 
@@ -64,6 +65,8 @@ class Simulation:
         ----------
         foldername : str
             Name of the folder containing the simulation details.
+        iterations_survived : int
+            Minimum number of iterations every body has survived. Defaults to None.
         """
         info = open(f"{foldername}/info.txt", "r").readlines()
         for line in info:
@@ -76,7 +79,10 @@ class Simulation:
         
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
         bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
-
+        if iterations_survived:
+            bodies = [body for body in bodies if body.iterations_survived >= iterations_survived]
+        print(len(bodies))
+        print(bodies[0].iterations_survived)
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time),
                    maximum_delta_time=delta_time)
 
@@ -153,8 +159,8 @@ class Simulation:
             self,
             duration: int,
             positions_saving_frequency: int,
-            potential_gradient_limit: int,
-            body_position_limits: int
+            potential_gradient_limit: float,
+            body_alive_func: Lambda
         ) -> dict:
         """
         Run the simulation.
@@ -165,10 +171,10 @@ class Simulation:
             Duration of the simulation in seconds.
         positions_saving_frequency : int
             Sets the number of steps after which the body's positions will be saved. Defaults to 1000.
-        potential_gradient_limit: int
+        potential_gradient_limit: float
             Limit for the potential gradient on a body to be considered still alive.
-        body_position_limits: tuple[int,int]
-            Specify the position in pixels of a body to be considered still alive.
+        body_alive_func: Lambda
+            Lambda function specifying the conditions a body must respect to stay alive.
 
         Returns
         -------
@@ -181,7 +187,7 @@ class Simulation:
             for i in range(int(positions_saving_frequency)):
                 system.update(self.maximum_delta_time)
             # Check for dead bodies in the system
-            system.remove_dead_bodies(potential_gradient_limit, body_position_limits)
+            system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
             if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
                 # Check if no bodies remain
                 break

@@ -7,7 +7,7 @@ from src.bodies.gravitational_body import GravitationalBody
 
 
 class ComputedBody(GravitationalBody):
-    def __init__(self, positions: list, type: str, *args, **kwargs):
+    def __init__(self, positions: list, type: str, iterations_survived: int=None, *args, **kwargs):
         """
         Defines required parameters.
 
@@ -17,12 +17,17 @@ class ComputedBody(GravitationalBody):
             Specifies the positions of the body at every time step.
         type : str
             Specifies the body's type. Supported types are: "base_body", "alive" and "dead".
-        *args : list
+        iterations_survived : int
+            Number of iterations the body has survived in its simulation.
+        args : list
+            Arguments to pass to the GravitationalBody constructor.
+        kwargs : dict
             Arguments to pass to the GravitationalBody constructor.
         """
         super().__init__(*args, **kwargs)
         self.positions = positions
         self.type = type
+        self.iterations_survived = iterations_survived
 
     def __str__(self):
         return super().__str__() + f"type: {self.type}, len(positions): {len(self.positions)}"

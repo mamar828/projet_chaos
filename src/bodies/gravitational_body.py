@@ -8,13 +8,16 @@
     @Description:       This file contains a class used to create a body with a mass used for computations using
                         gravitational potentials.
 """
+from __future__ import annotations
 
 from scipy.constants.constants import gravitational_constant
 from numpy.linalg import norm
+from eztcolors import Colors as C
 
 from src.bodies.base_body import Body
 from src.fields.scalar_field import ScalarField
 from src.tools.vector import Vector
+from src.simulator.lambda_func import Lambda
 
 
 class GravitationalBody(Body):
@@ -70,6 +73,7 @@ class GravitationalBody(Body):
             raise ValueError("mass must be positive")
         self.mass = mass
         self.dead = False   # Whether the body is dead or not and should be removed from the display
+        self.iterations_survived = 0
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -86,7 +90,7 @@ class GravitationalBody(Body):
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
             defaults to 10**(-3).
         """
-
+        self.iterations_survived += 1
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
         if self.integrator != "yoshida":
@@ -237,8 +241,9 @@ class GravitationalBody(Body):
             self,
             potential: ScalarField,
             epsilon: float,
-            potential_gradient_limit: int,
-            body_position_limit: tuple[int,int]
+            potential_gradient_limit: float,
+            body_alive_limits: Lambda,
+            tracked_body: GravitationalBody=None
         ) -> bool:
         """
         Gives whether the body is considered dead by evaluating if the modulus of the acceleration to which the body is
@@ -250,23 +255,27 @@ class GravitationalBody(Body):
             Potential field to evaluate the body's acceleration.
         epsilon : float
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
-        potential_gradient_limit: int
+        potential_gradient_limit: float
             Quantity over which the body is considered dead.
-        body_position_limit: tuple[int,int]
-            Specify the position in pixels of a body to be considered still alive.
+        body_alive_func: Lambda
+            Lambda function specifying the conditions a body must respect to stay alive.
+        tracked_body: GravitationalBody
+            Body that is tracked in the system. This allows to make operations with that body to determine alive
+            conditions.
             
         Returns
         -------
         is_dead : bool
             Whether the body is considered dead or not.
         """
-        condition_2D = (
-                norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit or
-                body_position_limit[0]-0.1 > self.position.x or self.position.x > body_position_limit[1] or
-                body_position_limit[0]-0.1 > self.position.y or self.position.y > body_position_limit[1]
-        )
-        if self.position.z == 0:
-            return condition_2D
-        else:
-            return (condition_2D or 
-                    body_position_limit[0]-0.1 > self.position.z or self.position.z > body_position_limit[1])
+        if body_alive_limits:
+            if body_alive_limits.number_of_parameters == 3:
+                if not body_alive_limits(*self.position): return True
+            elif body_alive_limits.number_of_parameters == 6:
+                if not body_alive_limits(*self.position, *tracked_body.position): return True
+            else:
+                raise ValueError(C.RED + "Function has an incorrect number of parameters. Expected 3 or 6." + C.END)
+
+        if norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit: return True
+        
+        return False

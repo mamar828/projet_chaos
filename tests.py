@@ -82,4 +82,8 @@ from datetime import datetime
 # e = ["ab", "cd", "ef"]
 # print(e.index("ab"))
 
-print("allo".split(","))
+# print("allo".split(","))
+
+# print(5<4<7)
+func = eval("lambda x: x > 3")
+print(func(5))
