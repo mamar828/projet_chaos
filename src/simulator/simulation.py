@@ -67,13 +67,13 @@ class Simulation:
         """
         info = open(f"{foldername}/info.txt", "r").readlines()
         for line in info:
-            if line.startswith("BaseSystem n:"):
+            if line.startswith("BaseSystem n"):
                 n = int(line.split(" ")[-1])
-            elif line.startswith("positions_saving_frequency:"):
+            elif line.startswith("positions_saving_frequency"):
                 save_freq = int(line.split(" ")[-1])
-            elif line.startswith("delta_time:"):
+            elif line.startswith("delta_time"):
                 delta_time = int(line.split(" ")[-1])
-
+        
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
         bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
 

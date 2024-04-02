@@ -16,19 +16,18 @@ if __name__ == '__main__':
     earth = GravitationalBody(mass=M_earth.value, position=Vector(297.90,450,0),
                               velocity=Vector(0,-29.29e-6,0), fixed=False) # Parameters at apoapsis
     sim_system = BaseSystem(list_of_bodies=[sun, earth], n=9)
-
     mommy = SimulationMother(base_system=sim_system)
     foldername = mommy.dispatch(
         simulation_count=230,
         delta_time=5000,
         bodies_per_simulation=50,
-        body_initial_position_limits=[(earth.position.x+1.5-0.1, earth.position.x+1.5+0.1),
-                                      (earth.position.y-0.1, earth.position.y+0.1), (0, 0)],
-        body_initial_velocity_limits=[(earth.velocity.x-1e-7, earth.velocity.x+1e-7),
-                                      (earth.velocity.y-1e-7, earth.velocity.y+1e-7), (0, 0)],
+        body_initial_position_limits=[(round(earth.position.x+1.5-0.1,10), round(earth.position.x+1.5+0.1,10)),
+                                      (round(earth.position.y-0.1,10), round(earth.position.y+0.1,10)), (0, 0)],
+        body_initial_velocity_limits=[(round(earth.velocity.x-1e-7,10), round(earth.velocity.x+1e-7,10)),
+                                      (round(earth.velocity.y-1e-6,10), round(earth.velocity.y+1e-6,10)), (0, 0)],
         save_foldername=f"simulations/L1",
-        simulation_duration=3e9,
-        positions_saving_frequency=4,
-        potential_gradient_limit= 5e-10,
+        simulation_duration=5e8,
+        positions_saving_frequency=15,
+        potential_gradient_limit=1e-11,
         body_position_limits=(295,605)
     )

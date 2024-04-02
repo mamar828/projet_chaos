@@ -9,7 +9,6 @@ from os import makedirs
 from tqdm import tqdm
 from eztcolors import Colors as C
 
-import src.simulator.istarmap
 from src.simulator.simulation import Simulation
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
@@ -34,7 +33,7 @@ class SimulationMother:
             Name of the folder in which to save the results.
         """
         with gzip_open(f"{save_foldername}/bodies.gz", "wb") as file:
-            for listi in results:
+            for listi in tqdm(results, desc="Saving", miniters=1):
                 for key, value in listi.items():
                     for body in value:
                         dump(
@@ -171,7 +170,7 @@ class SimulationMother:
               f"\n\tbody_position_limits:         {body_position_limits}" +
               f"\n\tsystem_n:                     {self.initial_system.n}" +
               f"\n\tsimulation_duration:          {simulation_duration:.0e}" +
-              f"\n\tpositions_saving_frequency:   {positions_saving_frequency:.0e}" +
+              f"\n\tpositions_saving_frequency:   {positions_saving_frequency:.0f}" +
               f"\n\tintegrator:                   {integrator}" +
               f"\n\tsave_foldername:              {save_foldername}{C.END}\n")
 
@@ -192,7 +191,7 @@ class SimulationMother:
         total_args = special_args + worker_args
         results = []
         mapped_pool = pool.imap(self.worker_simulation_star, total_args)
-        for result in tqdm(mapped_pool, total=len(total_args)):
+        for result in tqdm(mapped_pool, total=len(total_args), desc="Simulating", miniters=1):
             results.append(result)
         stop = datetime.now()
         pool.close()

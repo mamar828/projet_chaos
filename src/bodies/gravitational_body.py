@@ -31,7 +31,7 @@ class GravitationalBody(Body):
             fixed: bool = False,
             has_potential: bool = True,
             integrator: str = "synchronous"
-    ):
+        ):
         """
         Defines required parameters.
 
@@ -239,7 +239,7 @@ class GravitationalBody(Body):
             epsilon: float,
             potential_gradient_limit: int,
             body_position_limit: tuple[int,int]
-    ) -> bool:
+        ) -> bool:
         """
         Gives whether the body is considered dead by evaluating if the modulus of the acceleration to which the body is
         subjected. Also checks if the body is too far away from its initial position.
