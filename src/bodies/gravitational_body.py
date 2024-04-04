@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from scipy.constants.constants import gravitational_constant
 from numpy.linalg import norm
+from numpy.random import randint
 from eztcolors import Colors as C
 
 from src.bodies.base_body import Body
@@ -199,6 +200,7 @@ class GravitationalBody(Body):
                 v_y + (a_y_1 + 2 * a_y_2 + 2 * a_y_3 + a_y_4) / 6 * time_step,
                 v_z + (a_z_1 + 2 * a_z_2 + 2 * a_z_3 + a_z_4) / 6 * time_step
             )
+        # print(self.position)
 
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -279,3 +281,14 @@ class GravitationalBody(Body):
         if norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit: return True
         
         return False
+
+    def get_color(self) -> tuple[int, int, int]:
+        """
+        Get a random color of the body.
+
+        Returns
+        -------
+        color : tuple[int, int, int]
+            The color of the body.
+        """
+        return randint(0, 255, 3)

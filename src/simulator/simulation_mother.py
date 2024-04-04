@@ -63,7 +63,7 @@ class SimulationMother:
         save_foldername : str
             Name of the folder in which to save the results.
         """
-        print(C.LIGHT_PURPLE, end="")
+        print(C.LIGHT_CYAN, end="")
         with gzip_open(f"{save_foldername}/bodies.gz", "wb") as file:
             for listi in tqdm(results, desc="Saving", miniters=1, mininterval=0.001):
                 for key, value in listi.items():
@@ -110,6 +110,7 @@ class SimulationMother:
             # Save attractive moving bodies
             for body in results[0]["attractive_moving"]:
                 self.dump_body(body, "attractive_moving", file)
+            # print(f"{max_body.initial_velocity.y:.10e} {max_body.initial_position.y:.10e}")
             self.dump_body(max_body, body_type, file)
         return max_number
 
@@ -205,31 +206,47 @@ class SimulationMother:
         body_initial_position_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_position_limits]
         body_initial_velocity_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_velocity_limits]
 
-        body_positions = np.array([
-            np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
-            np.random.uniform(*body_initial_position_limits[1], size=simulation_count),
-            np.random.uniform(*body_initial_position_limits[2], size=simulation_count)
-        ]).transpose().tolist()
-        body_velocities = np.array([
-            np.random.uniform(*body_initial_velocity_limits[0], size=bodies_per_simulation),
-            np.random.uniform(*body_initial_velocity_limits[1], size=bodies_per_simulation),
-            np.random.uniform(*body_initial_velocity_limits[2], size=bodies_per_simulation)
-        ]).transpose().tolist()
+        if True:
+            body_positions = np.array([
+                np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
+                np.random.uniform(*body_initial_position_limits[1], size=simulation_count),
+                np.random.uniform(*body_initial_position_limits[2], size=simulation_count)
+            ]).transpose().tolist()
+            body_velocities = np.array([
+                np.random.uniform(*body_initial_velocity_limits[0], size=bodies_per_simulation),
+                np.random.uniform(*body_initial_velocity_limits[1], size=bodies_per_simulation),
+                np.random.uniform(*body_initial_velocity_limits[2], size=bodies_per_simulation)
+            ]).transpose().tolist()
+        else:
+            body_positions = np.array([
+                np.tile(np.linspace(*body_initial_position_limits[0], num=int(simulation_count**0.5)),
+                        int(simulation_count**0.5)),
+                np.repeat(np.linspace(*body_initial_position_limits[1], num=int(simulation_count**0.5)),
+                        int(simulation_count**0.5)),
+                np.linspace(*body_initial_position_limits[2], num=simulation_count)
+            ]).transpose().tolist()
+            body_velocities = np.array([
+                np.tile(np.linspace(*body_initial_velocity_limits[0], num=int(bodies_per_simulation**0.5)),
+                        int(bodies_per_simulation**0.5)),
+                np.repeat(np.linspace(*body_initial_velocity_limits[1], num=int(bodies_per_simulation**0.5)),
+                        int(bodies_per_simulation**0.5)),
+                np.linspace(*body_initial_velocity_limits[2], num=bodies_per_simulation)
+            ]).transpose().tolist()
 
         print(f"{C.YELLOW+C.BOLD}Simulation starting at {datetime.now().strftime('%H:%M:%S')} with parameters:{C.END}")
         print(C.BROWN)
-        print(f"\n\tsimulation_count:         {simulation_count}" +
-              f"\n\tbodies_per_simulation:    {bodies_per_simulation}" +
-              f"\n\tdelta_time:               {delta_time}" +
-              f"\n\tbody_init_pos_limits:     {body_initial_position_limits}" +
-              f"\n\tbody_init_vel_limits:     {body_initial_velocity_limits}" +
-              f"\n\tpotential_gradient_limit: {potential_gradient_limit:.0e}" +
-              f"\n\tbody_alive_func:          {True if body_alive_func else False}" +
-              f"\n\tsystem_n:                 {self.initial_system.n}" +
-              f"\n\tsimulation_duration:      {simulation_duration:.0e}" +
-              f"\n\tpos_saving_frequency:     {positions_saving_frequency:.0f}" +
-              f"\n\tintegrator:               {integrator}" +
-              f"\n\tsave_foldername:          {save_foldername}{C.END}\n")
+        print(f"\n    simulation_count:         {simulation_count}" +
+              f"\n    bodies_per_simulation:    {bodies_per_simulation}" +
+              f"\n    delta_time:               {delta_time}" +
+              f"\n    body_init_pos_limits:     {body_initial_position_limits}" +
+              f"\n    body_init_vel_limits:     {body_initial_velocity_limits}" +
+              f"\n    potential_gradient_limit: {potential_gradient_limit:.0e}" +
+              f"\n    body_alive_func:          {True if body_alive_func else False}" +
+              f"\n    system_n:                 {self.initial_system.n}" +
+              f"\n    simulation_duration:      {simulation_duration:.0e}" +
+              f"\n    pos_saving_frequency:     {positions_saving_frequency:.0f}" +
+              f"\n    integrator:               {integrator}" +
+              f"\n    save_foldername:          {save_foldername}{C.END}\n")
 
         self.pool = Pool()
         number_of_processes = self.pool._processes

@@ -38,3 +38,18 @@ class ComputedSystem(BaseSystem):
             for body in self.moving_bodies:
                 if not body.dead:
                     body.update()
+
+    def to_base_system(self) -> BaseSystem:
+        """
+        Convert the ComputedSystem to a BaseSystem
+        
+        Returns
+        -------
+        base_system : BaseSystem
+            BaseSystem with all the ComputedSystem's bodies.
+        """
+        return BaseSystem(
+            list_of_bodies=self.list_of_bodies, 
+            base_potential=self._base_potential,
+            n=self.n
+        )

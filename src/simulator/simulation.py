@@ -103,7 +103,7 @@ class Simulation:
 
         if min_time_survived and not only_load_best_body:
             bodies = [body for body in bodies if body.time_survived >= min_time_survived]
-        
+
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time),
                    maximum_delta_time=delta_time)
 
@@ -198,15 +198,19 @@ class Simulation:
         """
         total_iterations = duration // self.maximum_delta_time
         system = self.system
+        dead_body_removal_frequency = 10
         for i in range(int(total_iterations // positions_saving_frequency)):
-            for i in range(int(positions_saving_frequency)):
+            for j in range(int(positions_saving_frequency)):
                 system.update(self.maximum_delta_time)
-            # Check for dead bodies in the system
-            system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
+                if (i * positions_saving_frequency + j) % dead_body_removal_frequency == 0:
+                    # Check for dead bodies in the system
+                    system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
+
             if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
                 # Check if no bodies remain
                 break
             system.save_positions()
+            
         return {
             "alive": [body for body in system.list_of_bodies if body not in system.attractive_bodies 
                                                             and body not in system.dead_bodies],

@@ -55,6 +55,7 @@ class ComputedBody(GravitationalBody):
         Update the body's position.
         """
         if self.positions:
+            # print(self.positions)
             self._position = self.positions[0]
             del self.positions[0]
         else:
