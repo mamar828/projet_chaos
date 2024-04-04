@@ -17,24 +17,24 @@ if __name__ == '__main__':
     earth = GravitationalBody(mass=M_earth.value, position=Vector(297.90,450,0),
                               velocity=Vector(0,-29.29e-6,0), fixed=False) # Parameters at apoapsis
     sim_system = BaseSystem(list_of_bodies=[sun, earth], n=9)
-    bb = Simulation.load_from_folder("simulations/L1_2").system.get_best_body()
+    # bb = Simulation.load_from_folder("simulations/L1_2").system.get_best_body()
 
     mommy = SimulationMother(base_system=sim_system)
     foldername = mommy.dispatch(
-        simulation_count=8,
-        bodies_per_simulation=2,
+        simulation_count=1000,
+        bodies_per_simulation=1000,
         delta_time=5000,
-        body_initial_position_limits=[(bb.initial_position.x*0.9, bb.initial_position.x*1.1),
-                                      (bb.initial_position.y*0.9, bb.initial_position.y*1.1), (0, 0)],
-        body_initial_velocity_limits=[(bb.initial_velocity.x*0.9, bb.initial_velocity.x*1.1),
-                                      (bb.initial_velocity.y*0.9, bb.initial_velocity.y*1.1), (0, 0)],
-        # body_initial_position_limits=[(earth.position.x+1.5-0.2, earth.position.x+1.5+0.2),
-        #                               (earth.position.y-0.1,     earth.position.y+0.1), (0, 0)],
-        # body_initial_velocity_limits=[(earth.velocity.x-1e-7,    earth.velocity.x+1e-7),
-        #                               (earth.velocity.y-3e-7,    earth.velocity.y+3e-7), (0, 0)],
+        # body_initial_position_limits=[(bb.initial_position.x*0.9999, bb.initial_position.x*1.0001),
+        #                               (bb.initial_position.y*0.9999, bb.initial_position.y*1.0001), (0, 0)],
+        # body_initial_velocity_limits=[(bb.initial_velocity.x*0.9999, bb.initial_velocity.x*1.0001),
+        #                               (bb.initial_velocity.y*0.9999, bb.initial_velocity.y*1.0001), (0, 0)],
+        body_initial_position_limits=[(earth.position.x+1.5-0.2, earth.position.x+1.5+0.2),
+                                      (earth.position.y-0.1,     earth.position.y+0.1), (0, 0)],
+        body_initial_velocity_limits=[(earth.velocity.x-1e-7,    earth.velocity.x+1e-7),
+                                      (earth.velocity.y-3e-7,    earth.velocity.y+3e-7), (0, 0)],
         save_foldername=f"simulations/test",
         simulation_duration=5e8,
-        positions_saving_frequency=10,
-        potential_gradient_limit=1e-11,
+        positions_saving_frequency=30,
+        potential_gradient_limit=1e-10,
         body_alive_func=Lambda("lambda x, y, z, t_x, t_y, t_z: (1.2 < ((x-t_x)**2 + (y-t_y)**2)**0.5 < 1.8)", 6)
     )

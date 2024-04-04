@@ -73,7 +73,7 @@ class GravitationalBody(Body):
             raise ValueError("mass must be positive")
         self.mass = mass
         self.dead = False   # Whether the body is dead or not and should be removed from the display
-        self.iterations_survived = 0
+        self.time_survived = 0
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -90,7 +90,7 @@ class GravitationalBody(Body):
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
             defaults to 10**(-3).
         """
-        self.iterations_survived += 1
+        self.time_survived += time_step
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
         if self.integrator != "yoshida":

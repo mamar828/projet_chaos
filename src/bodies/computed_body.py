@@ -7,7 +7,7 @@ from src.bodies.gravitational_body import GravitationalBody
 
 
 class ComputedBody(GravitationalBody):
-    def __init__(self, positions: list, type: str, iterations_survived: int=None, *args, **kwargs):
+    def __init__(self, positions: list, type: str, time_survived: int=None, *args, **kwargs):
         """
         Defines required parameters.
 
@@ -17,8 +17,8 @@ class ComputedBody(GravitationalBody):
             Specifies the positions of the body at every time step.
         type : str
             Specifies the body's type. Supported types are: "base_body", "alive" and "dead".
-        iterations_survived : int
-            Number of iterations the body has survived in its simulation.
+        time_survived : int
+            Time during which the body has survived in its simulation.
         args : list
             Arguments to pass to the GravitationalBody constructor.
         kwargs : dict
@@ -27,10 +27,28 @@ class ComputedBody(GravitationalBody):
         super().__init__(*args, **kwargs)
         self.positions = positions
         self.type = type
-        self.iterations_survived = iterations_survived
+        self.time_survived = time_survived
 
     def __str__(self):
         return super().__str__() + f"type: {self.type}, len(positions): {len(self.positions)}"
+    
+    def to_gravitational_body(self) -> GravitationalBody:
+        """
+        Convert the ComputedBody to a GravitationalBody
+        
+        Returns
+        -------
+        gravitational_body : GravitationalBody
+            GravitationalBody with the initial conditions of the original ComputedBody.
+        """
+        return GravitationalBody(
+            mass=self.mass,
+            position=self.position,
+            velocity=self.velocity,
+            fixed=self.fixed,
+            has_potential=self.has_potential,
+            integrator=self.integrator
+        )
 
     def update(self):
         """

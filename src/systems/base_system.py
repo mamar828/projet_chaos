@@ -264,12 +264,12 @@ class BaseSystem:
 
     def get_best_body(self) -> GravitationalBody:
         """
-        Returns the body who survived the most iterations by looking at the iterations_survived variable.
+        Returns the body who survived the longest by looking at the time_survived variable.
 
         Returns
         -------
         best_body : ComputedBody
-            The best body in the system.
+            The body in the system who survived the longest.
         """
         simulated_bodies = list(set(self.moving_bodies) - set(self.attractive_bodies))
-        return simulated_bodies[argmax([body.iterations_survived for body in simulated_bodies])]
+        return simulated_bodies[argmax([body.time_survived for body in simulated_bodies])]

@@ -14,11 +14,9 @@ from src.tools.vector import Vector
 
 
 if __name__ == '__main__':
-    sim = Simulation.load_from_folder(f"simulations/L1_2", min_iterations_survived=4000)
-    # sim = Simulation(system=ComputedSystem(list_of_bodies=sim.system.list_of_bodies[:6], n=9,
-    #                                               tick_factor=sim.system.tick_factor))
-    print(len(sim.system.list_of_bodies))
-    raise
+    sim = Simulation.load_from_folder(f"simulations/test_6", only_load_best_body=True)
+    # sim.system = BaseSystem(list_of_bodies=(sim.system.list_of_bodies[:-1] + 
+    #                                         [sim.system.list_of_bodies[-1].to_gravitational_body()]), n=9)
 
     sim.show_3D(
         show_potential=True,
