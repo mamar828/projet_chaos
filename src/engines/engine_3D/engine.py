@@ -30,7 +30,8 @@ class Engine3D(GlobalEngine):
             camera_far_render_distance: float=1e20,
             camera_yaw: float=-90.,
             camera_pitch: float=0.,
-            camera_mode: str="free",
+            camera_movement_mode: str="free",
+            camera_rotation_mode: str="instantaneous",
             objects: list[Object3D]=None,
             functions: list[Function3D]=None,
             simulation_presets_allowed: bool=True,
@@ -38,7 +39,8 @@ class Engine3D(GlobalEngine):
             model_size_type: str="exaggerated",
         ):
         """ 
-        Supported camera_modes are "free" and "following".
+        Supported camera_movement_modes are "free" and "following".
+        Supported camera_rotation_modes are "instantaneous" and "cinematic".
         Supported model_size_types are "exaggerated" and "realistic".
         """
         # Default parameters for camera origin and light position
@@ -82,7 +84,8 @@ class Engine3D(GlobalEngine):
             far_render_distance=camera_far_render_distance,
             yaw=camera_yaw,
             pitch=camera_pitch,
-            mode=camera_mode
+            movement_mode=camera_movement_mode,
+            rotation_mode=camera_rotation_mode
         )
         self.functions = functions
         self.mesh = Mesh(self)

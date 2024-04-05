@@ -194,7 +194,8 @@ class Simulation:
         Returns
         -------
         results : dict
-            Dictionary containing the results of the simulation.
+            Results of the simulation. The keys "alive" and "dead" provide the corresponding bodies, in the form of a
+            list.
         """
         total_iterations = duration // self.maximum_delta_time
         system = self.system

@@ -14,7 +14,8 @@ class Camera:
             far_render_distance=1000,
             yaw=-90,
             pitch=0,
-            mode="free"
+            movement_mode="free",
+            rotation_mode="instantaneous"
         ):
         self.app = app
         self.speed = speed
@@ -33,7 +34,9 @@ class Camera:
         self.m_view = self.get_view_matrix()        # view_matrix
         self.m_proj = self.get_projection_matrix()  # projection_matrix
         self.current_speed_modifier = 1
-        self.mode = mode
+        self.movement_mode = movement_mode
+        self.rotation_mode = rotation_mode
+        
 
     def __str__(self):
         return f"Camera position: {self.position.x:.3f}, {-self.position.z:.3f}, {self.position.y:.3f}"
@@ -82,7 +85,7 @@ class Camera:
     def move(self):
         velocity = self.speed * self.app.camera_delta_time * self.current_speed_modifier
         keys = pg.key.get_pressed()
-        if self.mode == "free":
+        if self.movement_mode == "free":
             if True in list(keys):
                 if keys[pg.K_w]:
                     self.position += self.forward * velocity
@@ -97,7 +100,7 @@ class Camera:
                 if keys[pg.K_LSHIFT]:
                     self.position -= self.up * velocity
 
-        elif self.mode == "following":
+        elif self.movement_mode == "following":
             tracked_position = self.app.simulation.system.tracked_body.position
             self.set_position((tracked_position[0], tracked_position[1], self.position.y))
             if True in list(keys):
