@@ -1,6 +1,7 @@
 from numpy.random import randint
 from random import choice
 from eztcolors import Colors as C
+from time import sleep
 
 from src.bodies.gravitational_body import GravitationalBody
 
@@ -60,6 +61,7 @@ class ComputedBody(GravitationalBody):
             del self.positions[0]
         else:
             self.dead = True
+            sleep(1000)
 
     def get_color(self, random_tuple=True) -> str | tuple[int, int, int]:
         """

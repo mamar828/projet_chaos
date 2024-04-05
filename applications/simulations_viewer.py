@@ -11,22 +11,25 @@ from src.bodies.gravitational_body import GravitationalBody
 from src.engines.engine_3D.elements import Function3D, Object3D
 from src.engines.engine_3D.models import Cube
 from src.tools.vector import Vector
+from applications.simulations_examples import sun, earth
 
 
 
 if __name__ == '__main__':
-    sim = Simulation.load_from_folder(f"simulations/thrash_2")#, min_time_survived=2.889e+07)#, only_load_best_body=True)
+    sim = Simulation.load_from_folder(f"simulations/wtf", only_load_best_body=True)
     # other = sim.system.list_of_bodies[-1].to_gravitational_body()
     # sim.system = ComputedSystem(list_of_bodies=(sim.system.list_of_bodies + [other]), n=9, tick_factor=sim.system.tick_factor)
     # sim.system = sim.system.to_base_system()
 
-    # sim.show_3D(
-    #     show_potential=True,
-    #     print_camera_coordinates=False,
-    #     model_size_type="realistic",
-    #     window_size=(1440,900),
-    #     camera_mode="following"
-    # )
+    # sim = Simulation(system=BaseSystem(list_of_bodies=[sun, earth, sim.system.list_of_bodies[-1]], n=9))
+
+    sim.show_3D(
+        show_potential=True,
+        print_camera_coordinates=False,
+        model_size_type="realistic",
+        window_size=(1440,900),
+        camera_mode="following"
+    )
     sim.show_2D(
         window_size=(900,900),
         framerate=60,

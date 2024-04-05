@@ -11,6 +11,7 @@ from typing import Dict, List, Union, Optional, Callable
 
 from numpy import abs, gradient, ones_like, rot90, zeros_like, argmax
 from matplotlib.pyplot import close, colorbar, imshow, gca, scatter, show
+from matplotlib.pyplot import xlim, ylim
 
 from src.bodies.base_body import Body
 from src.bodies.gravitational_body import GravitationalBody
@@ -107,7 +108,7 @@ class BaseSystem:
         potential_gradient_limit: float
             Limit for the potential gradient on a body to be considered still alive.
         body_alive_func: Lambda
-            Lambda function specifying the conditions a body must respect to stay alive.
+            Lambda object specifying the conditions a body must respect to stay alive.
         """
         epsilon = 10**(-2)*10**(-self.n)
         for i, body in enumerate(self.moving_bodies):
@@ -240,6 +241,11 @@ class BaseSystem:
                     s=10,
                     c=colours[(i + len(list_of_massive_bodies)) % len(colours)]
                 )
+
+        # TO REMOVE
+        x, y, z = self.tracked_body.position
+        xlim(x-5,x+5)
+        ylim(y-5,y+5)
 
         if show_bodies or show_potential_null_slope_points or show_potential:
             show()

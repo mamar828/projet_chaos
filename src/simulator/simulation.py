@@ -205,6 +205,8 @@ class Simulation:
                 if (i * positions_saving_frequency + j) % dead_body_removal_frequency == 0:
                     # Check for dead bodies in the system
                     system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
+            if i % 30 == 0:
+                system.show(show_bodies=True)
 
             if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
                 # Check if no bodies remain
