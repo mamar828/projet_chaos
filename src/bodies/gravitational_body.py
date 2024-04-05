@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from scipy.constants.constants import gravitational_constant
 from numpy.linalg import norm
+from numpy.random import randint
 from eztcolors import Colors as C
 
 from src.bodies.base_body import Body
@@ -73,7 +74,7 @@ class GravitationalBody(Body):
             raise ValueError("mass must be positive")
         self.mass = mass
         self.dead = False   # Whether the body is dead or not and should be removed from the display
-        self.iterations_survived = 0
+        self.time_survived = 0
 
     def __call__(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -90,7 +91,7 @@ class GravitationalBody(Body):
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
             defaults to 10**(-3).
         """
-        self.iterations_survived += 1
+        self.time_survived += time_step
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
         if self.integrator != "yoshida":
@@ -199,6 +200,7 @@ class GravitationalBody(Body):
                 v_y + (a_y_1 + 2 * a_y_2 + 2 * a_y_3 + a_y_4) / 6 * time_step,
                 v_z + (a_z_1 + 2 * a_z_2 + 2 * a_z_3 + a_z_4) / 6 * time_step
             )
+        # print(self.position)
 
     def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
         """
@@ -279,3 +281,14 @@ class GravitationalBody(Body):
         if norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit: return True
         
         return False
+
+    def get_color(self) -> tuple[int, int, int]:
+        """
+        Get a random color of the body.
+
+        Returns
+        -------
+        color : tuple[int, int, int]
+            The color of the body.
+        """
+        return randint(0, 255, 3)

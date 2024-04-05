@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pickle import load
 from gzip import open as gzip_open
 from os.path import exists
@@ -59,7 +61,12 @@ class Simulation:
         return bodies
 
     @classmethod
-    def load_from_folder(cls, foldername: str, min_iterations_survived: int=None):
+    def load_from_folder(
+            cls,
+            foldername: str,
+            min_time_survived: int=None,
+            only_load_best_body: bool=False
+        ) -> Simulation:
         """
         Load a simulation from a folder containing details of a previously rendered simulation.
 
@@ -67,8 +74,16 @@ class Simulation:
         ----------
         foldername : str
             Name of the folder containing the simulation details.
-        min_iterations_survived : int
-            Minimum number of iterations a body survived to be displayed. Defaults to None.
+        min_time_survived : int
+            Minimum time a body survived to be displayed. Defaults to None.
+        only_load_best_body : bool
+            Whether the simulation should only be loaded with the best body. If False, all the bodies will be loaded.
+            Defaults to False.
+
+        Returns
+        -------
+        simulation : Simulation
+            Simulation object with the precomputed system.
         """
         assert exists(foldername), f"{C.RED+C.BOLD}Provided foldername ({foldername}) does not exist.{C.END}"
         info = open(f"{foldername}/info.txt", "r").readlines()
@@ -81,9 +96,13 @@ class Simulation:
                 delta_time = int(line.split(" ")[-1])
         
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
-        bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
-        if min_iterations_survived:
-            bodies = [body for body in bodies if body.iterations_survived >= min_iterations_survived]
+        if only_load_best_body:
+            bodies = cls.load_pickle_file(f"{foldername}/best_body.gz")
+        else:
+            bodies = cls.load_pickle_file(f"{foldername}/bodies.gz")
+
+        if min_time_survived and not only_load_best_body:
+            bodies = [body for body in bodies if body.time_survived >= min_time_survived]
 
         return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time),
                    maximum_delta_time=delta_time)
@@ -131,24 +150,18 @@ class Simulation:
             Parameters to pass to the Engine3D class.
         """
         if show_potential:
+            func = Function3D(
+                    texture="spacetime",
+                    position=(0,0,0),
+                    resolution=(200,200),
+                    x_limits=(0,900),
+                    y_limits=(0,900),
+                    instance=self.system
+            )
             if "functions" in kwargs.keys():
-                kwargs["functions"].append(Function3D(
-                    texture="spacetime",
-                    position=(0,0,0),
-                    resolution=(200,200),
-                    x_limits=(0,900),
-                    y_limits=(0,900),
-                    instance=self.system
-                ))
+                kwargs["functions"].append(func)
             else:
-                kwargs["functions"] = [Function3D(
-                    texture="spacetime",
-                    position=(0,0,0),
-                    resolution=(200,200),
-                    x_limits=(0,900),
-                    y_limits=(0,900),
-                    instance=self.system
-                )]
+                kwargs["functions"] = [func]
 
         app = Engine3D(
             simulation=self,
@@ -181,19 +194,26 @@ class Simulation:
         Returns
         -------
         results : dict
-            Dictionary containing the results of the simulation.
+            Results of the simulation. The keys "alive" and "dead" provide the corresponding bodies, in the form of a
+            list.
         """
         total_iterations = duration // self.maximum_delta_time
         system = self.system
+        dead_body_removal_frequency = 10
         for i in range(int(total_iterations // positions_saving_frequency)):
-            for i in range(int(positions_saving_frequency)):
+            for j in range(int(positions_saving_frequency)):
                 system.update(self.maximum_delta_time)
-            # Check for dead bodies in the system
-            system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
+                if (i * positions_saving_frequency + j) % dead_body_removal_frequency == 0:
+                    # Check for dead bodies in the system
+                    system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
+            if i % 30 == 0:
+                system.show(show_bodies=True)
+
             if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
                 # Check if no bodies remain
                 break
             system.save_positions()
+            
         return {
             "alive": [body for body in system.list_of_bodies if body not in system.attractive_bodies 
                                                             and body not in system.dead_bodies],

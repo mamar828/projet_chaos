@@ -27,7 +27,7 @@ funny_yeeting = BaseSystem(list_of_bodies=[
     GravitationalBody(mass=1e30, position=Vector(650,650,0), integrator="kick-drift-kick")
 ])
 
-sun = GravitationalBody(mass=M_sun.value, position=Vector(450,450,0), fixed=True)
-earth = GravitationalBody(mass=M_earth.value, position=Vector(297.90,450,0),
-                            velocity=Vector(0,-29.29e-6,0), fixed=False) # Parameters at apoapsis
+sun = GravitationalBody(mass=M_sun.value, position=Vector(450,450,0), fixed=True, integrator="kick-drift-kick")
+earth = GravitationalBody(mass=M_earth.value, position=Vector(297.90,450,0),                # Parameters at apoapsis
+                            velocity=Vector(0,-29.29e-6,0), fixed=False, integrator="kick-drift-kick")
 sim_system = BaseSystem(list_of_bodies=[sun, earth], n=9)

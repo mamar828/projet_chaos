@@ -2,6 +2,7 @@ import numpy as np
 
 from pickle import dump
 from gzip import open as gzip_open
+from gzip import GzipFile
 from multiprocessing import Pool
 from datetime import datetime
 from os.path import exists
@@ -21,9 +22,37 @@ from src.tools.vector import Vector
 class SimulationMother:
     def __init__(self, base_system: BaseSystem):
         self.initial_system = base_system
+        self.pool = None
 
     @staticmethod
-    def save_results(results: list, save_foldername: str):
+    def dump_body(body: GravitationalBody | ComputedBody, type: str, file: GzipFile):
+        """
+        Dump a body of a certain type into a file.
+
+        Parameters
+        ----------
+        body : GravitationalBody | ComputedBody
+            Body to dump into the file.
+        type : str
+            Type of the body.
+        file : gzip.GzipFile
+            Reference to the file in which the body should be dumped.
+        """
+        dump(
+            ComputedBody(
+                positions=body.positions,
+                type=type,
+                mass=body.mass,
+                position=body.initial_position,
+                velocity=body.initial_velocity,
+                fixed=body.fixed,
+                has_potential=body.has_potential,
+                integrator=body.integrator,
+                time_survived=body.time_survived
+            ), file
+        )
+
+    def save_results(self, results: list, save_foldername: str):
         """
         Save the results of a single simulation to a .pkl file.
 
@@ -34,25 +63,56 @@ class SimulationMother:
         save_foldername : str
             Name of the folder in which to save the results.
         """
-        print(C.LIGHT_PURPLE, end="")
+        print(C.LIGHT_CYAN, end="")
         with gzip_open(f"{save_foldername}/bodies.gz", "wb") as file:
             for listi in tqdm(results, desc="Saving", miniters=1, mininterval=0.001):
                 for key, value in listi.items():
                     for body in value:
-                        dump(
-                            ComputedBody(
-                                positions=body.positions,
-                                type=key,
-                                mass=body.mass,
-                                position=body.initial_position,
-                                velocity=body.initial_velocity,
-                                fixed=body.fixed,
-                                has_potential=body.has_potential,
-                                integrator=body.integrator,
-                                iterations_survived=body.iterations_survived
-                            ), file
-                        )
+                        self.dump_body(body, key, file)
         print(C.END, end="")
+
+    def save_best_body(self, results: list, save_foldername: str) -> int:
+        """ 
+        Save in its own file the body that has survived the longest during simulating. Also returns the time survived.
+
+        Parameters
+        ----------
+        results : list
+            List of dictionaries containing the results of each simulation.
+        save_foldername : str
+            Name of the folder in which to save the results.
+        
+        Returns
+        -------
+        max_time_survived : int
+            Maximum time survived.
+        """
+        max_number = 0
+        max_body = None
+        body_type = "dead"
+        for listi in results[1:]:           # Remove first value has it corresponds to the attractive body simulation
+            for state, bodies in listi.items():
+                if state == "alive" and bodies:
+                    max_number = bodies[0].time_survived
+                    max_body = bodies[0]
+                    body_type = "alive"
+                    break
+                else:
+                    for body in bodies:
+                        if body.time_survived > max_number:
+                            max_number = body.time_survived
+                            max_body = body
+            else:
+                continue
+            break
+
+        with gzip_open(f"{save_foldername}/best_body.gz", "wb") as file:
+            # Save attractive moving bodies
+            for body in results[0]["attractive_moving"]:
+                self.dump_body(body, "attractive_moving", file)
+            # print(f"{max_body.initial_velocity.y:.10e} {max_body.initial_position.y:.10e}")
+            self.dump_body(max_body, body_type, file)
+        return max_number
 
     def save_simulation_parameters(self, save_foldername: str, **kwargs):
         """
@@ -62,7 +122,7 @@ class SimulationMother:
         ----------
         save_foldername : str
             Name of the folder in which to save the results.
-        **kwargs : dict
+        kwargs : dict
             Every element to be saved to the info file. Saves in the form key: value.
         """
         filename_info = f"{save_foldername}/info.txt"
@@ -77,17 +137,7 @@ class SimulationMother:
         with gzip_open(filename_base, 'wb') as file:
             for body in self.initial_system.list_of_bodies:
                 if body.fixed:
-                    dump(
-                        ComputedBody(
-                            positions=body.positions,
-                            type="base_body",
-                            mass=body.mass,
-                            position=body.initial_position,
-                            velocity=body.initial_velocity,
-                            fixed=body.fixed,
-                            has_potential=body.has_potential
-                        ), file
-                    )
+                    self.dump_body(body, "base_body", file)
 
     def dispatch(
             self,
@@ -156,34 +206,50 @@ class SimulationMother:
         body_initial_position_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_position_limits]
         body_initial_velocity_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_velocity_limits]
 
-        body_positions = np.array([
-            np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
-            np.random.uniform(*body_initial_position_limits[1], size=simulation_count),
-            np.random.uniform(*body_initial_position_limits[2], size=simulation_count)
-        ]).transpose().tolist()
-        body_velocities = np.array([
-            np.random.uniform(*body_initial_velocity_limits[0], size=bodies_per_simulation),
-            np.random.uniform(*body_initial_velocity_limits[1], size=bodies_per_simulation),
-            np.random.uniform(*body_initial_velocity_limits[2], size=bodies_per_simulation)
-        ]).transpose().tolist()
+        if True:
+            body_positions = np.array([
+                np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
+                np.random.uniform(*body_initial_position_limits[1], size=simulation_count),
+                np.random.uniform(*body_initial_position_limits[2], size=simulation_count)
+            ]).transpose().tolist()
+            body_velocities = np.array([
+                np.random.uniform(*body_initial_velocity_limits[0], size=bodies_per_simulation),
+                np.random.uniform(*body_initial_velocity_limits[1], size=bodies_per_simulation),
+                np.random.uniform(*body_initial_velocity_limits[2], size=bodies_per_simulation)
+            ]).transpose().tolist()
+        else:
+            body_positions = np.array([
+                np.tile(np.linspace(*body_initial_position_limits[0], num=int(simulation_count**0.5)),
+                        int(simulation_count**0.5)),
+                np.repeat(np.linspace(*body_initial_position_limits[1], num=int(simulation_count**0.5)),
+                        int(simulation_count**0.5)),
+                np.linspace(*body_initial_position_limits[2], num=simulation_count)
+            ]).transpose().tolist()
+            body_velocities = np.array([
+                np.tile(np.linspace(*body_initial_velocity_limits[0], num=int(bodies_per_simulation**0.5)),
+                        int(bodies_per_simulation**0.5)),
+                np.repeat(np.linspace(*body_initial_velocity_limits[1], num=int(bodies_per_simulation**0.5)),
+                        int(bodies_per_simulation**0.5)),
+                np.linspace(*body_initial_velocity_limits[2], num=bodies_per_simulation)
+            ]).transpose().tolist()
 
         print(f"{C.YELLOW+C.BOLD}Simulation starting at {datetime.now().strftime('%H:%M:%S')} with parameters:{C.END}")
         print(C.BROWN)
-        print(f"\n\tsimulation_count:             {simulation_count}" +
-              f"\n\tbodies_per_simulation:        {bodies_per_simulation}" +
-              f"\n\tdelta_time:                   {delta_time}" +
-              f"\n\tbody_initial_position_limits: {body_initial_position_limits}" +
-              f"\n\tbody_initial_velocity_limits: {body_initial_velocity_limits}" +
-              f"\n\tpotential_gradient_limit:     {potential_gradient_limit:.0e}" +
-              f"\n\tbody_alive_func:              {True if body_alive_func else False}" +
-              f"\n\tsystem_n:                     {self.initial_system.n}" +
-              f"\n\tsimulation_duration:          {simulation_duration:.0e}" +
-              f"\n\tpositions_saving_frequency:   {positions_saving_frequency:.0f}" +
-              f"\n\tintegrator:                   {integrator}" +
-              f"\n\tsave_foldername:              {save_foldername}{C.END}\n")
+        print(f"\n    simulation_count:         {simulation_count}" +
+              f"\n    bodies_per_simulation:    {bodies_per_simulation}" +
+              f"\n    delta_time:               {delta_time}" +
+              f"\n    body_init_pos_limits:     {body_initial_position_limits}" +
+              f"\n    body_init_vel_limits:     {body_initial_velocity_limits}" +
+              f"\n    potential_gradient_limit: {potential_gradient_limit:.0e}" +
+              f"\n    body_alive_func:          {True if body_alive_func else False}" +
+              f"\n    system_n:                 {self.initial_system.n}" +
+              f"\n    simulation_duration:      {simulation_duration:.0e}" +
+              f"\n    pos_saving_frequency:     {positions_saving_frequency:.0f}" +
+              f"\n    integrator:               {integrator}" +
+              f"\n    save_foldername:          {save_foldername}{C.END}\n")
 
-        pool = Pool()
-        number_of_processes = pool._processes
+        self.pool = Pool()
+        number_of_processes = self.pool._processes
         print(f"{C.BROWN}Number of processes used: {number_of_processes}{C.END}")
         start = datetime.now()
 
@@ -198,19 +264,18 @@ class SimulationMother:
 
         total_args = special_args + worker_args
         results = []
-        mapped_pool = pool.imap(self.worker_simulation_star, total_args)
+        mapped_pool = self.pool.imap(self.worker_simulation_star, total_args)
         print(C.LIGHT_PURPLE, end="")
         for result in tqdm(mapped_pool, total=len(total_args), desc="Simulating", miniters=1, mininterval=0.001):
             results.append(result)
         print(C.END, end="")
         stop = datetime.now()
-        pool.close()
         time = stop - start
         print(f"\n{C.GREEN}Simulation finished in {time}.{C.END}")
 
         makedirs(save_foldername)
 
-        max_iterations_survived = self.get_max_iterations_from_results(results)
+        max_time_survived = self.save_best_body(results, save_foldername)
         self.save_simulation_parameters(
             save_foldername, number_of_processes=number_of_processes, real_time_duration=time,
             simulation_count=simulation_count, bodies_per_simulation=bodies_per_simulation,
@@ -219,10 +284,11 @@ class SimulationMother:
             positions_saving_frequency=int(positions_saving_frequency),
             simulation_duration=f"{simulation_duration:.3e}",
             delta_time=delta_time, integrator=integrator, potential_gradient_limit=potential_gradient_limit,
-            body_alive_func=str(body_alive_func), max_iterations_survived=max_iterations_survived
+            body_alive_func=str(body_alive_func), max_time_survived=f"{max_time_survived:.3e}"
         )
         self.save_results(results, save_foldername)
         print(f"{C.GREEN+C.BOLD}Simulation successfully saved at {save_foldername}.{C.END}")
+        self.pool.close()
         return save_foldername
     
     @staticmethod
@@ -231,36 +297,6 @@ class SimulationMother:
         Makes multiprocessing.pool.map -> multiprocessing.pool.starmap.
         """
         return worker_simulation(*args)
-    
-    @staticmethod
-    def get_max_iterations_from_results(results: list) -> int:
-        """ 
-        Get the maximum number of iterations a body has survived during simulating.
-
-        Parameters
-        ----------
-        results : list
-            Results in the format outputted by the worker_simulation function.
-        
-        Returns
-        -------
-        max_iterations_survived : int
-            Maximum number of iterations survived.
-        """
-        max_number = 0
-        for listi in results[1:]:           # Remove first value has it corresponds to the attractive body simulation
-            for key, value in listi.items():
-                if key == "alive" and value:
-                    max_number = value[0].iterations_survived
-                    break
-                else:
-                    for body in value:
-                        max_number = max(max_number, body.iterations_survived)
-            else:
-                continue
-            break
-        return max_number
-
 
 
 def worker_simulation(

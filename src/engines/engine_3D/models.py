@@ -102,7 +102,8 @@ class BaseModel:
     
     @staticmethod
     def get_random_color():
-        return choice(["green", "red", "blue", "yellow", "orange", "cyan", "magenta", "white", "black", "purple",
+        # black removed
+        return choice(["green", "red", "blue", "yellow", "orange", "cyan", "magenta", "white", "purple",
                        "brown", "grey"])
 
 

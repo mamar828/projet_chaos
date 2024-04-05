@@ -11,6 +11,7 @@ from typing import Dict, List, Union, Optional, Callable
 
 from numpy import abs, gradient, ones_like, rot90, zeros_like, argmax
 from matplotlib.pyplot import close, colorbar, imshow, gca, scatter, show
+from matplotlib.pyplot import xlim, ylim
 
 from src.bodies.base_body import Body
 from src.bodies.gravitational_body import GravitationalBody
@@ -108,7 +109,7 @@ class BaseSystem:
         potential_gradient_limit: float
             Limit for the potential gradient on a body to be considered still alive.
         body_alive_func: Lambda
-            Lambda function specifying the conditions a body must respect to stay alive.
+            Lambda object specifying the conditions a body must respect to stay alive.
         """
         epsilon = 10**(-2)*10**(-self.n)
         for i, body in enumerate(self.moving_bodies):
@@ -243,6 +244,11 @@ class BaseSystem:
                     c=colours[(i + len(list_of_massive_bodies)) % len(colours)]
                 )
 
+        # TO REMOVE
+        x, y, z = self.tracked_body.position
+        xlim(x-5,x+5)
+        ylim(y-5,y+5)
+
         if show_bodies or show_potential_null_slope_points or show_potential:
             show()
             close()
@@ -266,12 +272,12 @@ class BaseSystem:
 
     def get_best_body(self) -> GravitationalBody:
         """
-        Returns the body who survived the most iterations by looking at the iterations_survived variable.
+        Returns the body who survived the longest by looking at the time_survived variable.
 
         Returns
         -------
         best_body : ComputedBody
-            The best body in the system.
+            The body in the system who survived the longest.
         """
         simulated_bodies = list(set(self.moving_bodies) - set(self.attractive_bodies))
-        return simulated_bodies[argmax([body.iterations_survived for body in simulated_bodies])]
+        return simulated_bodies[argmax([body.time_survived for body in simulated_bodies])]
