@@ -26,11 +26,12 @@ class BaseSystem:
     A class used to compute simulations on systems made of multiple bodies.
     """
 
-    def __init__(self,
+    def __init__(
+            self,
             list_of_bodies: List[Body],
             base_potential: Optional[ScalarField] = None,
             n: int = 0
-        ):
+    ):
         """
         Defines the required parameters.
 
@@ -132,7 +133,8 @@ class BaseSystem:
             show_potential: bool = False,
             show_bodies: bool = False,
             show_potential_null_slope_points: float = False,
-            axes: Optional[Dict[str, int]] = None):
+            axes: Optional[Dict[str, int]] = None
+    ):
         """
         Shows the system as a collection of dots in 2D space. The size of the dots is linearly proportional to their
         mass.
