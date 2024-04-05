@@ -16,7 +16,8 @@ if __name__ == '__main__':
         mass=10,
         position=Vector(earth.position.x+1.5, earth.position.y, 0),
         velocity=Vector(earth.velocity.x, earth.velocity.y, 0),
-        has_potential=False
+        has_potential=False,
+        integrator="kick-drift-kick"
     )
     sim_system = BaseSystem(list_of_bodies=[sun, earth, other_body], n=9)
     # bb = Simulation.load_from_folder("simulations/L1_2").system.get_best_body()
@@ -25,8 +26,10 @@ if __name__ == '__main__':
     sim.show_3D(
         show_potential=True,
         model_size_type="realistic",
+        # model_size_type="exaggerated",
         window_size=(1440,900),
-        camera_movement_mode="following",
-        camera_rotation_mode="instantaneous"
+        # camera_position_mode="following",
+        camera_position_mode="free",
+        # camera_movement_mode="instantaneous"
+        camera_movement_mode="cinematic"
     )
-

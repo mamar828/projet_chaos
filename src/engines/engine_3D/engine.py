@@ -1,5 +1,6 @@
 import pygame as pg
 import moderngl as mgl
+from eztcolors import Colors as C
 
 from src.engines.engine_3D.camera import Camera
 from src.engines.engine_3D.light import Light
@@ -30,8 +31,8 @@ class Engine3D(GlobalEngine):
             camera_far_render_distance: float=1e20,
             camera_yaw: float=-90.,
             camera_pitch: float=0.,
-            camera_movement_mode: str="free",
-            camera_rotation_mode: str="instantaneous",
+            camera_position_mode: str="free",
+            camera_movement_mode: str="instantaneous",
             objects: list[Object3D]=None,
             functions: list[Function3D]=None,
             simulation_presets_allowed: bool=True,
@@ -39,10 +40,20 @@ class Engine3D(GlobalEngine):
             model_size_type: str="exaggerated",
         ):
         """ 
-        Supported camera_movement_modes are "free" and "following".
-        Supported camera_rotation_modes are "instantaneous" and "cinematic".
+        Supported camera_position_modes are "free" and "following".
+        Supported camera_movement_modes are "instantaneous" and "cinematic".
         Supported model_size_types are "exaggerated" and "realistic".
         """
+        assert camera_position_mode in ["free", "following"], (
+            f"{C.RED+C.BOLD}camera_position_mode keyword given is not supported. " +
+            f"Supported types are 'free' and 'following', not '{camera_position_mode}'.{C.END}")
+        assert camera_movement_mode in ["instantaneous", "cinematic"], (
+            f"{C.RED+C.BOLD}camera_movement_mode keyword given is not supported. " +
+            f"Supported types are 'instantaneous' and 'cinematic', not '{camera_movement_mode}'.{C.END}")
+        assert model_size_type in ["exaggerated", "realistic"], (
+            f"{C.RED+C.BOLD}model_size_type keyword given is not supported. " +
+            f"Supported types are 'exaggerated' and 'realistic', not '{model_size_type}'.{C.END}")
+        
         # Default parameters for camera origin and light position
         if simulation and simulation_presets_allowed:
             camera_origin = simulation.system.origin
@@ -84,8 +95,8 @@ class Engine3D(GlobalEngine):
             far_render_distance=camera_far_render_distance,
             yaw=camera_yaw,
             pitch=camera_pitch,
-            movement_mode=camera_movement_mode,
-            rotation_mode=camera_rotation_mode
+            position_mode=camera_position_mode,
+            movement_mode=camera_movement_mode
         )
         self.functions = functions
         self.mesh = Mesh(self)
