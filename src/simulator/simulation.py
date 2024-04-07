@@ -150,18 +150,16 @@ class Simulation:
             Parameters to pass to the Engine3D class.
         """
         if show_potential:
-            func = Function3D(
+            kwargs["functions"] = kwargs.get("functions", []) + [
+                Function3D(
                     texture="spacetime",
                     position=(0,0,0),
                     resolution=(200,200),
                     x_limits=(0,900),
                     y_limits=(0,900),
                     instance=self.system
-            )
-            if "functions" in kwargs.keys():
-                kwargs["functions"].append(func)
-            else:
-                kwargs["functions"] = [func]
+                )
+            ]
 
         app = Engine3D(
             simulation=self,

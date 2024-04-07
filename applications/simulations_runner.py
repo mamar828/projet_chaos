@@ -34,7 +34,7 @@ if __name__ == '__main__':
                                       (earth.velocity.y+1e-7,    earth.velocity.y+1e-7), (0, 0)],
         save_foldername=f"simulations/thrash",
         simulation_duration=31536000,
-        integrator="yoshida",
+        integrator="synchronous",
         positions_saving_frequency=1,
         # potential_gradient_limit=1e-10,
         # body_alive_func=Lambda("lambda x, y, z, t_x, t_y, t_z: (1.2 < ((x-t_x)**2 + (y-t_y)**2)**0.5 < 1.8)", 6)

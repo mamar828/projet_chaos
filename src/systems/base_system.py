@@ -68,8 +68,8 @@ class BaseSystem:
         self.origin = tuple(self.list_of_bodies[argmax(masses)].position)
         if len(self.list_of_bodies) > 1:
             # Reference the second largest body to be the body to track
-            masses[argmax(masses)] = 0
-            self.tracked_body = self.list_of_bodies[argmax(masses)]
+            moving_masses = [body.mass for body in self.moving_bodies]
+            self.tracked_body = self.moving_bodies[argmax(moving_masses)]
 
     def update(self, time_step: float, epsilon: float = 10**(-2)):
         """
