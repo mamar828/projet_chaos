@@ -105,10 +105,8 @@ class GravitationalBody(Body):
         if method == "potential":
             if self.integrator != "yoshida":
                 a_x, a_y, a_z = field.get_acceleration(self._position, epsilon)
-                # print(a_x, a_y, a_z)
         elif method == "force":
             a_x, a_y, a_z = field(self._position)
-            # print(a_x, a_y, a_z)
         else:
             a_x, a_y, a_z = 0, 0, 0
 

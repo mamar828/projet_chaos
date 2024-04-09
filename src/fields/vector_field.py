@@ -113,16 +113,12 @@ class VectorField(Field):
         """
         force = FakeVector(0, 0, 0)
         for term in self.terms:
-            print(term[2])
-            print(position)
             relative_distance = sqrt((term[2].x-position.x)**2+(term[2].y-position.y)**2+(term[2].z-position.z)**2)
-            print(relative_distance)
             force += FakeVector(
                 -1 * term[1] * (relative_distance ** term[0]) * (term[2].x - position.x) / relative_distance,
                 -1 * term[1] * (relative_distance ** term[0]) * (term[2].y - position.y) / relative_distance,
                 -1 * term[1] * (relative_distance ** term[0]) * (term[2].z - position.z) / relative_distance
             )
-            print(force)
         return force.vectorise()
 
     def get_acceleration(self, position: Vector, epsilon: float = 10 ** (-2), iterative: bool = False) -> Vector:
