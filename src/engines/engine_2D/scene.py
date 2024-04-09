@@ -15,6 +15,7 @@ class Scene:
         self.clock_color = clock_font[1]
         self.objects = []
         self.load()
+        self.current_tick = 0
 
     def load(self):
         # Determine the displayed colors
@@ -41,9 +42,13 @@ class Scene:
 
     def update(self):
         # Update system
-        for i in range(int(self.app.delta_time // self.app.simulation.maximum_delta_time)):
+        self.current_tick += self.app.delta_time
+        for i in range(int(self.current_tick // self.app.simulation.maximum_delta_time)):
             self.system.update(self.app.simulation.maximum_delta_time)
-        self.system.update(self.app.delta_time % self.app.simulation.maximum_delta_time)
+            self.current_tick -= self.app.simulation.maximum_delta_time
+        # for i in range(int(self.app.delta_time // self.app.simulation.maximum_delta_time)):
+        #     self.system.update(self.app.simulation.maximum_delta_time)
+        # self.system.update(self.app.delta_time % self.app.simulation.maximum_delta_time)
 
         # Update display
         for obj in self.objects:
