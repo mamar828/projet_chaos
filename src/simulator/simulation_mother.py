@@ -108,8 +108,10 @@ class SimulationMother:
 
         with gzip_open(f"{save_foldername}/best_body.gz", "wb") as file:
             # Save attractive moving bodies
-            for body in results[0]["attractive_moving"]:
-                self.dump_body(body, "attractive_moving", file)
+            attractive_moving = results[0].get("attractive_moving")
+            if attractive_moving:
+                for body in attractive_moving:
+                    self.dump_body(body, "attractive_moving", file)
             # print(f"{max_body.initial_velocity.y:.10e} {max_body.initial_position.y:.10e}")
             self.dump_body(max_body, body_type, file)
         return max_number
@@ -261,6 +263,8 @@ class SimulationMother:
         if self.initial_system.moving_bodies:
             special_args = [(None, None, self.initial_system, delta_time, simulation_duration,
                              positions_saving_frequency, None, None, integrator)]
+        else:
+            special_args = []
 
         total_args = special_args + worker_args
         results = []
@@ -338,4 +342,5 @@ def worker_simulation(
         )
         result = simulation.run(simulation_duration, positions_saving_frequency,
                                 potential_gradient_limit, body_alive_func)
+
     return result

@@ -43,10 +43,14 @@ class Camera:
         elif movement_mode == "cinematic":
             self.move = self.move_cinematic
             self.rotate = self.rotate_cinematic
-            self.positive_acceleration_scalar = 0.05
-            self.negative_acceleration_scalar = 0.05
-            self.positive_camera_scalar = 0.02
-            self.negative_camera_factor = 0.94
+            # self.positive_acceleration_scalar = 0.05
+            self.positive_acceleration_scalar = 0.005
+            # self.negative_acceleration_scalar = 0.05
+            self.negative_acceleration_scalar = 0.0
+            # self.positive_camera_scalar = 0.02
+            self.positive_camera_scalar = 0.005
+            # self.negative_camera_factor = 0.94
+            self.negative_camera_factor = 1
             self.acceleration_vector = glm.vec3(0,0,0)
             self.rotation_vector = glm.vec2(0,0)
 
