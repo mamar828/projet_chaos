@@ -13,6 +13,7 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 from src.fields.scalar_field import ScalarField
+from src.fields.vector_field import VectorField
 from src.tools.vector import Vector
 
 
@@ -52,7 +53,7 @@ class Body:
         self.initial_velocity = deepcopy(velocity)
         self.positions = [deepcopy(position)]
 
-    def __call__(self, time_step: float, potential: ScalarField, epsilon: float):
+    def __call__(self, time_step: float, potential: ScalarField, epsilon: float, method: str):
         """
         Updates the position and velocity of the body according to a potential and time step.
 
@@ -108,6 +109,19 @@ class Body:
         -------
         scalar_field : ScalarField
             The ScalarField object associated with the body's potential.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def gravitational_field(self) -> VectorField:
+        """
+        Gives the body's potential as a ScalarField object.
+
+        Returns
+        -------
+        scalar_field : ScalarField
+            The ScalarField object associated with the body's gravitational potential.
         """
 
         raise NotImplementedError

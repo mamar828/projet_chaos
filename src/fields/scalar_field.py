@@ -97,7 +97,7 @@ class ScalarField(Field):
 
         return self * other
 
-    def __call__(self, position: Vector) -> float:
+    def __call__(self, position: Vector, iterative: bool = False) -> float:
         """
         Computes the value of the scalar field at a desired position.
 
@@ -112,10 +112,16 @@ class ScalarField(Field):
             The value of the field at the given position.
         """
         value = 0
-        for term in self.terms:
-            relative_distance = sqrt((term[2].x-position.x)**2+(term[2].y-position.y)**2+(term[2].z-position.z)**2)
-            value += term[1]*(relative_distance**term[0])
-
+        if iterative:
+            value = []
+            for term in self.terms:
+                relative_distance = sqrt(
+                    (term[2].x - position.x) ** 2 + (term[2].y - position.y) ** 2 + (term[2].z - position.z) ** 2)
+                value.append(term[1] * (relative_distance ** term[0]))
+        else:
+            for term in self.terms:
+                relative_distance = sqrt((term[2].x-position.x)**2+(term[2].y-position.y)**2+(term[2].z-position.z)**2)
+                value += term[1]*(relative_distance**term[0])
         return value
 
     def get_gradient(self, position: Vector, epsilon: float = 10**(-2)) -> Vector:
@@ -142,8 +148,13 @@ class ScalarField(Field):
             (self(Vector(x, y + epsilon/2, z)) - self(Vector(x, y - epsilon/2, z)))/epsilon,
             (self(Vector(x, y, z + epsilon/2)) - self(Vector(x, y, z - epsilon/2)))/epsilon,
         )
+        # return Vector(
+        #     (self(Vector(x + epsilon, y, z)) - self(Vector(x, y, z))) / epsilon,
+        #     (self(Vector(x, y + epsilon, z)) - self(Vector(x, y, z))) / epsilon,
+        #     (self(Vector(x, y, z + epsilon)) - self(Vector(x, y, z))) / epsilon,
+        # )
 
-    def get_acceleration(self, position: Vector, epsilon: float = 10**(-2)) -> Vector:
+    def get_acceleration(self, position: Vector, epsilon: float = 10**(-2), iterative: bool = False) -> Vector:
         """
         Computes the gradient of the scalar field at a given position using a step of size epsilon.
 
@@ -162,11 +173,33 @@ class ScalarField(Field):
         """
 
         x, y, z = position
-        return Vector(
-            -(self(Vector(x + epsilon/2, y, z)) - self(Vector(x - epsilon/2, y, z)))/epsilon,
-            -(self(Vector(x, y + epsilon/2, z)) - self(Vector(x, y - epsilon/2, z)))/epsilon,
-            -(self(Vector(x, y, z + epsilon/2)) - self(Vector(x, y, z - epsilon/2)))/epsilon,
-        )
+        a_x, a_y, a_z = 0, 0, 0
+        if iterative:
+            v_plus = [
+                self(Vector(x + epsilon/2, y, z), iterative=iterative),
+                self(Vector(x, y + epsilon/2, z), iterative=iterative),
+                self(Vector(x, y, z + epsilon/2), iterative=iterative)
+            ]
+            v_minus = [
+                self(Vector(x - epsilon/2, y, z), iterative=iterative),
+                self(Vector(x, y - epsilon/2, z), iterative=iterative),
+                self(Vector(x, y, z - epsilon/2), iterative=iterative)
+            ]
+            for i, p, m in zip([0, 1, 2], v_plus, v_minus):
+                for v_p, v_m in zip(p, m):
+                    if i == 0:
+                        a_x += -(v_p - v_m)/epsilon
+                    elif i == 1:
+                        a_y += -(v_p - v_m)/epsilon
+                    elif i == 2:
+                        a_z += -(v_p - v_m)/epsilon
+            return Vector(a_x, a_y, a_z)
+        else:
+            return Vector(
+                -(self(Vector(x + epsilon/2, y, z)) - self(Vector(x - epsilon/2, y, z)))/epsilon,
+                -(self(Vector(x, y + epsilon/2, z)) - self(Vector(x, y - epsilon/2, z)))/epsilon,
+                -(self(Vector(x, y, z + epsilon/2)) - self(Vector(x, y, z - epsilon/2)))/epsilon,
+            )
 
     def _compute_field_wide_operations(
             self,

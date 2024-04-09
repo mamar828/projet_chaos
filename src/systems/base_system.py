@@ -17,6 +17,7 @@ from src.bodies.base_body import Body
 from src.bodies.gravitational_body import GravitationalBody
 from src.tools.vector import FakeVector, Vector
 from src.fields.scalar_field import ScalarField
+from src.fields.vector_field import VectorField
 from src.simulator.lambda_func import Lambda
 
 from pickle import dumps, loads
@@ -31,7 +32,9 @@ class BaseSystem:
             self,
             list_of_bodies: List[Body],
             base_potential: Optional[ScalarField] = None,
-            n: int = 0
+            base_force_field: Optional[VectorField] = None,
+            n: int = 0,
+            method: str = "potential"
     ):
         """
         Defines the required parameters.
@@ -46,10 +49,14 @@ class BaseSystem:
             The log base 10 of the space unit relative to the meter (e.g. 3 means 1000m or km and 6 means 10**6m or
             Mm).
         """
+        self.method = method
         self.n = n
         if base_potential is None:
             base_potential = ScalarField([(0, 0, Vector(0, 0, 0))])
+        if base_force_field is None:
+            base_force_field = VectorField([(0, 0, Vector(0, 0, 0))])
         self._base_potential = base_potential
+        self._base_force_field = base_force_field
         self.fixed_bodies = []
         self.moving_bodies = []
         self.attractive_bodies = []
@@ -71,7 +78,7 @@ class BaseSystem:
             moving_masses = [body.mass for body in self.moving_bodies]
             self.tracked_body = self.moving_bodies[argmax(moving_masses)]
 
-    def update(self, time_step: float, epsilon: float = 10**(-2)):
+    def update(self, time_step: float, epsilon: float = 10**(-2), method: str = "potential"):
         """
         Updates the position and velocity of the bodies within the system according to a potential and time step.
 
@@ -84,20 +91,36 @@ class BaseSystem:
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
             defaults to 10**(-2).
         """
-        potential_field = loads(dumps(self._base_potential))
-        for body in self.attractive_bodies:
-            potential_field += body.potential
-        if len(potential_field.terms) > 2:
-            potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
-        for body in self.moving_bodies:
-            if body is not None:
-                if body.has_potential:
-                    acting_potential = loads(dumps(potential_field)) - body.potential       # equivalent to deepcopy()
-                else:
-                    acting_potential = loads(dumps(potential_field))
-                body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n))
+        method = self.method
+        if method == "force":
+            force_field = loads(dumps(self._base_force_field))
+            for body in self.attractive_bodies:
+                force_field += body.gravitational_field
+            if len(force_field.terms) > 2:
+                force_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+            for body in self.moving_bodies:
+                if body is not None:
+                    if body.has_potential:
+                        acting_force = loads(dumps(force_field)) - body.gravitational_field  # equivalent to deepcopy()
+                    else:
+                        acting_force = loads(dumps(force_field))
+                    body(time_step, acting_force * (10 ** (-self.n)) ** 3, epsilon * 10 ** (-self.n), method=method)
 
-        self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
+        elif method == "potential":
+            potential_field = loads(dumps(self._base_potential))
+            for body in self.attractive_bodies:
+                potential_field += body.potential
+            if len(potential_field.terms) > 2:
+                potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+            for body in self.moving_bodies:
+                if body is not None:
+                    if body.has_potential:
+                        acting_potential = loads(dumps(potential_field)) - body.potential    # equivalent to deepcopy()
+                    else:
+                        acting_potential = loads(dumps(potential_field))
+                    body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n), method=method)
+
+            self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
 
     def remove_dead_bodies(self, potential_gradient_limit: float, body_alive_func: Lambda):
         """
@@ -245,9 +268,11 @@ class BaseSystem:
                 )
 
         # TO REMOVE
-        x, y, z = self.tracked_body.position
-        xlim(x-5,x+5)
-        ylim(y-5,y+5)
+        # x, y, z = self.tracked_body.position
+        # xlim(x-5,x+5)
+        # ylim(y-5,y+5)
+        xlim(250, 650)
+        ylim(250, 650)
 
         if show_bodies or show_potential_null_slope_points or show_potential:
             show()

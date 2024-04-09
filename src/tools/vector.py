@@ -7,6 +7,7 @@
 
     @Description:       This file contains a class used to create vectors in 3D space.
 """
+from __future__ import annotations
 
 from typing import NamedTuple
 
@@ -32,7 +33,6 @@ class Vector(NamedTuple):
 
     def __str__(self):
         return f"({self.x:.2f}, {self.y:.2f}, {self.z:.2f})"
-
 
 
 class FakeVector:
@@ -69,5 +69,27 @@ class FakeVector:
 
         return Vector(self.x, self.y, self.z)
 
+    @staticmethod
+    def fakevectorise(vector: Vector) -> FakeVector:
+        """
+        Returns a FakeVector object with the same components as the Vector Object
+
+        Returns
+        -------
+        fakevector : FakeVector
+            The corresponding FakeVector object.
+        """
+
+        return FakeVector(vector.x, vector.y, vector.z)
+
     def __str__(self):
         return f"({self.x}, {self.y}, {self.z})"
+
+    def __add__(self, other):
+        return FakeVector(self.x+other.x, self.y+other.y, self.z+other.z)
+
+    def __sub__(self, other):
+        return FakeVector(self.x-other.x, self.y-other.y, self.z-other.z)
+
+    def __rmul__(self, other):
+        return FakeVector(self.x * other.x, self.y * other.y, self.z * other.z)
