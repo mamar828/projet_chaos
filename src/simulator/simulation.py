@@ -31,10 +31,8 @@ class Simulation:
         self.traces = None
 
     def __str__(self):
-        returnstr = f"Number of bodies: {len(self.system.list_of_bodies)}\n"
-        for body in self.system.list_of_bodies:
-            returnstr += str(body) + "\n"
-        return returnstr
+        return f"Number of bodies: {len(self.system.list_of_bodies)}\n" + \
+                "\n".join([str(body) for body in self.system.list_of_bodies])
 
     @staticmethod
     def load_pickle_file(filename: str) -> list:
@@ -135,14 +133,12 @@ class Simulation:
         )
         app.run()
 
-    def show_3D(self, *args, show_potential: bool=False, **kwargs):
+    def show_3D(self, show_potential: bool=False, **kwargs):
         """
         Show a simulation in 3D with pygame and moderngl.
 
         Parameters
         ----------
-        args : list
-            Parameters to pass to the Engine3D class.
         show_potential : bool
             If True, the potential function is passed directly to the Engine3D class. This eases the plotting of the 
             potential field. Defaults to False.
@@ -163,7 +159,6 @@ class Simulation:
 
         app = Engine3D(
             simulation=self,
-            *args,
             **kwargs
         )
         app.run()
@@ -183,7 +178,7 @@ class Simulation:
         duration : int
             Duration of the simulation in seconds.
         positions_saving_frequency : int
-            Sets the number of steps after which the body's positions will be saved. Defaults to 1000.
+            Sets the number of steps after which the body's positions will be saved.
         potential_gradient_limit: float
             Limit for the potential gradient on a body to be considered still alive.
         body_alive_func: Lambda
@@ -197,21 +192,30 @@ class Simulation:
         """
         total_iterations = duration // self.maximum_delta_time
         system = self.system
+        system.method = "force"
         dead_body_removal_frequency = 10
-        for i in range(int(total_iterations // positions_saving_frequency)):
+        for i in range(1, int(total_iterations // positions_saving_frequency)+1):
             for j in range(int(positions_saving_frequency)):
-                system.update(self.maximum_delta_time)
+                system.update(self.maximum_delta_time, time=self.maximum_delta_time*(i))
+
                 if (i * positions_saving_frequency + j) % dead_body_removal_frequency == 0:
                     # Check for dead bodies in the system
                     system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
-            if i % 30 == 0:
-                system.show(show_bodies=True)
+            # if 1.75e7 < i*self.maximum_delta_time < 2e7:
+            #     system.show(show_bodies=True)
 
-            if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
+            if len(system.attractive_bodies) - len(system.fixed_bodies) == len([b for b in system.moving_bodies if b]):
                 # Check if no bodies remain
                 break
+
             system.save_positions()
-            
+
+        # for body in system.list_of_bodies:
+        #     if body.test_list:
+        #         array = np.array(body.test_list)
+        #         plt.plot(array[:,0], array[:,1], "go", markersize=1)
+        #         plt.show(block=True)
+
         return {
             "alive": [body for body in system.list_of_bodies if body not in system.attractive_bodies 
                                                             and body not in system.dead_bodies],
@@ -236,8 +240,10 @@ class Simulation:
         """
         total_iterations = duration // self.maximum_delta_time
         system = self.system
+        system.method = "force"
         for i in range(int(total_iterations // positions_saving_frequency)):
             for i in range(int(positions_saving_frequency)):
                 system.update(self.maximum_delta_time)
             system.save_positions()
         return {"attractive_moving": [body for body in system.list_of_bodies if body in system.moving_bodies]}
+    

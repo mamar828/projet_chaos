@@ -31,7 +31,7 @@ class ComputedBody(GravitationalBody):
         self.time_survived = time_survived
 
     def __str__(self):
-        return super().__str__() + f"type: {self.type}, len(positions): {len(self.positions)}"
+        return super().__str__() + f" type: {self.type}, len(positions): {len(self.positions)}"
     
     def to_gravitational_body(self) -> GravitationalBody:
         """
@@ -56,12 +56,10 @@ class ComputedBody(GravitationalBody):
         Update the body's position.
         """
         if self.positions:
-            # print(self.positions)
             self._position = self.positions[0]
             del self.positions[0]
         else:
             self.dead = True
-            sleep(1000)
 
     def get_color(self, random_tuple=True) -> str | tuple[int, int, int]:
         """

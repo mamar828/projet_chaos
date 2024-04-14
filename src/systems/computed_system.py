@@ -1,4 +1,6 @@
 from pickle import loads, dumps
+import numpy as np
+import matplotlib.pyplot as plt
 
 from src.systems.base_system import BaseSystem
 
@@ -53,3 +55,18 @@ class ComputedSystem(BaseSystem):
             base_potential=self._base_potential,
             n=self.n
         )
+    
+    def filter_bodies(self): ...
+    
+    def plot_bodies(self):
+        """
+        Plot the positions of all the bodies in the system.
+        """
+        position_velocity = []
+        for body in self.list_of_bodies:
+            position_velocity.append(body.position.x, body.position.y, body.time_survived)
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3), projection="3d")
+        array = np.array(position_velocity)
+        ax.bar3d(position_velocity[:,0], position_velocity[:,1], np.zeros_like(array[:,2]), 1, 1, array[:,2],
+                 shade=True)
+        plt.show()

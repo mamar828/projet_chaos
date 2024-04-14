@@ -14,7 +14,9 @@ from eztcolors import Colors as C
 from src.simulator.simulation import Simulation
 from src.simulator.lambda_func import Lambda
 from src.systems.base_system import BaseSystem
+from src.systems.new_system import NewSystem
 from src.bodies.gravitational_body import GravitationalBody
+from src.bodies.new_body import NewBody
 from src.bodies.computed_body import ComputedBody
 from src.tools.vector import Vector
 
@@ -324,9 +326,9 @@ def worker_simulation(
 
     else:
         # Normal simulation
-        simulated_system = BaseSystem(
+        simulated_system = NewSystem(
             list_of_bodies=(
-                system.list_of_bodies + [GravitationalBody(
+                system.list_of_bodies + [NewBody(
                     mass=1,
                     position=Vector(*body_position),
                     velocity=Vector(v_x,v_y,v_z),

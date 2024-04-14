@@ -22,6 +22,7 @@ class Scene:
             self.load_simulation()
         self.skybox = Skybox(app)
         self.current_tick = 0
+        self.total_ticks = 0
 
     def load_objects(self, scene_objects):
         for obj in scene_objects:
@@ -62,6 +63,8 @@ class Scene:
         if self.system:
             # Update system
             self.current_tick += self.app.delta_time
+            self.total_ticks += self.app.delta_time
+            # print(self.total_ticks)
             for i in range(int(self.current_tick // self.app.simulation.maximum_delta_time)):
                 self.system.update(self.app.simulation.maximum_delta_time)
                 self.current_tick -= self.app.simulation.maximum_delta_time

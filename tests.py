@@ -85,5 +85,12 @@ from datetime import datetime
 # print("allo".split(","))
 
 # print(5<4<7)
-func = eval("lambda x: x > 3")
-print(func(5))
+# func = eval("lambda x: x > 3")
+# print(func(5))
+
+# print([] + ["a"])
+
+# print("\n".join(["1","2","3"]))
+
+print([1,2,3][:])
+print(list(reversed([1,2,3])))

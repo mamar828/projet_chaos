@@ -34,6 +34,12 @@ class Vector(NamedTuple):
     def __str__(self):
         return f"({self.x:.2f}, {self.y:.2f}, {self.z:.2f})"
 
+    def __repr__(self):
+        return f"({self.x:.20f}, {self.y:.20f}, {self.z:.20f})"
+    
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y and self.z == other.z
+
 
 class FakeVector:
     """
@@ -91,5 +97,13 @@ class FakeVector:
     def __sub__(self, other):
         return FakeVector(self.x-other.x, self.y-other.y, self.z-other.z)
 
+    def __mul__(self, other):
+        if isinstance(other, FakeVector):
+            return FakeVector(self.x * other.x, self.y * other.y, self.z * other.z)
+        elif isinstance(other, (float, int)):
+            return FakeVector(self.x * other, self.y * other, self.z * other)
+        else:
+            raise NotImplementedError
+    
     def __rmul__(self, other):
-        return FakeVector(self.x * other.x, self.y * other.y, self.z * other.z)
+        return self.__mul__(other)
