@@ -108,14 +108,15 @@ class SimulationMother:
                 continue
             break
 
-        with gzip_open(f"{save_foldername}/best_body.gz", "wb") as file:
-            # Save attractive moving bodies
-            attractive_moving = results[0].get("attractive_moving")
-            if attractive_moving:
-                for body in attractive_moving:
-                    self.dump_body(body, "attractive_moving", file)
-            # print(f"{max_body.initial_velocity.y:.10e} {max_body.initial_position.y:.10e}")
-            self.dump_body(max_body, body_type, file)
+        if max_body:
+            with gzip_open(f"{save_foldername}/best_body.gz", "wb") as file:
+                # Save attractive moving bodies
+                attractive_moving = results[0].get("attractive_moving")
+                if attractive_moving:
+                    for body in attractive_moving:
+                        self.dump_body(body, "attractive_moving", file)
+                # print(f"{max_body.initial_velocity.y:.10e} {max_body.initial_position.y:.10e}")
+                self.dump_body(max_body, body_type, file)
         return max_number
 
     def save_simulation_parameters(self, save_foldername: str, **kwargs):
@@ -206,22 +207,31 @@ class SimulationMother:
                     save_foldername = f"{save_foldername}_1"
             else:
                 save_foldername = f"{save_foldername}_1"
+
+        if not potential_gradient_limit: potential_gradient_limit = 1e10
         
         body_initial_position_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_position_limits]
         body_initial_velocity_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_velocity_limits]
+
+        def get_meshed_array(x_lims, y_lims, z_lims, count) -> np.ndarray:
+            x_coords = np.linspace(*x_lims, num=round(count**(1/3)))
+            y_coords = np.linspace(*y_lims, num=round(count**(1/3)))
+            z_coords = np.linspace(*z_lims, num=round(count**(1/3)))
+            X, Y, Z = np.meshgrid(x_coords, y_coords, z_coords)
+            return np.vstack((X.ravel(), Y.ravel(), Z.ravel())).transpose()
 
         if True:
             body_positions = np.array([
                 np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
                 np.random.uniform(*body_initial_position_limits[1], size=simulation_count),
                 np.random.uniform(*body_initial_position_limits[2], size=simulation_count)
-            ]).transpose().tolist()
+            ]).transpose()
             body_velocities = np.array([
                 np.random.uniform(*body_initial_velocity_limits[0], size=bodies_per_simulation),
                 np.random.uniform(*body_initial_velocity_limits[1], size=bodies_per_simulation),
                 np.random.uniform(*body_initial_velocity_limits[2], size=bodies_per_simulation)
             ]).transpose().tolist()
-        else:
+        elif False:
             body_positions = np.array([
                 np.tile(np.linspace(*body_initial_position_limits[0], num=int(simulation_count**0.5)),
                         int(simulation_count**0.5)),
@@ -236,6 +246,9 @@ class SimulationMother:
                         int(bodies_per_simulation**0.5)),
                 np.linspace(*body_initial_velocity_limits[2], num=bodies_per_simulation)
             ]).transpose().tolist()
+        else:
+            body_positions = get_meshed_array(*body_initial_position_limits, simulation_count).tolist()
+            body_velocities = get_meshed_array(*body_initial_velocity_limits, bodies_per_simulation).tolist()
 
         print(f"{C.YELLOW+C.BOLD}Simulation starting at {datetime.now().strftime('%H:%M:%S')} with parameters:{C.END}")
         print(C.BROWN)
@@ -316,7 +329,7 @@ def worker_simulation(
         body_alive_func: tuple[int,int],
         integrator: str
     ):
-    if body_position == None and body_velocities == None:
+    if not isinstance(body_position, np.ndarray) and not isinstance(body_velocities, np.ndarray):
         # Special simulation, occuring only once
         simulation = Simulation(
             system=system,
@@ -326,9 +339,9 @@ def worker_simulation(
 
     else:
         # Normal simulation
-        simulated_system = NewSystem(
+        simulated_system = BaseSystem(
             list_of_bodies=(
-                system.list_of_bodies + [NewBody(
+                system.list_of_bodies + [GravitationalBody(
                     mass=1,
                     position=Vector(*body_position),
                     velocity=Vector(v_x,v_y,v_z),

@@ -81,12 +81,12 @@ class NewSystem:
         # for body in self.moving_bodies:
         #     body.update(time_step, epsilon*10**(-self.n), bodies_copy, self.n)
         bodies_copy_position = [NewBody(body.mass, body.position, body.velocity, body.fixed,
-                                        body.has_potential, body.integrator) for body in self.list_of_bodies]
+                                        body.has_potential, body.integrator) for body in self.attractive_bodies]
         for body in self.moving_bodies:
             body.update_position(time_step, bodies_copy_position, self.n)
 
         bodies_copy_velocity = [NewBody(body.mass, body.position, body.velocity, body.fixed,
-                                        body.has_potential, body.integrator) for body in self.list_of_bodies]
+                                        body.has_potential, body.integrator) for body in self.attractive_bodies]
         
         for body in self.moving_bodies:
             body.update_velocity(time_step, bodies_copy_velocity, self.n)
@@ -105,20 +105,18 @@ class NewSystem:
         """
         epsilon = 10**(-2)*10**(-self.n)
         for i, body in enumerate(self.moving_bodies):
-            if body is not None:
-                if not body.has_potential and body.is_dead(self.current_potential, epsilon,
-                                                           potential_gradient_limit, body_alive_func,
-                                                           self.tracked_body):
-                    self.dead_bodies.append(body)
-                    self.moving_bodies[i] = None
+            if not body.has_potential and body.is_dead(self.current_potential, epsilon,
+                                                        potential_gradient_limit, body_alive_func,
+                                                        self.tracked_body):
+                self.dead_bodies.append(body)
+                self.moving_bodies.remove(body)
 
     def save_positions(self):
         """
         Save the positions of every body in the system.
         """
         for body in self.moving_bodies:
-            if body is not None:
-                body.save_position()
+            body.save_position()
 
     def show(
             self,

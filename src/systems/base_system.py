@@ -120,7 +120,12 @@ class BaseSystem:
                         acting_potential = loads(dumps(potential_field))
                     body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n), method=method)
 
-            self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
+        potential_field = loads(dumps(self._base_potential))
+        for body in self.attractive_bodies:
+            potential_field += body.potential
+        if len(potential_field.terms) > 2:
+            potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+        self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
 
     def remove_dead_bodies(self, potential_gradient_limit: float, body_alive_func: Lambda):
         """
@@ -135,21 +140,19 @@ class BaseSystem:
             Lambda object specifying the conditions a body must respect to stay alive.
         """
         epsilon = 10**(-2)*10**(-self.n)
-        for i, body in enumerate(self.moving_bodies):
-            if body is not None:
-                if not body.has_potential and body.is_dead(self.current_potential, epsilon,
-                                                           potential_gradient_limit, body_alive_func,
-                                                           self.tracked_body):
-                    self.dead_bodies.append(body)
-                    self.moving_bodies[i] = None
+        for body in self.moving_bodies:
+            if not body.has_potential and body.is_dead(self.current_potential, epsilon,
+                                                        potential_gradient_limit, body_alive_func,
+                                                        self.tracked_body):
+                self.dead_bodies.append(body)
+                self.moving_bodies.remove(body)
 
     def save_positions(self):
         """
         Save the positions of every body in the system.
         """
         for body in self.moving_bodies:
-            if body is not None:
-                body.save_position()
+            body.save_position()
 
     def show(
             self,

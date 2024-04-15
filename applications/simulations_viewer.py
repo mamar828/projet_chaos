@@ -16,15 +16,16 @@ from applications.simulations_examples import sun, earth
 
 
 if __name__ == '__main__':
-    sim = Simulation.load_from_folder(f"simulations/new_methods_50")#, only_load_best_body=False)
+    sim = Simulation.load_from_folder(f"simulations/thrash_8")#, only_load_best_body=True)
     # print(repr(sim.system.list_of_bodies[-1].position))
     # print(repr(sim.system.list_of_bodies[-1].velocity))
     # raise
     # other = sim.system.list_of_bodies[-1].to_gravitational_body()
     # sim.system = ComputedSystem(list_of_bodies=(sim.system.list_of_bodies + [other]), n=9, tick_factor=sim.system.tick_factor)
-    sim.system = sim.system.to_base_system()
+    # sim.system = sim.system.to_base_system()
 
     # sim = Simulation(system=BaseSystem(list_of_bodies=[sun, earth, sim.system.list_of_bodies[-1]], n=9))
+    # input("loaded")
 
     sim.show_3D(
         show_potential=True,
