@@ -15,31 +15,43 @@ class Camera:
             far_render_distance=1000,
             yaw=-90,
             pitch=0,
-            position_mode="free",
             movement_mode="instantaneous"
         ):
         self.app = app
         self.speed = speed
         self.sensitivity = sensitivity
+
         self.FOV = fov
         self.NEAR = near_render_distance
         self.FAR = far_render_distance
         self.aspect_ratio = app.window_size[0] / app.window_size[1]
         self.position = None
         self.set_position(position)
+
         self.up = glm.vec3(0,1,0)
         self.right = glm.vec3(1,0,0)
         self.forward = glm.vec3(0,0,-1)
         self.yaw = yaw
         self.pitch = pitch
+        
         self.m_view = self.get_view_matrix()        # view_matrix
         self.m_proj = self.get_projection_matrix()  # projection_matrix
         self.current_speed_modifier = 1
-        self.position_mode = position_mode
+
+        self.position_mode = "free"
+        self.current_tracked_body_index = -1
+        self.current_tracked_body = None
+        if self.app.simulation.system.tracked_bodies:
+            self.body_tracking_allowed = True
+        else:
+            self.body_tracking_allowed = False
+
         self.movement_mode = movement_mode
+
         if movement_mode == "instantaneous":
             self.move = self.move_instaneous
             self.rotate = self.rotate_instantaneous
+
         elif movement_mode == "cinematic":
             self.move = self.move_cinematic
             self.rotate = self.rotate_cinematic
@@ -72,7 +84,7 @@ class Camera:
         self.up = glm.normalize(glm.cross(self.right, self.forward))
 
     def update(self):
-        self.update_speed_modifier()
+        self.update_states()
         self.move()
         self.rotate_mouse()
         self.rotate()
@@ -120,7 +132,7 @@ class Camera:
                     self.position -= self.up * velocity
 
         elif self.position_mode == "following":
-            tracked_position = self.app.simulation.system.tracked_body.position
+            tracked_position = self.current_tracked_body.position
             self.set_position((tracked_position[0], tracked_position[1], self.position.y))
             if True in list(keys):
                 if keys[pg.K_SPACE]:
@@ -197,7 +209,7 @@ class Camera:
                     self.acceleration_vector += self.up * self.negative_acceleration_scalar * min(1,max(-1,abs(dot_2)))
  
         elif self.position_mode == "following":
-            tracked_position = self.app.simulation.system.tracked_body.position
+            tracked_position = self.current_tracked_body.position
             self.set_position((tracked_position[0], tracked_position[1], self.position.y))
             up = glm.vec3(0,1,0)
             if keys[pg.K_SPACE] or keys[pg.K_LSHIFT]:
@@ -225,10 +237,21 @@ class Camera:
     def get_projection_matrix(self):
         return glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR, self.FAR)
     
-    def update_speed_modifier(self):
-        if self.app.key_mode == "camera":
-            keys = pg.key.get_pressed()
-            if True in list(keys):
+    def update_states(self):
+        keys = pg.key.get_pressed()
+        if True in list(keys):
+            if keys[pg.K_TAB] and pg.K_TAB not in self.app.pressed_keys and self.body_tracking_allowed:
+                self.app.pressed_keys.add(pg.K_TAB)
+                if self.current_tracked_body_index == len(self.app.simulation.system.tracked_bodies) - 1:
+                    self.current_tracked_body_index = -1
+                    self.position_mode = "free"
+                else:
+                    self.current_tracked_body_index += 1
+                    self.current_tracked_body = self.app.simulation.system.tracked_bodies[
+                                                                                        self.current_tracked_body_index]
+                    self.position_mode = "following"
+
+            if self.app.key_mode == "camera":
                 for i in range(1,10):
                     if keys[getattr(pg, f"K_{i}")]:
                         if i <= 5:

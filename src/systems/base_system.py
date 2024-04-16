@@ -15,6 +15,7 @@ from matplotlib.pyplot import xlim, ylim
 
 from src.bodies.base_body import Body
 from src.bodies.gravitational_body import GravitationalBody
+from src.bodies.fake_body import FakeBody
 from src.tools.vector import FakeVector, Vector
 from src.fields.scalar_field import ScalarField
 from src.fields.vector_field import VectorField
@@ -62,7 +63,11 @@ class BaseSystem:
         self.attractive_bodies = []
         self.dead_bodies = []
         self.list_of_bodies = list_of_bodies
+        self.fake_body = None
         for body in list_of_bodies:
+            if isinstance(body, FakeBody):
+                self.fake_body = body
+                continue
             if body.fixed:
                 self.fixed_bodies.append(body)
             else:
@@ -73,10 +78,18 @@ class BaseSystem:
         # Find origin for plotting the potential
         masses = loads(dumps([body.mass for body in self.list_of_bodies]))
         self.origin = tuple(self.list_of_bodies[argmax(masses)].position)
-        if len(self.list_of_bodies) > 1:
+
+        # Create a list of bodies relevant for tracking the position in the Engine3D
+        self.tracked_bodies = []
+        if self.fake_body:
+            self.tracked_bodies.append(self.fake_body)
+            self.tracked_body = self.fake_body
+        elif len(self.list_of_bodies) > 1:
             # Reference the second largest body to be the body to track
             moving_masses = [body.mass for body in self.moving_bodies]
             self.tracked_body = self.moving_bodies[argmax(moving_masses)]
+
+        self.tracked_bodies += self.attractive_bodies
 
     def update(self, time_step: float, epsilon: float = 10**(-2), method: str = "potential"):
         """
@@ -98,6 +111,8 @@ class BaseSystem:
                 force_field += body.gravitational_field
             if len(force_field.terms) > 2:
                 force_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+            if self.fake_body:
+                self.fake_body.update(self.attractive_bodies)
             for body in self.moving_bodies:
                 if body is not None:
                     if body.has_potential:
@@ -119,6 +134,9 @@ class BaseSystem:
                     else:
                         acting_potential = loads(dumps(potential_field))
                     body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n), method=method)
+
+        if self.fake_body:
+            self.fake_body(self.attractive_bodies)
 
         potential_field = loads(dumps(self._base_potential))
         for body in self.attractive_bodies:
@@ -271,9 +289,9 @@ class BaseSystem:
                 )
 
         # TO REMOVE
-        x, y, z = self.tracked_body.position
-        xlim(x-3,x+3)
-        ylim(y-3,y+3)
+        # x, y, z = self.tracked_body.position
+        # xlim(x-3,x+3)
+        # ylim(y-3,y+3)
         # xlim(0,900)
         # ylim(0,900)
 

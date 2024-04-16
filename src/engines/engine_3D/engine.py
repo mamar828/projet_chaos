@@ -31,7 +31,6 @@ class Engine3D(GlobalEngine):
             camera_far_render_distance: float=1e20,
             camera_yaw: float=-90.,
             camera_pitch: float=0.,
-            camera_position_mode: str="free",
             camera_movement_mode: str="instantaneous",
             objects: list[Object3D]=None,
             functions: list[Function3D]=None,
@@ -40,19 +39,16 @@ class Engine3D(GlobalEngine):
             model_size_type: str="exaggerated",
         ):
         """ 
-        Supported camera_position_modes are "free" and "following".
         Supported camera_movement_modes are "instantaneous" and "cinematic".
         Supported model_size_types are "exaggerated" and "realistic".
         """
-        assert camera_position_mode in ["free", "following"], (
-            f"{C.RED+C.BOLD}camera_position_mode keyword given is not supported. " +
-            f"Supported types are 'free' and 'following', not '{camera_position_mode}'.{C.END}")
         assert camera_movement_mode in ["instantaneous", "cinematic"], (
             f"{C.RED+C.BOLD}camera_movement_mode keyword given is not supported. " +
             f"Supported types are 'instantaneous' and 'cinematic', not '{camera_movement_mode}'.{C.END}")
         assert model_size_type in ["exaggerated", "realistic"], (
             f"{C.RED+C.BOLD}model_size_type keyword given is not supported. " +
             f"Supported types are 'exaggerated' and 'realistic', not '{model_size_type}'.{C.END}")
+
         
         # Default parameters for camera origin and light position
         if simulation and simulation_presets_allowed:
@@ -95,7 +91,6 @@ class Engine3D(GlobalEngine):
             far_render_distance=camera_far_render_distance,
             yaw=camera_yaw,
             pitch=camera_pitch,
-            position_mode=camera_position_mode,
             movement_mode=camera_movement_mode
         )
         self.functions = functions
@@ -115,7 +110,6 @@ class Engine3D(GlobalEngine):
         while True:
             self.get_time()
             self.check_events()
-            # self.camera.update()
             self.render()
             self.delta_time = (self.clock.tick(self.framerate) / 1000) * self.physics_speed
             self.camera_delta_time = self.clock.tick(self.framerate)

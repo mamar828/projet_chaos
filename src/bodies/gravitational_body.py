@@ -318,3 +318,4 @@ class GravitationalBody(Body):
             The color of the body.
         """
         return randint(0, 255, 3)
+        

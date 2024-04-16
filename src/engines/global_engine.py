@@ -81,7 +81,8 @@ class GlobalEngine:
                 self.key_mode = "camera"
                 self.key_string = ""
             
-            self.pressed_keys.add(event.key)
+            if event.key != pg.K_TAB:
+                self.pressed_keys.add(event.key)
 
         elif event.type == pg.KEYUP and event.key in self.pressed_keys:
             self.pressed_keys.remove(event.key)
