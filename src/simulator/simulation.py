@@ -201,20 +201,13 @@ class Simulation:
                 if (i * positions_saving_frequency + j) % dead_body_removal_frequency == 0:
                     # Check for dead bodies in the system
                     system.remove_dead_bodies(potential_gradient_limit, body_alive_func)
-            # if 1.75e7 < i*self.maximum_delta_time < 2e7:
-            #     system.show(show_bodies=True)
 
+            # Check if no bodies remain
             if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
-                # Check if no bodies remain
                 break
 
             system.save_positions()
 
-        # for body in system.list_of_bodies:
-        #     if body.test_list:
-        #         array = np.array(body.test_list)
-        #         plt.plot(array[:,0], array[:,1], "go", markersize=1)
-        #         plt.show(block=True)
         return {
             "alive": [body for body in system.moving_bodies if body not in system.attractive_bodies],
             "dead": system.dead_bodies,
