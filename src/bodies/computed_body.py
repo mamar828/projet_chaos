@@ -85,5 +85,7 @@ class ComputedBody(GravitationalBody):
             return "green"
         elif self.type == "dead":
             return "red"
+        elif self.type == "fake":
+            return "white"
         else:
             raise ValueError(f"self.type: {C.RED+C.BOLD}{self.type} is not a supported type.{C.END}")

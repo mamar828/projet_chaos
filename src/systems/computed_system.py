@@ -22,6 +22,9 @@ class ComputedSystem(BaseSystem):
         super().__init__(*args, **kwargs)
         self.tick_factor = tick_factor
         self.current_tick = 0
+        for body in self.list_of_bodies:
+            if body.type == "fake":
+                self.tracked_bodies.append(body)
 
     def update(self, time_step: float):
         """

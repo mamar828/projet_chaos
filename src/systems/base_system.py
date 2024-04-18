@@ -84,12 +84,14 @@ class BaseSystem:
         if self.fake_body:
             self.tracked_bodies.append(self.fake_body)
             self.tracked_body = self.fake_body
+            self.fake_body(self.attractive_bodies)
+
         elif len(self.list_of_bodies) > 1:
             # Reference the second largest body to be the body to track
             moving_masses = [body.mass for body in self.moving_bodies]
             self.tracked_body = self.moving_bodies[argmax(moving_masses)]
 
-        self.tracked_bodies += self.attractive_bodies
+        self.tracked_bodies = self.attractive_bodies + self.tracked_bodies
 
     def update(self, time_step: float, epsilon: float = 10**(-2), method: str = "potential"):
         """
@@ -111,8 +113,6 @@ class BaseSystem:
                 force_field += body.gravitational_field
             if len(force_field.terms) > 2:
                 force_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
-            if self.fake_body:
-                self.fake_body.update(self.attractive_bodies)
             for body in self.moving_bodies:
                 if body is not None:
                     if body.has_potential:
@@ -165,12 +165,14 @@ class BaseSystem:
                 self.dead_bodies.append(body)
                 self.moving_bodies.remove(body)
 
-    def save_positions(self):
+    def save_positions(self, save_fake=False):
         """
         Save the positions of every body in the system.
         """
         for body in self.moving_bodies:
             body.save_position()
+        if save_fake and self.fake_body:
+            self.fake_body.save_position()
 
     def show(
             self,
@@ -326,4 +328,4 @@ class BaseSystem:
             The body in the system who survived the longest.
         """
         simulated_bodies = list(set(self.moving_bodies) - set(self.attractive_bodies))
-        return simulated_bodies[argmax([body.time_survived for body in simulated_bodies])]
+        return simulated_bodies[argmax([body.time_survived for body in simulated_bodies if body.time_survived != 1e20])]

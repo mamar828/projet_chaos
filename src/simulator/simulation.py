@@ -6,12 +6,15 @@ from os.path import exists
 from eztcolors import Colors as C
 
 from src.systems.base_system import BaseSystem
-from src.engines.engine_2D.engine import Engine2D
-from src.engines.engine_3D.engine import Engine3D
 from src.systems.computed_system import ComputedSystem
 from src.engines.engine_3D.elements import Function3D
 from src.simulator.lambda_func import Lambda
-
+try:
+    from src.engines.engine_2D.engine import Engine2D
+    from src.engines.engine_3D.engine import Engine3D
+except ImportError:
+    Engine2D = None
+    Engine3D = None
 
 class Simulation:
     def __init__(self, system: BaseSystem, maximum_delta_time: int=5000):
@@ -210,7 +213,7 @@ class Simulation:
 
         return {
             "alive": [body for body in system.moving_bodies if body not in system.attractive_bodies],
-            "dead": system.dead_bodies,
+            "dead": system.dead_bodies
         }
     
     def run_attractive_bodies(self, duration: int, positions_saving_frequency: int) -> list:
@@ -235,6 +238,9 @@ class Simulation:
         for i in range(int(total_iterations // positions_saving_frequency)):
             for i in range(int(positions_saving_frequency)):
                 system.update(self.maximum_delta_time)
-            system.save_positions()
-        return {"attractive_moving": [body for body in system.list_of_bodies if body in system.moving_bodies]}
+            system.save_positions(save_fake=True)
+        return {
+            "attractive_moving": [body for body in system.list_of_bodies if body in system.moving_bodies],
+            "fake": system.fake_body
+        }
     

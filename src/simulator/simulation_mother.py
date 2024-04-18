@@ -16,6 +16,7 @@ from src.simulator.lambda_func import Lambda
 from src.systems.base_system import BaseSystem
 from src.systems.new_system import NewSystem
 from src.bodies.gravitational_body import GravitationalBody
+from src.bodies.fake_body import FakeBody
 from src.bodies.new_body import NewBody
 from src.bodies.computed_body import ComputedBody
 from src.tools.vector import Vector
@@ -66,11 +67,19 @@ class SimulationMother:
             Name of the folder in which to save the results.
         """
         print(C.LIGHT_CYAN, end="")
+        fake_body_saved = False
         with gzip_open(f"{save_foldername}/bodies.gz", "wb") as file:
             for listi in tqdm(results, desc="Saving", miniters=1, mininterval=0.001):
                 for key, value in listi.items():
-                    for body in value:
-                        self.dump_body(body, key, file)
+                    if key == "fake":
+                        if fake_body_saved:
+                            continue
+                        else:
+                            self.dump_body(value, key, file)
+                            fake_body_saved = True
+                    else:
+                        for body in value:
+                            self.dump_body(body, key, file)
         print(C.END, end="")
 
     def save_best_body(self, results: list, save_foldername: str) -> int:
@@ -115,7 +124,8 @@ class SimulationMother:
                 if attractive_moving:
                     for body in attractive_moving:
                         self.dump_body(body, "attractive_moving", file)
-                # print(f"{max_body.initial_velocity.y:.10e} {max_body.initial_position.y:.10e}")
+                if results[0]["fake"]:
+                    self.dump_body(results[0]["fake"], "fake", file)
                 self.dump_body(max_body, body_type, file)
         return max_number
 

@@ -58,7 +58,7 @@ class GravitationalBody(Body):
             "runge-kutta"
         """
 
-        assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"], \
+        assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta", None], \
             ('The currently implemented integrators are:'
              ' "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"')
         self.integrator = integrator
@@ -71,7 +71,7 @@ class GravitationalBody(Body):
             self.yoshida_d_constants = (w_1, w_0, w_1)
 
         super().__init__(position, velocity, fixed, has_potential)
-        if mass <= 0:
+        if mass < 0:
             raise ValueError("mass must be positive")
         self.mass = mass
         self.dead = False   # Whether the body is dead or not and should be removed from the display

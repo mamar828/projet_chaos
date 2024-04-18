@@ -16,7 +16,7 @@ from applications.simulations_examples import sun, earth
 
 
 if __name__ == '__main__':
-    sim = Simulation.load_from_folder(f"simulations/thrash_8")#, only_load_best_body=True)
+    sim = Simulation.load_from_folder(f"simulations/L1_tracking_3", only_load_best_body=True)
     # print(repr(sim.system.list_of_bodies[-1].position))
     # print(repr(sim.system.list_of_bodies[-1].velocity))
     # raise
@@ -32,7 +32,6 @@ if __name__ == '__main__':
         print_camera_coordinates=False,
         model_size_type="realistic",
         window_size=(1440,900),
-        camera_position_mode="following",
         camera_movement_mode="instantaneous"
     )
     sim.show_2D(

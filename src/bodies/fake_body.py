@@ -11,7 +11,13 @@ class FakeBody:
         self.type = type
         self.mass = 0
         self.dead = False
-        self.position = Vector(0, 0, 0)
+        self.fixed = False
+        self._position = Vector(0, 0, 0)
+        self.initial_position = Vector(0, 0, 0)
+        self.initial_velocity = None
+        self.has_potential = False
+        self.integrator = None
+        self.time_survived = 1e20
         self.positions = []
 
     def __call__(self, attractive_bodies: list):
@@ -26,8 +32,9 @@ class FakeBody:
         new_x = delta_x / a * r + 450
         new_y = delta_y / a * r + 450
 
-        self.position = Vector(new_x, new_y, 0)
-
+        self._position = Vector(new_x, new_y, 0)
+        if self.positions == []:
+            self.positions.append(self._position)
 
     def save_position(self):
         """
@@ -45,3 +52,7 @@ class FakeBody:
             The color of the body.
         """
         return (117, 117, 117)
+    
+    @property
+    def position(self) -> Vector:
+        return self._position
