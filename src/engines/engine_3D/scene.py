@@ -5,6 +5,7 @@ from src.engines.engine_3D.models import *
 from src.engines.engine_3D.relative_paths import get_path
 
 from src.systems.computed_system import ComputedSystem
+from src.bodies.fake_body import FakeBody
 
 
 class Scene:
@@ -56,8 +57,12 @@ class Scene:
                 if abs(body.mass - M_sun.value) < 1e28: s = R_sun.value / 10**(self.app.simulation.system.n)
                 elif abs(body.mass == M_earth.value) < 1e22: s = R_earth.value / 10**(self.app.simulation.system.n)
                 else: s = R_earth.value / 10**(self.app.simulation.system.n) / 10
-            self.objects.append(Sphere(app=self.app, texture_id=color_func(body), scale=(s,s,s), instance=body,
-                                       position=tuple(body.position), saturated=True))
+            if isinstance(body, FakeBody):
+                self.objects.append(Sphere(app=self.app, texture_id="grey", scale=(s,s,s), instance=body,
+                                        position=tuple(body.position), saturated=True))
+            else:
+                self.objects.append(Sphere(app=self.app, texture_id=color_func(body), scale=(s,s,s), instance=body,
+                                        position=tuple(body.position), saturated=True))
 
     def update(self):
         if self.system:

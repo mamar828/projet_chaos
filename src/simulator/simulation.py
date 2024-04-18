@@ -241,6 +241,6 @@ class Simulation:
             system.save_positions(save_fake=True)
         return {
             "attractive_moving": [body for body in system.list_of_bodies if body in system.moving_bodies],
-            "fake": system.fake_body
+            "fake": system.fake_bodies[0]
         }
     

@@ -63,10 +63,10 @@ class BaseSystem:
         self.attractive_bodies = []
         self.dead_bodies = []
         self.list_of_bodies = list_of_bodies
-        self.fake_body = None
+        self.fake_bodies = []
         for body in list_of_bodies:
             if isinstance(body, FakeBody):
-                self.fake_body = body
+                self.fake_bodies.append(body)
                 continue
             if body.fixed:
                 self.fixed_bodies.append(body)
@@ -81,10 +81,12 @@ class BaseSystem:
 
         # Create a list of bodies relevant for tracking the position in the Engine3D
         self.tracked_bodies = []
-        if self.fake_body:
-            self.tracked_bodies.append(self.fake_body)
-            self.tracked_body = self.fake_body
-            self.fake_body(self.attractive_bodies)
+        if self.fake_bodies:
+            self.tracked_bodies += self.fake_bodies
+            self.tracked_body = self.fake_bodies[0]
+            for body in self.fake_bodies:
+                body(self.attractive_bodies)
+                body.save_position()
 
         elif len(self.list_of_bodies) > 1:
             # Reference the second largest body to be the body to track
@@ -135,8 +137,9 @@ class BaseSystem:
                         acting_potential = loads(dumps(potential_field))
                     body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n), method=method)
 
-        if self.fake_body:
-            self.fake_body(self.attractive_bodies)
+        if self.fake_bodies:
+            for body in self.fake_bodies:
+                body(self.attractive_bodies)
 
         potential_field = loads(dumps(self._base_potential))
         for body in self.attractive_bodies:
@@ -171,8 +174,9 @@ class BaseSystem:
         """
         for body in self.moving_bodies:
             body.save_position()
-        if save_fake and self.fake_body:
-            self.fake_body.save_position()
+        if save_fake and self.fake_bodies:
+            for body in self.fake_bodies:
+                body.save_position()
 
     def show(
             self,

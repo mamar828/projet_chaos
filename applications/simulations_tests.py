@@ -5,7 +5,7 @@ import numpy as np
 from src.systems.base_system import BaseSystem
 from src.systems.new_system import NewSystem
 from src.bodies.gravitational_body import GravitationalBody
-from src.bodies.fake_body import FakeBody
+from src.bodies.fake_body import *
 from src.bodies.new_body import NewBody
 from src.tools.vector import Vector
 from src.simulator.simulation_mother import SimulationMother
@@ -19,7 +19,7 @@ sun2 = GravitationalBody(mass=M_sun.value, position=Vector(450,440,0), fixed=Tru
 
 
 if __name__ == '__main__':
-    sim_system = BaseSystem(list_of_bodies=[sun, earth, FakeBody()], n=9)
+    sim_system = BaseSystem(list_of_bodies=[sun, earth, L1Body(), L2Body(), L3Body(), L4Body(), L5Body()], n=9)
     # bb = Simulation.load_from_folder("simulations/L1_2").system.get_best_body()
 
     sim = Simulation(system=sim_system, maximum_delta_time=5000)
