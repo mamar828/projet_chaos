@@ -7,8 +7,9 @@
 
     @Description:       This file contains a class used to create the basic structure of a many body system.
 """
-from typing import Dict, List, Union, Optional, Callable
+from typing import Dict, List, Union, Optional
 
+import numpy as np
 from numpy import abs, gradient, ones_like, rot90, zeros_like, argmax
 from matplotlib.pyplot import close, colorbar, imshow, gca, scatter, show
 from matplotlib.pyplot import xlim, ylim
@@ -35,7 +36,8 @@ class BaseSystem:
             base_potential: Optional[ScalarField] = None,
             base_force_field: Optional[VectorField] = None,
             n: int = 0,
-            method: str = "potential"
+            method: str = "potential",
+            integrator: str = "synchronous"
     ):
         """
         Defines the required parameters.
@@ -50,6 +52,11 @@ class BaseSystem:
             The log base 10 of the space unit relative to the meter (e.g. 3 means 1000m or km and 6 means 10**6m or
             Mm).
         """
+        assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"], \
+            ('The currently implemented integrators are:'
+             ' "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"')
+        self.integrator = integrator
+        assert method in ["potential", "force"], 'The currently implemented methods are: "potential", "force"'
         self.method = method
         self.n = n
         if base_potential is None:
@@ -63,6 +70,8 @@ class BaseSystem:
         self.attractive_bodies = []
         self.dead_bodies = []
         self.list_of_bodies = list_of_bodies
+        if integrator == "leapfrog":
+            self.set_up_step = True
         self.fake_bodies = []
         for body in list_of_bodies:
             if isinstance(body, FakeBody):
@@ -115,6 +124,7 @@ class BaseSystem:
                 force_field += body.gravitational_field
             if len(force_field.terms) > 2:
                 force_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+            force_field = loads(dumps(force_field))
             for body in self.moving_bodies:
                 if body is not None:
                     if body.has_potential:
@@ -147,6 +157,84 @@ class BaseSystem:
         if len(potential_field.terms) > 2:
             potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
         self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
+
+    def update_new(self, time_step: float, epsilon: float = 10**(-2)):
+        """
+
+        :param time_step:
+        :param epsilon:
+        :param method:
+        :return:
+        """
+        epsilon = epsilon*(10**(-self.n))
+        scale = (10**(-self.n))**3
+        method = self.method
+        if method == "force":
+            field = loads(dumps(self._base_force_field))
+        elif method == "potential":
+            field = loads(dumps(self._base_potential))
+        for body in self.attractive_bodies:
+            field += body.get_field(method)
+        if (0, 0, Vector(0, 0, 0)) in field.terms:
+            field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+        field = loads(dumps(field * (10 ** (-self.n)) ** 3))
+        # self.time_survived += time_step
+        positions = np.array([body.position for body in self.moving_bodies if body is not None])
+        velocities = np.array([body.velocity for body in self.moving_bodies if body is not None])
+        if self.integrator != "yoshida":
+            accelerations = np.array(
+                [
+                    loads(dumps(field)).__sub__(body.get_field(method)*scale).get_acceleration(body.position, epsilon)
+                    for body in self.moving_bodies if body is not None
+                ]
+            )
+        if self.integrator == "euler":
+            updated_positions = positions + velocities*time_step + accelerations/2*time_step**2
+            updated_velocities = velocities + accelerations*time_step
+            for i, body in enumerate(self.moving_bodies):
+                body._position = Vector(*updated_positions[i, :])
+                body._velocity = Vector(*updated_velocities[i, :])
+
+        elif self.integrator == "leapfrog":
+            if self.set_up_step:
+                velocities = velocities - accelerations * time_step / 2
+                self.set_up_step = False
+
+            updated_velocities = velocities + accelerations * time_step
+            updated_positions = positions + updated_velocities * time_step
+            for i, body in enumerate(self.moving_bodies):
+                body._position = Vector(*updated_positions[i, :])
+                body._velocity = Vector(*updated_velocities[i, :])
+
+        elif self.integrator == "synchronous":
+            updated_positions = positions + velocities*time_step + accelerations/2*time_step**2
+
+            new_accelerations = np.array(
+                [
+                    loads(dumps(field)).__sub__(body.get_field(method)*scale).get_acceleration(Vector(*updated_positions[i, :]), epsilon)
+                    for i, body in enumerate(self.moving_bodies) if body is not None
+                ]
+            )
+            updated_velocities = velocities + (accelerations + new_accelerations)*time_step/2
+            for i, body in enumerate(self.moving_bodies):
+                body._position = Vector(*updated_positions[i, :])
+                body._velocity = Vector(*updated_velocities[i, :])
+
+        elif self.integrator == "kick-drift-kick":
+            updated_velocities = velocities + accelerations*time_step/2
+            updated_positions = positions+updated_velocities*time_step
+            for i, body in enumerate(self.moving_bodies):
+                body._position = Vector(*updated_positions[i, :])
+            new_accelerations = np.array(
+                [
+                    loads(dumps(field)).__sub__(body.get_field(method)*scale).get_acceleration(body.position, epsilon)
+                    for body in self.moving_bodies if body is not None
+                ]
+            )
+            updated_velocities = velocities+new_accelerations*time_step/2
+            for i, body in enumerate(self.moving_bodies):
+                body._velocity = Vector(*updated_velocities[i, :])
+
 
     def remove_dead_bodies(self, potential_gradient_limit: float, body_alive_func: Lambda):
         """

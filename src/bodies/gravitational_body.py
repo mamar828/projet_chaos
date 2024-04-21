@@ -102,14 +102,10 @@ class GravitationalBody(Body):
         self.time_survived += time_step
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
-        if method == "potential":
-            if self.integrator != "yoshida":
-                a_x, a_y, a_z = field.get_acceleration(self._position, epsilon)
-        elif method == "force":
-            a_x, a_y, a_z = field(self._position)
+        if self.integrator != "yoshida":
+            a_x, a_y, a_z = field.get_acceleration(self._position, epsilon)
         else:
             a_x, a_y, a_z = 0, 0, 0
-
         if self.integrator == "euler":
             self._position = Vector(
                 x+v_x*time_step+a_x/2*time_step**2,
@@ -120,7 +116,6 @@ class GravitationalBody(Body):
 
         elif self.integrator == "leapfrog":
             if self.set_up_step:
-                v_x, v_y, v_z = self._velocity
                 v_x, v_y, v_z = v_x - a_x * time_step / 2, v_y - a_y * time_step / 2, v_z - a_z * time_step / 2
                 self._velocity = Vector(v_x, v_y, v_z)
                 self.set_up_step = False
@@ -318,4 +313,12 @@ class GravitationalBody(Body):
             The color of the body.
         """
         return randint(0, 255, 3)
-        
+
+    def get_field(self, method: str):
+        assert method in ["potential", "force"], 'The currently implemented methods are: "potential", "force"'
+
+        if method == "force":
+            return self.gravitational_field
+        elif method == "potential":
+            return self.potential
+
