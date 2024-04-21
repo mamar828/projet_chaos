@@ -28,7 +28,7 @@ class SimulationMother:
         self.pool = None
 
     @staticmethod
-    def dump_body(body: GravitationalBody | ComputedBody, type: str, file: GzipFile):
+    def dump_body(body: GravitationalBody | ComputedBody | FakeBody, type: str, file: GzipFile):
         """
         Dump a body of a certain type into a file.
 
@@ -72,10 +72,11 @@ class SimulationMother:
             for listi in tqdm(results, desc="Saving", miniters=1, mininterval=0.001):
                 for key, value in listi.items():
                     if key == "fake":
+                        body = value
                         if fake_body_saved:
                             continue
                         else:
-                            self.dump_body(value, key, file)
+                            self.dump_body(body, body.type, file)
                             fake_body_saved = True
                     else:
                         for body in value:
@@ -125,7 +126,7 @@ class SimulationMother:
                     for body in attractive_moving:
                         self.dump_body(body, "attractive_moving", file)
                 if results[0]["fake"]:
-                    self.dump_body(results[0]["fake"], "fake", file)
+                    self.dump_body(results[0]["fake"], results[0]["fake"].type, file)
                 self.dump_body(max_body, body_type, file)
         return max_number
 

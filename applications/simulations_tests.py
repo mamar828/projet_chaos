@@ -19,7 +19,21 @@ sun2 = GravitationalBody(mass=M_sun.value, position=Vector(450,440,0), fixed=Tru
 
 
 if __name__ == '__main__':
+    # toy_system = BaseSystem(list_of_bodies=[sun, earth, L2Body()], n=9)
+    # a = GravitationalBody(
+    #     mass=1,
+    #     position=(toy_system.list_of_bodies[-1].position + Vector(0,0.001,0)),
+    #     velocity=(toy_system.list_of_bodies[-2].velocity - Vector(0,2.9e-7,0)),
+    #     has_potential=False
+    # )
+    # b = GravitationalBody(
+    #     mass=1,
+    #     position=(toy_system.list_of_bodies[-1].position - Vector(0,0.001,0)),
+    #     velocity=(toy_system.list_of_bodies[-2].velocity - Vector(0,3.1e-7,0)),
+    #     has_potential=False
+    # )
     sim_system = BaseSystem(list_of_bodies=[sun, earth, L1Body(), L2Body(), L3Body(), L4Body(), L5Body()], n=9)
+    # sim_system = BaseSystem(list_of_bodies=[sun, earth, L1Body(), L2Body(), L3Body(), L4Body(), L5Body()], n=9)
     # bb = Simulation.load_from_folder("simulations/L1_2").system.get_best_body()
 
     sim = Simulation(system=sim_system, maximum_delta_time=5000)

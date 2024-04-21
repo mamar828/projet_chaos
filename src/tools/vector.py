@@ -31,6 +31,12 @@ class Vector(NamedTuple):
     y: float
     z: float
 
+    def __add__(self, other):
+        return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other):
+        return Vector(self.x - other.x, self.y - other.y, self.z - other.z)
+
     def __str__(self):
         return f"({self.x:.2f}, {self.y:.2f}, {self.z:.2f})"
 

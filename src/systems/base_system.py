@@ -331,5 +331,6 @@ class BaseSystem:
         best_body : ComputedBody
             The body in the system who survived the longest.
         """
-        simulated_bodies = list(set(self.moving_bodies) - set(self.attractive_bodies))
-        return simulated_bodies[argmax([body.time_survived for body in simulated_bodies if body.time_survived != 1e20])]
+        simulated_bodies = [body for body in list(set(self.moving_bodies) - set(self.attractive_bodies))
+                            if body.time_survived != 1e20]
+        return simulated_bodies[argmax([body.time_survived for body in simulated_bodies])]

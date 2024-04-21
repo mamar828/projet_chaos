@@ -208,9 +208,9 @@ class Simulation:
             # Check if no bodies remain
             if len(system.attractive_bodies) - len(system.fixed_bodies) == len(system.moving_bodies):
                 break
-
+            
             system.save_positions()
-
+        
         return {
             "alive": [body for body in system.moving_bodies if body not in system.attractive_bodies],
             "dead": system.dead_bodies

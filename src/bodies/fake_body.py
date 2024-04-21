@@ -17,6 +17,7 @@ class FakeBody:
         self.integrator = None
         self.time_survived = 1e20
         self.positions = []
+        self.type = self.__class__.__name__
 
     @property
     def position(self) -> Vector:

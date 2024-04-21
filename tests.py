@@ -92,5 +92,15 @@ from datetime import datetime
 
 # print("\n".join(["1","2","3"]))
 
-print([1,2,3][:])
-print(list(reversed([1,2,3])))
+# print([1,2,3][:])
+# print(list(reversed([1,2,3])))
+
+
+
+\frac{5.573\cdot 2.5953254607\cdot10^{15}}{1.405\cdot10^{10}}
+\frac{6.132\frac{1}{8766}\cdot 2.5953254607\cdot10^{15}}{1.405\cdot10^{10}}
+\frac{1.912\cdot 2.5953254607\cdot10^{15}}{1.405\cdot10^{10}}
+\frac{3.623\frac{1}{365.25}\cdot 2.5953254607\cdot10^{15}}{1.405\cdot10^{10}}
+\frac{55.6\frac{1}{31557600}\cdot 2.5953254607\cdot10^{15}}{1.405\cdot10^{10}}
+\frac{145\cdot10^{-3}\frac{1}{31557600}\cdot 2.5953254607\cdot10^{15}}{1.405\cdot10^{10}}
+\frac{10.64\frac{1}{8766}\cdot 2.5953254607\cdot10^{15}}{1.405\cdot10^{10}}

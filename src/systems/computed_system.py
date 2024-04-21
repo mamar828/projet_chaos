@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.systems.base_system import BaseSystem
+from src.bodies.fake_body import *
 
 
 class ComputedSystem(BaseSystem):
@@ -23,7 +24,7 @@ class ComputedSystem(BaseSystem):
         self.tick_factor = tick_factor
         self.current_tick = 0
         for body in self.list_of_bodies:
-            if body.type == "fake":
+            if body.type.endswith("Body") or body.type.endswith("fake"):
                 self.tracked_bodies.append(body)
 
     def update(self, time_step: float):
@@ -52,8 +53,18 @@ class ComputedSystem(BaseSystem):
         base_system : BaseSystem
             BaseSystem with all the ComputedSystem's bodies.
         """
+        new_bodies = []
+        for body in self.list_of_bodies:
+            if body.time_survived == 1e20:
+                try:
+                    new_bodies.append(eval(f"{body.type}()"))
+                except NameError:
+                    # TEMPORARY, REMOVE LATER
+                    new_bodies.append(L1Body())
+            else:
+                new_bodies.append(body)
         return BaseSystem(
-            list_of_bodies=self.list_of_bodies, 
+            list_of_bodies=new_bodies, 
             base_potential=self._base_potential,
             n=self.n
         )
