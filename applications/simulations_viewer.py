@@ -3,6 +3,7 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import numpy as np
 from copy import deepcopy
+from eztcolors import Colors as C
 
 from src.simulator.simulation import Simulation
 from src.systems.base_system import BaseSystem
@@ -16,7 +17,7 @@ from applications.simulations_examples import sun, earth
 
 
 if __name__ == '__main__':
-    sim = Simulation.load_from_folder(f"simulations/L5")#, min_time_survived=1e8)#, only_load_best_body=True)
+    sim = Simulation.load_from_folder(f"simulations/L4_longer", min_time_survived=1e8)#, only_load_best_body=True)
     # print(repr(sim.system.list_of_bodies[-1].position))
     # print(repr(sim.system.list_of_bodies[-1].velocity))
     # other = sim.system.list_of_bodies[-1].to_gravitational_body()

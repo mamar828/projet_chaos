@@ -88,13 +88,13 @@ class Simulation:
         """
         assert exists(foldername), f"{C.RED+C.BOLD}Provided foldername ({foldername}) does not exist.{C.END}"
         info = open(f"{foldername}/info.txt", "r").readlines()
+        info_dict = {}
         for line in info:
-            if line.startswith("BaseSystem n"):
-                n = int(line.split(" ")[-1])
-            elif line.startswith("positions_saving_frequency"):
-                save_freq = int(line.split(" ")[-1])
-            elif line.startswith("delta_time"):
-                delta_time = int(line.split(" ")[-1])
+            split = line.split(":")
+            info_dict[split[0]] = ":".join(split[1:])[1:-1]
+        n = float(info_dict["BaseSystem n"])
+        save_freq = float(info_dict["positions_saving_frequency"])
+        delta_time = float(info_dict["delta_time"])
         
         base_system = cls.load_pickle_file(f"{foldername}/base_system.gz")
         if only_load_best_body:
@@ -105,7 +105,7 @@ class Simulation:
         if min_time_survived and not only_load_best_body:
             bodies = [body for body in bodies if body.time_survived >= min_time_survived]
 
-        return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time),
+        return cls(system=ComputedSystem(base_system + bodies, n=n, tick_factor=save_freq*delta_time, info=info_dict),
                    maximum_delta_time=delta_time)
 
     def show_2D(self, *args, traces: list | bool=None, **kwargs):

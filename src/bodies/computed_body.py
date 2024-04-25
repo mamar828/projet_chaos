@@ -89,3 +89,6 @@ class ComputedBody(GravitationalBody):
             return "white"
         else:
             raise ValueError(f"self.type: {C.RED+C.BOLD}{self.type} is not a supported type.{C.END}")
+
+    def get_info(self) -> tuple[float, float, float, float, float, float, float]:
+        return *self.position, *self.velocity, self.time_survived

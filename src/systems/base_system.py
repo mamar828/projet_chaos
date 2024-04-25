@@ -36,7 +36,7 @@ class BaseSystem:
             base_potential: Optional[ScalarField] = None,
             base_force_field: Optional[VectorField] = None,
             n: int = 0,
-            method: str = "potential",
+            method: str = "force",
             integrator: str = "synchronous"
     ):
         """

@@ -19,31 +19,26 @@ sun2 = GravitationalBody(mass=M_sun.value, position=Vector(450,440,0), fixed=Tru
 
 
 if __name__ == '__main__':
-    # toy_system = BaseSystem(list_of_bodies=[sun, earth, L2Body()], n=9)
-    # a = GravitationalBody(
-    #     mass=1,
-    #     position=(toy_system.list_of_bodies[-1].position + Vector(0,0.001,0)),
-    #     velocity=(toy_system.list_of_bodies[-2].velocity - Vector(0,2.9e-7,0)),
-    #     has_potential=False
-    # )
-    # b = GravitationalBody(
-    #     mass=1,
-    #     position=(toy_system.list_of_bodies[-1].position - Vector(0,0.001,0)),
-    #     velocity=(toy_system.list_of_bodies[-2].velocity - Vector(0,3.1e-7,0)),
-    #     has_potential=False
-    # )
-    sim_system = BaseSystem(list_of_bodies=[sun, earth, L1Body(), L2Body(), L3Body(), L4Body(), L5Body()], n=9)
     # sim_system = BaseSystem(list_of_bodies=[sun, earth, L1Body(), L2Body(), L3Body(), L4Body(), L5Body()], n=9)
-    # bb = Simulation.load_from_folder("simulations/L1_2").system.get_best_body()
-
-    sim = Simulation(system=sim_system, maximum_delta_time=5000)
-    # sim.run(
-    #     duration=1e8,
-    #     positions_saving_frequency=10,
-    #     potential_gradient_limit=None,
-    #     body_alive_func=None
+    sim = Simulation(
+        system=BaseSystem(
+            list_of_bodies=(
+                GravitationalBody(mass=M_sun.value/2, position=Vector(50,200,0), velocity=Vector(0,1.5e-5,0)),
+                GravitationalBody(mass=M_sun.value/2, position=Vector(200,350,0), velocity=Vector(1.5e-5,0,0)),
+                GravitationalBody(mass=M_sun.value/2, position=Vector(350,200,0), velocity=Vector(0,-1.5e-5,0)),
+                GravitationalBody(mass=M_sun.value/2, position=Vector(200,50,0), velocity=Vector(-1.5e-5,0,0))
+            ),
+            n=9
+        ),
+        maximum_delta_time=1000
+    )
+    # sim.show_2D(
+    #     traces=True,
+    #     display_clock=True,
+    #     window_size=(400,400),
+    #     screen_color=(255,255,255),
+    #     clock_font=(("Trebuchet MS", 25), "black")
     # )
-    # sim.show_2D(traces=True, display_clock=True, window_size=(900,900))
     sim.show_3D(
         show_potential=True,
         # model_size_type="realistic",

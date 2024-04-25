@@ -17,13 +17,13 @@ from applications.simulations_examples import sun, earth
 
 
 if __name__ == '__main__':
-    sim_system = BaseSystem(list_of_bodies=[sun, earth, L5Body()], n=9)
+    sim_system = BaseSystem(list_of_bodies=[sun, earth, L4Body()], n=9)
     # bb = Simulation.load_from_folder("simulations/L2", only_load_best_body=True).system.get_best_body()
 
     mommy = SimulationMother(base_system=sim_system)
     foldername = mommy.dispatch(
         simulation_count=500,
-        bodies_per_simulation=100,
+        bodies_per_simulation=200,
         delta_time=200,
         # body_initial_position_limits=[(bb.initial_position.x*0.999999, bb.initial_position.x*1.000001),
         #                               (bb.initial_position.y*0.999999, bb.initial_position.y*1.000001), (0, 0)],
@@ -33,22 +33,24 @@ if __name__ == '__main__':
         #                               (earth.position.y-0.1,     earth.position.y+0.1), (0, 0)],
         # body_initial_velocity_limits=[(earth.velocity.x-4e-7,    earth.velocity.x+4e-7),
         #                               (earth.velocity.y-4e-7,    earth.velocity.y+4e-7), (0, 0)],
-        body_initial_position_limits=[
-            (sim_system.fake_bodies[0].position.x-10, sim_system.fake_bodies[0].position.x+10),
-            (sim_system.fake_bodies[0].position.y-10, sim_system.fake_bodies[0].position.y+10), 
-            (0,                                          0)
-        ],
-        body_initial_velocity_limits=[
-            (earth.velocity.x-200e-7,                  earth.velocity.x-300e-7),
-            (earth.velocity.y+110e-7,                   earth.velocity.y+170e-7),
-            (0,                                        0)
-        ],
+        # body_initial_position_limits=[
+        #     (sim_system.fake_bodies[0].position.x-10, sim_system.fake_bodies[0].position.x+10),
+        #     (sim_system.fake_bodies[0].position.y-10, sim_system.fake_bodies[0].position.y+10), 
+        #     (0,                                          0)
+        # ],
+        # body_initial_velocity_limits=[
+        #     (earth.velocity.x-200e-7,                  earth.velocity.x-300e-7),
+        #     (earth.velocity.y+110e-7,                   earth.velocity.y+170e-7),
+        #     (0,                                        0)
+        # ],
+        body_initial_position_limits=[(363.95, 383.95), (308.2775360844, 328.2775360844), (0, 0)],
+        body_initial_velocity_limits=[(2e-05, 3e-05), (-1.829e-05, -1.229e-05), (0, 0)],
         # body_initial_position_limits=[(earth.position.x+1.5, earth.position.x+1.5),
         #                               (earth.position.y,     earth.position.y), (0, 0)],
         # body_initial_velocity_limits=[(earth.velocity.x,    earth.velocity.x),
         #                               (earth.velocity.y+1e-7,    earth.velocity.y+1e-7), (0, 0)],
-        save_foldername=f"simulations/L5",
-        simulation_duration=1e9,
+        save_foldername=f"simulations/L4_longer",
+        simulation_duration=3e9,
         integrator="synchronous",
         positions_saving_frequency=100,
         potential_gradient_limit=1e-10,
