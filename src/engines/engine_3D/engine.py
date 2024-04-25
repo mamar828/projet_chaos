@@ -9,7 +9,7 @@ from src.engines.engine_3D.scene import Scene
 from src.engines.engine_3D.scene_renderer import SceneRenderer
 from src.engines.engine_3D.elements import Object3D, Function3D
 from src.engines.global_engine import GlobalEngine
-
+from src.engines.inputs.keyboard import Keyboard
 
 class Engine3D(GlobalEngine):
     def __init__(
@@ -36,7 +36,7 @@ class Engine3D(GlobalEngine):
             functions: list[Function3D]=None,
             simulation_presets_allowed: bool=True,
             print_camera_coordinates: bool=False,
-            model_size_type: str="exaggerated",
+            model_size_type: str="exaggerated"
         ):
         """ 
         Supported camera_movement_modes are "instantaneous" and "cinematic".
@@ -93,6 +93,8 @@ class Engine3D(GlobalEngine):
             pitch=camera_pitch,
             movement_mode=camera_movement_mode
         )
+        self.keyboard = Keyboard(self)
+
         self.functions = functions
         self.mesh = Mesh(self)
         self.scene = Scene(self, objects)

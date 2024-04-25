@@ -28,9 +28,10 @@ class Camera:
         self.position = None
         self.set_position(position)
 
-        self.up = glm.vec3(0,1,0)
         self.right = glm.vec3(1,0,0)
+        self.up = glm.vec3(0,1,0)
         self.forward = glm.vec3(0,0,-1)
+        self.direction_array = nparray((-self.right, self.up, self.forward))
         self.yaw = yaw
         self.pitch = pitch
         
@@ -116,20 +117,31 @@ class Camera:
     def move_instaneous(self):
         velocity = self.speed * self.app.camera_delta_time * self.current_speed_modifier
         keys = pg.key.get_pressed()
-        if self.position_mode == "free":
-            if True in list(keys):
-                if keys[pg.K_w]:
-                    self.position += self.forward * velocity
-                if keys[pg.K_s]:
-                    self.position -= self.forward * velocity
-                if keys[pg.K_d]:
-                    self.position += self.right * velocity
-                if keys[pg.K_a]:
-                    self.position -= self.right * velocity
-                if keys[pg.K_SPACE]:
-                    self.position += self.up * velocity
-                if keys[pg.K_LSHIFT]:
-                    self.position -= self.up * velocity
+        movement_array = self.app.keyboard.get_movement_array()
+        
+        if movement_array is not None:
+            if self.position_mode == "free":
+                # print(self.direction_array)
+                # print(movement_array)
+                # print(self.direction_array * movement_array * velocity)
+                # print(*(self.direction_array * movement_array * velocity).sum(axis=0))
+                vec = glm.vec3(*(self.direction_array * movement_array * velocity).sum(axis=0))
+                print(vec, self.direction_array * movement_array * velocity)
+                self.position += vec
+        # if self.position_mode == "free":
+        #     if True in list(keys):
+        #         if keys[pg.K_w]:
+        #             self.position += self.forward * velocity
+        #         if keys[pg.K_s]:
+        #             self.position -= self.forward * velocity
+        #         if keys[pg.K_d]:
+        #             self.position += self.right * velocity
+        #         if keys[pg.K_a]:
+        #             self.position -= self.right * velocity
+        #         if keys[pg.K_SPACE]:
+        #             self.position += self.up * velocity
+        #         if keys[pg.K_LSHIFT]:
+        #             self.position -= self.up * velocity
 
         elif self.position_mode == "following":
             tracked_position = self.current_tracked_body.position
@@ -175,7 +187,7 @@ class Camera:
                 elif keys[pg.K_s]:
                     self.acceleration_vector -= self.forward * self.positive_acceleration_scalar
             else:
-                # Exercise damping
+                # Apply damping
                 dot_0 = glm.dot(self.acceleration_vector, self.forward)
                 if dot_0 > 0:
                     self.acceleration_vector -= self.forward * self.negative_acceleration_scalar * min(1,max(-1,abs(dot_0)))
@@ -188,7 +200,7 @@ class Camera:
                 elif keys[pg.K_a]:
                     self.acceleration_vector -= self.right * self.positive_acceleration_scalar
             else:
-                # Exercise damping
+                # Apply damping
                 dot_1 = glm.dot(self.acceleration_vector, self.right)
                 if dot_1 > 0:
                     self.acceleration_vector -= self.right * self.negative_acceleration_scalar * min(1,max(-1,abs(dot_1)))
@@ -201,7 +213,7 @@ class Camera:
                 elif keys[pg.K_LSHIFT]:
                     self.acceleration_vector -= self.up * self.positive_acceleration_scalar
             else:
-                # Exercise damping
+                # Apply damping
                 dot_2 = glm.dot(self.acceleration_vector, self.up)
                 if dot_2 > 0:
                     self.acceleration_vector -= self.up * self.negative_acceleration_scalar * min(1,max(-1,abs(dot_2)))
@@ -218,7 +230,7 @@ class Camera:
                 elif keys[pg.K_LSHIFT]:
                     self.acceleration_vector -= up * self.positive_acceleration_scalar
             else:
-                # Exercise damping
+                # Apply damping
                 dot_2 = glm.dot(self.acceleration_vector, up)
                 if dot_2 > 0:
                     self.acceleration_vector -= up * self.negative_acceleration_scalar * min(1,max(-1,abs(dot_2)))
