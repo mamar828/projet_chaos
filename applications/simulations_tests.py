@@ -44,6 +44,6 @@ if __name__ == '__main__':
         # model_size_type="realistic",
         model_size_type="exaggerated",
         window_size=(1440,900),
-        camera_movement_mode="instantaneous"
-        # camera_movement_mode="cinematic"
+        # camera_movement_mode="instantaneous"
+        camera_movement_mode="cinematic"
     )

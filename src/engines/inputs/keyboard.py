@@ -1,26 +1,29 @@
 import pygame as pg
-from numpy import array as nparray, where
-from numpy.core import records
 
 
 class Keyboard:
     def __init__(self, app):
         self.app = app
 
-    def get_movement_array(self):
+    def get_movement_dict(self):
         keys_pressed = pg.key.get_pressed()
         if True in list(keys_pressed):
-            # movements = nparray(["forward", "backward", "left", "right", "up", "down"])
-            keys_array = nparray([
-                int(keys_pressed[pg.K_a]) - int(keys_pressed[pg.K_d]),
-                int(keys_pressed[pg.K_SPACE]) - int(keys_pressed[pg.K_LSHIFT]),
-                int(keys_pressed[pg.K_w]) - int(keys_pressed[pg.K_s])
-            ])
-            # key_values = where(key_bools, 1, 0)
-            # return records.fromarrays((movements, key_values), names="movements,keys_value")
-            return keys_array
+            keys_dict = {
+                "forward" : int(keys_pressed[pg.K_w]) - int(keys_pressed[pg.K_s]),
+                "right" : int(keys_pressed[pg.K_d]) - int(keys_pressed[pg.K_a]),
+                "up" : int(keys_pressed[pg.K_SPACE]) - int(keys_pressed[pg.K_LSHIFT])
+            }
+            return keys_dict
         else:
-            return None
+            return {}
 
-    def get_rotation_array(self):
-        raise NotImplemented
+    def get_rotation_dict(self):
+        keys_pressed = pg.key.get_pressed()
+        if True in list(keys_pressed):
+            keys_dict = {
+                "horizontal" : int(keys_pressed[pg.K_l]) - int(keys_pressed[pg.K_j]),
+                "vertical" : int(keys_pressed[pg.K_i]) - int(keys_pressed[pg.K_k])
+            }
+            return keys_dict
+        else:
+            return {}
