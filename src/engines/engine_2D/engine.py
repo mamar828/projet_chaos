@@ -16,6 +16,8 @@ class Engine2D(GlobalEngine):
             fullscreen: bool=False,
             screen_color: tuple[int,int,int]=(0,0,0)
         ):
+
+        self.key_modes = ["presets", "manual"]
         super().__init__(simulation=simulation, window_size=window_size, framerate=framerate, fullscreen=fullscreen)
         self.screen_color = screen_color
         pg.init()
@@ -28,6 +30,21 @@ class Engine2D(GlobalEngine):
         self.scene.update()
         pg.display.update()
 
+    def get_current_state(self):
+        state = {
+            "lEngine type" : self.__class__.__name__,
+            "Simulation time (s)" : f"{self.simulation_time:.2e}",
+            "lWindow size" : self.window_size,
+            "Physics speed" : f"{self.physics_speed:.2e}",
+            "lFramerate" : self.framerate,
+            "Manual str" : self.key_string,
+            "lNumber of inputs" : len(self.input.inputs),
+            "empty2" : "   ",
+            "lKey mode" : self.key_mode,
+            "empty3" : "   "
+        }
+        return state
+
     def run(self):
         while True:
             self.get_time()
@@ -36,18 +53,4 @@ class Engine2D(GlobalEngine):
             self.delta_time = (self.clock.tick(self.framerate) / 1000) * self.physics_speed
             pg.display.set_caption(f"Current physics speed : x{self.physics_speed:.2e}")
             self.simulation_time += self.delta_time
-
-
-# listi = [
-#     {"object_instance": Flat_earth(position=(51,51)), "model": Rectangle, "color": "blue", "scale": (100,100)},
-#     {"object_instance": Flat_earth(position=(849,51)), "model": Circle, "color": "yellow", "scale": (100,100)},
-#     {"object_instance": t(position=(700,600)), "model": Circle, "color": "orange", "scale": (80,150)}
-# ]
-# app = Engine2D(
-#     window_size=(1440,900),
-#     framerate=60,
-#     fullscreen=True,
-#     screen_color=(0,60,60),
-#     system=listi
-# )
-# app.run()
+            self.display.update(self.get_current_state())

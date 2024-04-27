@@ -15,7 +15,7 @@ class Camera:
             far_render_distance=1000,
             yaw=-90,
             pitch=0,
-            movement_mode="instantaneous"
+            cinematic_settings: dict=None
         ):
         self.app = app
         self.speed = speed
@@ -38,6 +38,7 @@ class Camera:
         self.m_view = self.get_view_matrix()        # view_matrix
         self.m_proj = self.get_projection_matrix()  # projection_matrix
         self.current_speed_modifier = 1
+        self.current_speed_modifier_i = 5
 
         self.position_mode = "free"
         self.current_tracked_body_index = -1
@@ -47,25 +48,25 @@ class Camera:
         else:
             self.body_tracking_allowed = False
 
-        self.movement_mode = movement_mode
+        self.movement_mode = None
+        self.cycle_movement_modes()
+        self.c_s = cinematic_settings
 
-        if movement_mode == "instantaneous":
-            self.move = self.move_instaneous
-            self.rotate = self.rotate_instantaneous
+        # if movement_mode == "instantaneous":
+        #     self.move = self.move_instaneous
+        #     self.rotate = self.rotate_instantaneous
 
-        elif movement_mode == "cinematic":
-            self.move = self.move_cinematic
-            self.rotate = self.rotate_cinematic
-            # self.positive_acceleration_scalar = 0.05
-            self.positive_acceleration_scalar = 0.005
-            # self.negative_acceleration_scalar = 0.05
-            self.negative_acceleration_scalar = 0.0
-            # self.positive_camera_scalar = 0.02
-            self.positive_camera_scalar = 0.005
-            # self.negative_camera_factor = 0.94
-            self.negative_camera_factor = 1
-            self.acceleration_vector = glm.vec3(0,0,0)
-            self.rotation_vector = glm.vec2(0,0)
+        # elif movement_mode == "cinematic":
+            # self.move = self.move_cinematic
+            # self.rotate = self.rotate_cinematic
+            # # self.positive_acceleration_scalar = 0.05
+            # self.positive_acceleration_scalar = 0.005
+            # # self.negative_acceleration_scalar = 0.05
+            # self.negative_acceleration_scalar = 0.0
+            # # self.positive_rotation_scalar = 0.02
+            # self.positive_rotation_scalar = 0.005
+            # # self.negative_rotation_factor = 0.94
+            # self.negative_rotation_factor = 1
 
     def __str__(self):
         return f"Camera position: {self.position.x:.3f}, {-self.position.z:.3f}, {self.position.y:.3f}"
@@ -85,7 +86,6 @@ class Camera:
         self.up = glm.normalize(glm.cross(self.right, self.forward))
 
     def update(self):
-        self.update_states()
         self.move()
         self.rotate_mouse()
         self.rotate()
@@ -102,7 +102,7 @@ class Camera:
     def rotate_instantaneous(self):
         # Key controls
         rotation_speed = self.sensitivity * self.app.camera_delta_time
-        rotation_dict = self.app.keyboard.get_rotation_dict()
+        rotation_dict = self.app.input.get_rotation_dict()
         if rotation_dict:
             self.yaw += rotation_speed * rotation_dict["horizontal"]
             self.pitch += rotation_speed * rotation_dict["vertical"]
@@ -111,7 +111,7 @@ class Camera:
 
     def move_instaneous(self):
         velocity = self.speed * self.app.camera_delta_time * self.current_speed_modifier
-        movement_dict = self.app.keyboard.get_movement_dict()
+        movement_dict = self.app.input.get_movement_dict()
         
         if self.position_mode == "free":
             if movement_dict:
@@ -128,16 +128,16 @@ class Camera:
     def rotate_cinematic(self):
         # Key controls
         rotation_speed = self.sensitivity * self.app.camera_delta_time
-        rotation_dict = self.app.keyboard.get_rotation_dict()
+        rotation_dict = self.app.input.get_rotation_dict()
         if rotation_dict.get("horizontal"):
-            self.rotation_vector += glm.vec2(self.positive_camera_scalar,0) * rotation_dict["horizontal"]
+            self.rotation_vector += glm.vec2(self.c_s["positive_rotation"], 0) * rotation_dict["horizontal"]
         else:
-            self.rotation_vector *= glm.vec2(self.negative_camera_factor,1)
+            self.rotation_vector *=  glm.vec2(self.c_s["negative_rotation"], 1)
         
         if rotation_dict.get("vertical"):
-            self.rotation_vector += glm.vec2(0,self.positive_camera_scalar) * rotation_dict["vertical"]
+            self.rotation_vector += glm.vec2(0, self.c_s["positive_rotation"]) * rotation_dict["vertical"]
         else:
-            self.rotation_vector *= glm.vec2(1,self.negative_camera_factor)
+            self.rotation_vector *=  glm.vec2(1, self.c_s["negative_rotation"])
         
         self.rotation_vector = glm.clamp(self.rotation_vector,-1,1)
         self.yaw += self.rotation_vector[0] * rotation_speed
@@ -146,45 +146,45 @@ class Camera:
 
     def move_cinematic(self):
         velocity = self.speed * self.app.camera_delta_time * self.current_speed_modifier
-        movement_dict = self.app.keyboard.get_movement_dict()
+        movement_dict = self.app.input.get_movement_dict()
         if self.position_mode == "free":
             if movement_dict.get("forward"):
-                self.acceleration_vector += self.forward * self.positive_acceleration_scalar * movement_dict["forward"]
+                self.acceleration_vector += self.forward * self.c_s["positive_acceleration"] * movement_dict["forward"]
             else:
                 # Apply damping
                 dot_0 = glm.dot(self.acceleration_vector, self.forward)
                 if dot_0 != 0:
-                    self.acceleration_vector -= dot_0 / abs(dot_0) * (self.forward * self.negative_acceleration_scalar
+                    self.acceleration_vector -= dot_0 / abs(dot_0) * (self.forward * self.c_s["negative_acceleration"]
                                                                       * min(1,max(-1,abs(dot_0))))
 
             if movement_dict.get("right"):
-                self.acceleration_vector += self.right * self.positive_acceleration_scalar * movement_dict["right"]
+                self.acceleration_vector += self.right * self.c_s["positive_acceleration"] * movement_dict["right"]
             else:
                 # Apply damping
                 dot_1 = glm.dot(self.acceleration_vector, self.right)
                 if dot_1 != 0:
-                    self.acceleration_vector -= dot_1 / abs(dot_1) * (self.right * self.negative_acceleration_scalar
+                    self.acceleration_vector -= dot_1 / abs(dot_1) * (self.right * self.c_s["negative_acceleration"]
                                                                       * min(1,max(-1,abs(dot_1))))
 
             if movement_dict.get("up"):
-                self.acceleration_vector += self.up * self.positive_acceleration_scalar * movement_dict["up"]
+                self.acceleration_vector += self.up * self.c_s["positive_acceleration"] * movement_dict["up"]
             else:
                 # Apply damping
                 dot_2 = glm.dot(self.acceleration_vector, self.up)
                 if dot_2 != 0:
-                    self.acceleration_vector -= dot_2 / abs(dot_2) * (self.up * self.negative_acceleration_scalar
+                    self.acceleration_vector -= dot_2 / abs(dot_2) * (self.up * self.c_s["negative_acceleration"]
                                                                       * min(1,max(-1,abs(dot_2))))
  
         elif self.position_mode == "following":
             tracked_position = self.current_tracked_body.position
             self.set_position((tracked_position[0], tracked_position[1], self.position.y))
             if movement_dict.get("up"):
-                self.acceleration_vector += self.stable_up * self.positive_acceleration_scalar * movement_dict["up"]
+                self.acceleration_vector +=     self.stable_up * self.c_s["positive_acceleration"] * movement_dict["up"]
             else:
                 # Apply damping
                 dot_2 = glm.dot(self.acceleration_vector, self.stable_up)
                 if dot_2 != 0:
-                    self.acceleration_vector -= dot_2 / abs(dot_2) * (self.stable_up * self.negative_acceleration_scalar
+                    self.acceleration_vector -= dot_2 / abs(dot_2) * (self.stable_up * self.c_s["negative_acceleration"]
                                                                       * min(1,max(-1,abs(dot_2))))
 
         # Apply max speed
@@ -199,25 +199,27 @@ class Camera:
     def get_projection_matrix(self):
         return glm.perspective(glm.radians(self.FOV), self.aspect_ratio, self.NEAR, self.FAR)
     
-    def update_states(self):
-        keys = pg.key.get_pressed()
-        if True in list(keys):
-            if keys[pg.K_TAB] and pg.K_TAB not in self.app.pressed_keys and self.body_tracking_allowed:
-                self.app.pressed_keys.add(pg.K_TAB)
-                if self.current_tracked_body_index == len(self.app.simulation.system.tracked_bodies) - 1:
-                    self.current_tracked_body_index = -1
-                    self.position_mode = "free"
-                else:
-                    self.current_tracked_body_index += 1
-                    self.current_tracked_body = self.app.simulation.system.tracked_bodies[
-                                                                                        self.current_tracked_body_index]
-                    self.position_mode = "following"
+    def cycle_tracked_bodies(self):
+        if self.body_tracking_allowed:
+            if self.current_tracked_body_index == len(self.app.simulation.system.tracked_bodies) - 1:
+                self.current_tracked_body_index = -1
+                self.position_mode = "free"
+            else:
+                self.current_tracked_body_index += 1
+                self.current_tracked_body = self.app.simulation.system.tracked_bodies[self.current_tracked_body_index]
+                self.position_mode = "following"
+                self.acceleration_vector = glm.vec3(0,0,0)
+                self.rotation_vector = glm.vec2(0,0)
 
-            if self.app.key_mode == "camera":
-                for i in range(1,10):
-                    if keys[getattr(pg, f"K_{i}")]:
-                        if i <= 5:
-                            self.current_speed_modifier = 1 / 5**3 * i**3
-                        else:
-                            self.current_speed_modifier = 1 / 5**6 * i**6
-                        break
+    def cycle_movement_modes(self):
+        if self.movement_mode == "instantaneous":
+            self.movement_mode = "cinematic"
+            self.move = self.move_cinematic
+            self.rotate = self.rotate_cinematic
+            # Reset previous accelerations
+            self.acceleration_vector = glm.vec3(0,0,0)
+            self.rotation_vector = glm.vec2(0,0)
+        else:
+            self.movement_mode = "instantaneous"
+            self.move = self.move_instaneous
+            self.rotate = self.rotate_instantaneous

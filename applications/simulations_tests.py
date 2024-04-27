@@ -15,7 +15,13 @@ from applications.simulations_examples import sun, earth
 from src.engines.engine_3D.elements import Function3D
 
 from astropy.constants import M_sun
-sun2 = GravitationalBody(mass=M_sun.value, position=Vector(450,440,0), fixed=True, integrator="synchronous")
+
+cinematic_movement = {
+    "positive_acceleration" : 0.05,
+    "negative_acceleration" : 0,
+    "positive_rotation" : 0.05,
+    "negative_rotation" : 1
+}
 
 
 if __name__ == '__main__':
@@ -41,9 +47,11 @@ if __name__ == '__main__':
     # )
     sim.show_3D(
         show_potential=True,
+        fullscreen=False,
         # model_size_type="realistic",
         model_size_type="exaggerated",
-        window_size=(1440,900),
-        # camera_movement_mode="instantaneous"
-        camera_movement_mode="cinematic"
+        window_size=(500,500),
+        # window_size=(1440,900),
+        # window_size=(1920,1080),
+        # camera_cinematic_settings=cinematic_movement
     )
