@@ -36,7 +36,7 @@ class Engine2D(GlobalEngine):
             "Simulation time (s)" : f"{self.simulation_time:.2e}",
             "lWindow size" : self.window_size,
             "Physics speed" : f"{self.physics_speed:.2e}",
-            "lFramerate" : self.framerate,
+            "lFramerate" : f"{self.physics_speed / self.delta_time:.1f}",
             "Manual str" : self.key_string,
             "lNumber of inputs" : len(self.input.inputs),
             "empty2" : "   ",

@@ -38,19 +38,19 @@ if __name__ == '__main__':
         ),
         maximum_delta_time=1000
     )
-    # sim.show_2D(
-    #     traces=True,
-    #     display_clock=True,
-    #     window_size=(400,400),
-    #     screen_color=(255,255,255),
-    #     clock_font=(("Trebuchet MS", 25), "black")
-    # )
+    sim.show_2D(
+        traces=True,
+        display_clock=True,
+        window_size=(400,400),
+        screen_color=(255,255,255),
+        clock_font=(("Trebuchet MS", 25), "black")
+    )
     sim.show_3D(
         show_potential=True,
         fullscreen=False,
         # model_size_type="realistic",
         model_size_type="exaggerated",
-        window_size=(500,500),
+        window_size=(1000,600),
         # window_size=(1440,900),
         # window_size=(1920,1080),
         # camera_cinematic_settings=cinematic_movement

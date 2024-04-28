@@ -112,7 +112,7 @@ class Engine3D(GlobalEngine):
             "Simulation time (s)" : f"{self.simulation_time:.2e}",
             "lWindow size" : self.window_size,
             "Physics speed" : f"{self.physics_speed:.2e}",
-            "lFramerate" : self.framerate,
+            "lFramerate" : f"{self.physics_speed / self.delta_time:.1f}",
             "Camera pos (x,y,z)" : \
                 f"{self.camera.position.x:.3f}, {-self.camera.position.z:.3f}, {self.camera.position.y:.3f}",
             "lNumber of inputs" : len(self.input.inputs),
