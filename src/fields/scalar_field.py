@@ -241,7 +241,10 @@ class ScalarField(Field):
             nb_ticks_per_axis = {"x": 100, "y": 100, "z": 100}
         if origin_position is None:
             origin_position = [0], [0], [0]
-        x_positions, y_positions, z_positions = [origin_position[0]], [origin_position[1]], [origin_position[2]]
+        x_positions, y_positions, z_positions = origin_position
+        x_positions = [x_positions]
+        y_positions = [y_positions]
+        z_positions = [z_positions]
         for axis, nb_ticks in nb_ticks_per_axis.items():
             if axis == "x":
                 x_positions = linspace(getattr(start, axis), getattr(stop, axis), int(nb_ticks))
