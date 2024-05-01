@@ -152,34 +152,33 @@ class SurfaceVBO(BaseVertexBufferObject):
             return self.load_data()
         else:
             # Set parameters
-            x_num, y_num = self.function.resolution
+            num = self.function.resolution
             x_start, x_end = self.function.x_limits
             y_start, y_end = self.function.y_limits
 
             # Setup array indicating the z value at every (x,y) coordinates
-            x_space = np.linspace(x_start, x_end, x_num)
-            y_space = np.linspace(y_start, y_end, y_num)
+            x_space = np.linspace(x_start, x_end, num)
+            y_space = np.linspace(y_start, y_end, num)
             x, y = np.meshgrid(x_space, y_space)
             z_array = self.function.function(x, y).T    # Transpose to format the array so the indices are given [x,y]
-            # print(z_array[33,100], self.function.i)
 
             vertices = []       # List of every points of the screen (which will be linked together to form triangles)
             indices = []        # List of the vertices that should be connected to form triangles
-            for i in range(x_num):
-                for j in range(y_num):
-                    current_i = i + j*x_num
-                    vertices.append(((i/(x_num-1) * (x_end - x_start) + x_start), 
+            for i in range(num):
+                for j in range(num):
+                    current_i = i + j*num
+                    vertices.append(((i/(num-1) * (x_end - x_start) + x_start), 
                                     z_array[i,j],
-                                    -(j/(y_num-1) * (y_end - y_start) + y_start)))
-                    if i < x_num-1 and j < y_num-1:
+                                    -(j/(num-1) * (y_end - y_start) + y_start)))
+                    if i < num-1 and j < num-1:
                         # Create first side
                         # Indices must be given in clockwise order to be viewed from the front
-                        indices.append((current_i, current_i + x_num+1, current_i + x_num))
-                        indices.append((current_i, current_i + 1,  current_i + x_num+1))
+                        indices.append((current_i, current_i + num+1, current_i + num))
+                        indices.append((current_i, current_i + 1,  current_i + num+1))
                         # Create other side
                         # Indices must be given in counter-clockwise order to be viewed from the front
-                        indices.append((current_i, current_i + x_num, current_i + x_num+1))
-                        indices.append((current_i, current_i + x_num+1, current_i + 1))
+                        indices.append((current_i, current_i + num, current_i + num+1))
+                        indices.append((current_i, current_i + num+1, current_i + 1))
 
 
             vertex_data = self.get_data(vertices, indices)

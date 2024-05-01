@@ -52,7 +52,7 @@ def make_3D_figure(save_filename):
 # make_3D_figure("figures/3d_survival_time.png")
 
 
-def make_2D_figure(save_filename):
+def make_2D_figure(save_filename, split_figures: bool=False):
     fig = plt.figure()
     axs = [fig.add_subplot(3, 2, i) for i in range(1,7)]
     zipper = zip(
@@ -104,8 +104,9 @@ def make_2D_figure(save_filename):
         ax.xaxis.set_major_locator(MaxNLocator(3))
         ax.yaxis.set_major_locator(MaxNLocator(3))
         # plt.show()
+        if split_figures: ax.set_xlabel(r"$D_{\odot x}$ [Gm]")
 
-    fig.supxlabel(r"$D_{\odot x}$ [Gm]")
+    if not split_figures: fig.supxlabel(r"$D_{\odot x}$ [Gm]")
     fig.set_size_inches(7.5, 9)
     fig.subplots_adjust(left=0.1, right=1, top=0.9, bottom=0.1)
     plt.tight_layout()
@@ -114,7 +115,7 @@ def make_2D_figure(save_filename):
     print(np.array(best_bodies_info))
 
 
-# make_2D_figure("figures/2d_survival_time.png")
+# make_2D_figure("figures/2d_survival_time_r.png", split_figures=True)
 
 
 def make_distances_figure(filename):
@@ -146,7 +147,7 @@ def make_distances_figure(filename):
         # ax.legend(loc="upper left")
 
     fig.supxlabel("Temps [a]")
-    fig.supylabel("Distance entre le meilleur corps\net le point de Lagrange [Mm]")
+    fig.supylabel("Distance entre le meilleur corps\net le point de Lagrange [Gm]")
     fig.set_size_inches(7.5, 5)
     plt.tight_layout()
     plt.savefig(filename, dpi=600, bbox_inches="tight")
@@ -169,14 +170,4 @@ def make_chaos_figure(filename):
     # plt.show()
 
 
-
 # make_chaos_figure("figures/chaos.png")
-
-
-""" 
-Ideas :
-Table with the characteristics of the surviving body (position, velocity and survival time) and the simulation time,
-maybe time steps ?
-# Nombre de corps ayant survécu après un certain temps en fonction du point de Lagrange ? Peut-être un pourcentage du
-# nombre de corps simulés
-"""

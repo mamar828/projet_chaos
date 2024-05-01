@@ -125,7 +125,7 @@ class SimulationMother:
                 if attractive_moving:
                     for body in attractive_moving:
                         self.dump_body(body, "attractive_moving", file)
-                if results[0]["fake"]:
+                if results[0].get("fake"):
                     self.dump_body(results[0]["fake"], results[0]["fake"].type, file)
                 self.dump_body(max_body, body_type, file)
         return max_number

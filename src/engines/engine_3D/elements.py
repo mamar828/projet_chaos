@@ -3,6 +3,7 @@ from eztcolors import Colors as C
 
 from src.systems.computed_system import ComputedSystem
 from src.tools.vector import Vector
+from src.engines.engine_3D.models import *
 
 
 class Element3D:
@@ -29,7 +30,7 @@ class Object3D(Element3D):
             rotation: tuple[int,int,int]=(0,0,0),
             scale: tuple[int,int,int]=(1,1,1),
             instance=None,
-            model: str="sphere"
+            model: BaseModel=Sphere
         ):
         """
         Initialize an Object3D object. All coordinates are given in tuples of x, y, z.
@@ -62,10 +63,11 @@ class Function3D(Element3D):
             rotation: tuple[int,int,int]=(0,0,0),
             scale: tuple[int,int,int]=(1,1,1),
             function: Callable=None,
-            resolution: tuple=(100,100),
+            resolution: int=100,
             x_limits: tuple=(-100,100),
             y_limits: tuple=(-100,100),
             instance: ComputedSystem=None,
+            hidden: bool=False,
             save_filename: str=None
         ):
         """
@@ -110,10 +112,9 @@ class Function3D(Element3D):
         self.x_limits = x_limits
         self.y_limits = y_limits
         self.save_filename = save_filename
+        self.hidden = hidden
         if instance:
-            # self.i = 0
             self.update()
 
     def update(self):
-        # self.i += 1
         self.function = lambda x, y: self.instance.get_potential_function()(Vector(x,y,0)) * 1e10# + self.i

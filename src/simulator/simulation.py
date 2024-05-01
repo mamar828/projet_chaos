@@ -153,7 +153,7 @@ class Simulation:
                 Function3D(
                     texture="spacetime",
                     position=(0,0,0),
-                    resolution=(200,200),
+                    resolution=200,
                     x_limits=(0,900),
                     y_limits=(0,900),
                     instance=self.system

@@ -3,11 +3,12 @@ from numpy import max as npmax, abs as npabs
 
 
 class Controller:
-    def __init__(self, master_input, joystick, threshold: float=0.35):
+    def __init__(self, master_input, joystick, threshold: float=0.3, rotation_sensitivity: float=2):
         self.master_input = master_input
         self.joystick = joystick
         self.joystick.init()
         self.threshold = threshold
+        self.rotation_sensitivity = rotation_sensitivity
 
     def get_movement_dict(self):
         axis = [self.joystick.get_axis(i) for i in range(self.joystick.get_numaxes())]
@@ -15,7 +16,7 @@ class Controller:
             keys_dict = {
                 "forward" : -axis[1],
                 "right" : axis[0],
-                "up" : max(0, axis[4]) - max(0, axis[5])
+                "up" : max(0, axis[5]) - max(0, axis[4])
             }
         else:
             keys_dict = {
@@ -29,8 +30,8 @@ class Controller:
         axis = [self.joystick.get_axis(i) for i in range(self.joystick.get_numaxes())]
         if npmax(npabs(axis[2:4])) > self.threshold:
             keys_dict = {
-                "horizontal" : axis[2],
-                "vertical" : -axis[3]
+                "horizontal" : axis[2] * self.rotation_sensitivity,
+                "vertical" : -axis[3] * self.rotation_sensitivity
             }
         else:
             keys_dict = {

@@ -1,10 +1,11 @@
-from curses import initscr
+import curses
 
 
 class Display:
     def __init__(self, app):
         self.app = app
-        self.console = initscr()
+        self.console = curses.initscr()
+        curses.noecho()
         self.line_length = 120
 
     def update(self, state: dict):
@@ -28,3 +29,9 @@ class Display:
         except:
             # Terminal window is not big enough to display
             pass
+
+    def destroy(self):
+        curses.nocbreak()
+        self.console.keypad(0)
+        curses.echo()
+        curses.endwin()

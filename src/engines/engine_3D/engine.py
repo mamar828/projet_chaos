@@ -14,7 +14,7 @@ from src.engines.inputs.keyboard import Keyboard
 class Engine3D(GlobalEngine):
     def __init__(
             self,
-            simulation,#=Simulation                 Cannot provide type due to circular imports
+            simulation=None,#: Simulation                 Cannot provide type due to circular imports
             window_size: tuple[int,int]=(1440,900),
             framerate: int=60,
             fullscreen: bool=True,
@@ -35,6 +35,7 @@ class Engine3D(GlobalEngine):
             functions: list[Function3D]=None,
             simulation_presets_allowed: bool=True,
             model_size_type: str="exaggerated",
+            model_saturation: bool=True,
             camera_cinematic_settings: dict={
                 "positive_acceleration" : 0.05,
                 "negative_acceleration" : 0.05,
@@ -71,6 +72,7 @@ class Engine3D(GlobalEngine):
         self.context = mgl.create_context()
         self.context.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE)       # Allows for depth testing (z-buffering)
         self.camera_delta_time = 0                                   # Used for constant camera speed regardless of fps
+        self.saturated = model_saturation
         self.model_size_type = model_size_type
 
         self.light = Light(
@@ -94,8 +96,9 @@ class Engine3D(GlobalEngine):
         )
 
         self.functions = functions
+        self.objects = objects
         self.mesh = Mesh(self)
-        self.scene = Scene(self, objects)
+        self.scene = Scene(self)
         self.scene_renderer = SceneRenderer(self)
 
     def render(self):
@@ -112,7 +115,7 @@ class Engine3D(GlobalEngine):
             "Simulation time (s)" : f"{self.simulation_time:.2e}",
             "lWindow size" : self.window_size,
             "Physics speed" : f"{self.physics_speed:.2e}",
-            "lFramerate" : f"{self.physics_speed / self.delta_time:.1f}",
+            "lFramerate" : f"{0 if self.delta_time ==0 else self.physics_speed / self.delta_time:.1f}",
             "Camera pos (x,y,z)" : \
                 f"{self.camera.position.x:.3f}, {-self.camera.position.z:.3f}, {self.camera.position.y:.3f}",
             "lNumber of inputs" : len(self.input.inputs),
@@ -127,12 +130,13 @@ class Engine3D(GlobalEngine):
         return state
 
     def run(self):
-        while True:
+        while self.running:
             self.get_time()
             self.check_events()
-            self.render()
-            self.delta_time = (self.clock.tick(self.framerate) / 1000) * self.physics_speed
-            self.camera_delta_time = self.clock.tick(self.framerate)
-            pg.display.set_caption(f"Current physics speed : x{self.physics_speed:.2e}")
-            self.simulation_time += self.delta_time
-            self.display.update(self.get_current_state())
+            if self.running:
+                self.render()
+                self.delta_time = (self.clock.tick(self.framerate) / 1000) * self.physics_speed
+                self.camera_delta_time = self.clock.tick(self.framerate)
+                pg.display.set_caption(f"Current physics speed : x{self.physics_speed:.2e}")
+                self.simulation_time += self.delta_time
+                self.display.update(self.get_current_state())
