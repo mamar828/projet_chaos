@@ -174,7 +174,7 @@ def presentation():
             # Function3D(texture="bremss_1", instance=sim1.system, x_limits=(0,900), y_limits=(0,900),
             #             resolution=200, hidden=True)
             Function3D(texture="bremss_2", instance=sim1.system, x_limits=(0,900), y_limits=(0,900),
-                        resolution=200, hidden=True, rotation=(0,0,90), position=(900,0,0))
+                       resolution=100, hidden=True, rotation=(0,0,90), position=(900,0,0))
         ],
         # model_size_type="exaggerated",
         window_size=(1920,1080)
