@@ -27,12 +27,12 @@ def all_lagrange_points():
         show_potential=True,
         # model_size_type="realistic",
         model_size_type="exaggerated",
-        # window_size=(1920,1080)
-        window_size=(1440,900)
+        window_size=(1920,1080)
+        # window_size=(1440,900)
     )
 
 
-all_lagrange_points()
+# all_lagrange_points()
 
 
 def earth_amplified():
@@ -95,7 +95,10 @@ def chaos_example():
     sim_system = BaseSystem(list_of_bodies=circular_bodies, n=9, method="force")
 
     sim = Simulation(system=sim_system, maximum_delta_time=1000)
-    sim.show_2D(traces=True, display_clock=True)
+    sim.show_2D(
+        traces=True,
+        display_clock=True
+    )
 
 
 # chaos_example()
