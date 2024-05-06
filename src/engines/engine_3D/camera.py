@@ -1,6 +1,5 @@
 import glm
 import pygame as pg
-from numpy import array as nparray
 
 
 class Camera:
@@ -43,30 +42,15 @@ class Camera:
         self.position_mode = "free"
         self.current_tracked_body_index = -1
         self.current_tracked_body = None
-        if self.app.simulation.system.tracked_bodies:
-            self.body_tracking_allowed = True
-        else:
-            self.body_tracking_allowed = False
+        if self.app.simulation:
+            if self.app.simulation.system.tracked_bodies:
+                self.body_tracking_allowed = True
+            else:
+                self.body_tracking_allowed = False
 
         self.movement_mode = None
         self.cycle_movement_modes()
         self.c_s = cinematic_settings
-
-        # if movement_mode == "instantaneous":
-        #     self.move = self.move_instaneous
-        #     self.rotate = self.rotate_instantaneous
-
-        # elif movement_mode == "cinematic":
-            # self.move = self.move_cinematic
-            # self.rotate = self.rotate_cinematic
-            # # self.positive_acceleration_scalar = 0.05
-            # self.positive_acceleration_scalar = 0.005
-            # # self.negative_acceleration_scalar = 0.05
-            # self.negative_acceleration_scalar = 0.0
-            # # self.positive_rotation_scalar = 0.02
-            # self.positive_rotation_scalar = 0.005
-            # # self.negative_rotation_factor = 0.94
-            # self.negative_rotation_factor = 1
 
     def __str__(self):
         return f"Camera position: {self.position.x:.3f}, {-self.position.z:.3f}, {self.position.y:.3f}"

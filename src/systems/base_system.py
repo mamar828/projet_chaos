@@ -35,7 +35,7 @@ class BaseSystem:
             list_of_bodies: List[Body],
             base_potential: Optional[ScalarField] = None,
             base_force_field: Optional[VectorField] = None,
-            n: int = 0,
+            n: int = 9,
             method: str = "force",
             integrator: str = "synchronous"
     ):

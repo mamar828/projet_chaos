@@ -18,6 +18,7 @@ class GlobalEngine:
         self.window_size = window_size
         self.framerate = framerate
         self.fullscreen = fullscreen
+        self.running = True
 
         self.clock = pg.time.Clock()
         self.time = 0
@@ -33,12 +34,17 @@ class GlobalEngine:
         self.input = MasterInput()
         self.display = Display(self)
 
+    def quit(self):
+        self.scene.destroy()
+        self.display.destroy()
+        pg.quit()
+        self.running = False
+        # exit()
+
     def check_events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
-                self.scene.destroy()
-                pg.quit()
-                exit()
+                self.quit()
             else:
                 self.filter_event(event)
 
@@ -94,6 +100,12 @@ class GlobalEngine:
         if event.key == pg.K_t and "camera" in self.key_modes:
             self.camera.cycle_movement_modes()
 
+        if event.key == pg.K_b and "camera" in self.key_modes and self.scene.hidden_surfaces:
+            self.scene.hidden_surfaces.append(self.scene.surfaces[0])
+            self.scene.surfaces.remove(self.scene.surfaces[0])
+            self.scene.surfaces.append(self.scene.hidden_surfaces[0])
+            self.scene.hidden_surfaces.remove(self.scene.hidden_surfaces[0])
+
         if event.key == pg.K_p:
             self.key_mode = "presets"
             self.key_string = ""
@@ -132,15 +144,31 @@ class GlobalEngine:
         if event.button == 1 and "camera" in self.key_modes:
             self.camera.cycle_movement_modes()
 
+        if event.button == 3 and "camera" in self.key_modes and self.scene.hidden_surfaces:
+            self.scene.hidden_surfaces.append(self.scene.surfaces[0])
+            self.scene.surfaces.remove(self.scene.surfaces[0])
+            self.scene.surfaces.append(self.scene.hidden_surfaces[0])
+            self.scene.hidden_surfaces.remove(self.scene.hidden_surfaces[0])
+
+
         if event.button == 14:
             current_mode_1 = self.key_modes.index(self.key_mode)
             self.key_mode = self.key_modes[(current_mode_1 + 1) % len(self.key_modes)]
+            if self.key_mode == "manual":
+                current_mode_1 = self.key_modes.index(self.key_mode)
+                self.key_mode = self.key_modes[(current_mode_1 + 1) % len(self.key_modes)]
             self.key_string = ""
 
         if event.button == 13:
             current_mode_1 = self.key_modes.index(self.key_mode)
             self.key_mode = self.key_modes[(current_mode_1 - 1 + len(self.key_modes)) % len(self.key_modes)]
+            if self.key_mode == "manual":
+                current_mode_1 = self.key_modes.index(self.key_mode)
+                self.key_mode = self.key_modes[(current_mode_1 - 1 + len(self.key_modes)) % len(self.key_modes)]
             self.key_string = ""
+
+        if event.button == 6:
+            self.quit()
             
     def filter_event(self, event):
         if event.type == pg.KEYDOWN:

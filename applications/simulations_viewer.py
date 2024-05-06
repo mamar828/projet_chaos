@@ -17,7 +17,7 @@ from applications.simulations_examples import sun, earth
 
 
 if __name__ == '__main__':
-    sim = Simulation.load_from_folder(f"simulations/L4_longer", min_time_survived=1e8)#, only_load_best_body=True)
+    sim = Simulation.load_from_folder(f"simulations/single_body_2d_1")#, min_time_survived=2e8)#, only_load_best_body=True)
     # print(repr(sim.system.list_of_bodies[-1].position))
     # print(repr(sim.system.list_of_bodies[-1].velocity))
     # other = sim.system.list_of_bodies[-1].to_gravitational_body()
@@ -25,14 +25,13 @@ if __name__ == '__main__':
 
     # sim = Simulation(system=BaseSystem(list_of_bodies=[sun, earth, sim.system.list_of_bodies[-1]], n=9))
     # input("loaded")
-    sim.show_3D(
-        show_potential=True,
-        print_camera_coordinates=False,
-        # model_size_type="realistic",
-        model_size_type="exaggerated",
-        window_size=(1440,900),
-        camera_movement_mode="instantaneous"
-    )
+    # sim.show_3D(
+    #     show_potential=True,
+    #     # model_size_type="realistic",
+    #     model_size_type="exaggerated",
+    #     window_size=(1920,1080)
+    #     # window_size=(1440,900)
+    # )
     sim.show_2D(
         window_size=(900,900),
         framerate=60,

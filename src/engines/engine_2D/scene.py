@@ -9,15 +9,28 @@ from src.systems.computed_system import ComputedSystem
 class Scene:
     def __init__(self, app, display_clock: bool, clock_font: tuple[tuple, str]):
         self.app = app
-        self.system = app.simulation.system
         self.display_clock = display_clock
         self.clock_sys_font = SysFont(*clock_font[0])
         self.clock_color = clock_font[1]
         self.objects = []
-        self.load()
+        self.system = None
+        if app.objects:
+            self.load_objects(app.objects)
+        if app.simulation:
+            self.system = app.simulation.system
+            self.load_simulation()
         self.current_tick = 0
 
-    def load(self):
+    def load_objects(self, objects):
+        for obj in objects:
+            if obj.instance:
+                self.objects.append(obj.model(screen=self.app.screen, color=obj.color, scale=obj.scale,
+                                              position=obj.instance.position, instance=obj.instance))
+            else:
+                self.objects.append(obj.model(screen=self.app.screen, color=obj.color, scale=obj.scale,
+                                              position=obj.position))
+
+    def load_simulation(self):
         # Determine the displayed colors
         if isinstance(self.system, ComputedSystem):
             color_func = lambda body: body.get_color()
@@ -41,24 +54,30 @@ class Scene:
         return f"{years}y {days}d {hours:02}:{minutes:02}:{seconds:02}"
 
     def update(self):
-        # Update system
-        self.current_tick += self.app.delta_time
-        for i in range(int(self.current_tick // self.app.simulation.maximum_delta_time)):
-            self.system.update(self.app.simulation.maximum_delta_time)
-            self.current_tick -= self.app.simulation.maximum_delta_time
-        # for i in range(int(self.app.delta_time // self.app.simulation.maximum_delta_time)):
-        #     self.system.update(self.app.simulation.maximum_delta_time)
-        # self.system.update(self.app.delta_time % self.app.simulation.maximum_delta_time)
+        if self.system:
+            # Update system
+            self.current_tick += self.app.delta_time
+            for i in range(int(self.current_tick // self.app.simulation.maximum_delta_time)):
+                self.system.update(self.app.simulation.maximum_delta_time)
+                self.current_tick -= self.app.simulation.maximum_delta_time
 
-        # Update display
-        for obj in self.objects:
-            if not obj.instance.dead:
-                obj.move((obj.instance.position[0], obj.instance.position[1]))
+            # Update display
+            for obj in self.objects:
+                if not obj.instance.dead:
+                    obj.move((obj.instance.position[0], obj.instance.position[1]))
+                    obj.update()
+                else:
+                    obj.destroy()
+                    self.objects.remove(obj)
+
+        else:
+            for obj in self.objects:
+                if obj.instance:
+                    obj.instance.update(self.app.delta_time)
+                    obj.move((obj.instance.position[0], obj.instance.position[1]))
+                    if obj.instance.color is not None:
+                        obj.color = obj.instance.color
                 obj.update()
-                # if abs(obj.instance.position[1] - 450) < 0.01 and not obj.instance.fixed: print(self.format_time(self.app.simulation_time))
-            else:
-                obj.destroy()
-                self.objects.remove(obj)
         
         # Update clock
         if self.display_clock:

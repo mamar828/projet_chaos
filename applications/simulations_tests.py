@@ -3,7 +3,6 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import numpy as np
 
 from src.systems.base_system import BaseSystem
-from src.systems.new_system import NewSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.bodies.fake_body import *
 from src.bodies.new_body import NewBody
@@ -38,20 +37,24 @@ if __name__ == '__main__':
         ),
         maximum_delta_time=1000
     )
-    sim.show_2D(
-        traces=True,
-        display_clock=True,
-        window_size=(400,400),
-        screen_color=(255,255,255),
-        clock_font=(("Trebuchet MS", 25), "black")
-    )
+    # sim.show_2D(
+    #     traces=True,
+    #     display_clock=True,
+    #     window_size=(400,400),
+    #     screen_color=(255,255,255),
+    #     clock_font=(("Trebuchet MS", 25), "black")
+    # )
     sim.show_3D(
         show_potential=True,
-        fullscreen=False,
+        functions=[
+            Function3D("bremss_1", (0,0,100),
+            function=lambda x, y: 30 * np.sin(x/20) * np.sin(y/20) + 500 * np.exp(-((x-450)**2+(y-450)**2)/1000), 
+            x_limits=(0,900), y_limits=(0,900), resolution=500, hidden=True)],
+        # fullscreen=False,
         # model_size_type="realistic",
         model_size_type="exaggerated",
-        window_size=(1000,600),
-        # window_size=(1440,900),
+        # window_size=(1000,600),
+        window_size=(1440,900),
         # window_size=(1920,1080),
         # camera_cinematic_settings=cinematic_movement
     )

@@ -1,5 +1,4 @@
 from numpy import cos, sin, arctan2, pi
-from eztcolors import Colors as C
 
 from src.bodies.gravitational_body import GravitationalBody
 from src.tools.vector import Vector

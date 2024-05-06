@@ -10,10 +10,8 @@ class Texture:
         self.context = app.context
         self.textures = {
             0 : self.get_texture(path=get_path("textures/majora.png")),
-            1 : self.get_texture(path=get_path("textures/endor.jpg")),
-            2 : self.get_texture(path=get_path("textures/mesmer.jpg")),
-            3 : self.get_texture(path=get_path("textures/boxy.jpg")),
-            4 : self.get_texture(path=get_path("textures/boxy_2.png"))
+            1 : self.get_texture(path=get_path("textures/mesmer.jpg")),
+            2 : self.get_texture(path=get_path("textures/boxy.jpg"))
         }
         self.textures["skybox"] = self.get_texture_cube(get_path("textures/skybox"))
         self.textures["depth_texture"] = self.get_depth_texture()
@@ -21,6 +19,8 @@ class Texture:
         self.textures["floor"] = self.get_texture(get_path("textures/floor_test.png"))
         self.textures["filix"] = self.get_texture(get_path("textures/filix.png"))
         self.textures["spacetime"] = self.get_texture(get_path("textures/spacetime.png"))
+        self.textures["bremss_1"] = self.get_texture(get_path("textures/bremss_1.png"))
+        self.textures["bremss_2"] = self.get_texture(get_path("textures/bremss_2.png"))
         
         for color in ["green", "red", "blue", "yellow", "orange", "cyan", "magenta", "white", "black", "purple",
                       "brown", "grey"]:

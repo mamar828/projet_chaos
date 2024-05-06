@@ -16,8 +16,8 @@ class BaseModel:
             saturated=False
         ):
         if saturated and not vertex_array_object_name.startswith("surface"):
-
             vertex_array_object_name = f"saturated_{vertex_array_object_name}"
+
         self.app = app
         self.position = position
         self.rotation = glm.vec3([glm.radians(angle) for angle in rotation])  # Convert angles from degrees to radians
@@ -80,7 +80,7 @@ class BaseModel:
 
     def get_model_matrix(self):
         # translation 
-        # Account for the fact that usal coords are (x,y,z) but model ones should be (x,z,y)
+        # Account for the fact that usual coords are (x,y,z) but model ones should be (x,z,y)
         t_model = glm.translate(glm.mat4(), (self.position[0], self.position[2], -self.position[1]))
         # rotation
         r_model = glm.rotate(t_model, self.rotation.x, glm.vec3(1,0,0))
@@ -165,23 +165,6 @@ class Surface(BaseModel):
         ):
         super().__init__(app, vertex_array_object_name, texture_id, position, rotation, scale, instance, True)
 
-    # def on_init(self):
-    #     self.depth_texture = self.app.mesh.texture.textures["depth_texture"]
-    #     self.depth_texture.use(location=1)
-    #     # texture
-    #     self.texture = self.app.mesh.texture.textures[self.texture_id]
-    #     self.program["u_texture_0"] = 0
-    #     self.texture.use(location=0)
-    #     # mvp matrices
-    #     self.program["m_proj"].write(self.camera.m_proj)
-    #     self.program["m_view"].write(self.camera.m_view)
-    #     self.program["m_model"].write(self.m_model)
-
-    # def update(self):
-    #     self.texture.use(location=0)
-    #     self.program["m_view"].write(self.camera.m_view)
-    #     self.program["m_model"].write(self.m_model)
-
 
 class Sphere(AnimatedModel):
     def __init__(
@@ -209,6 +192,7 @@ class Cat(BaseModel):
             rotation=(0,0,0),
             scale=(1,1,1),
             instance=None,
-            saturated=False
+            saturated=False,
+            texture_id="cat"
         ):
-        super().__init__(app, "cat", "cat", position, rotation, scale, instance, saturated)
+        super().__init__(app, "cat", texture_id, position, rotation, scale, instance, saturated)

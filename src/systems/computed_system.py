@@ -143,7 +143,7 @@ class ComputedSystem(BaseSystem):
             x = np.abs(450 - current_data[:,0]) * multiplication_factors[0]
             y = np.abs(450 - current_data[:,1]) * multiplication_factors[1]
             z = current_data[:,6] / (8766*3600)
-            scat = axis.scatter(x, y, c=z, s=2)
+            scat = axis.scatter(x, y, c=z, s=2, cmap="viridis_r")
             cbar = plt.colorbar(scat)
             if kwargs.get("cbar_label"):
                 cbar.set_label(kwargs.get("cbar_label"))

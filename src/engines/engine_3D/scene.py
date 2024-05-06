@@ -2,20 +2,20 @@ from pygame.font import SysFont
 from astropy.constants import M_sun, M_earth, R_sun, R_earth
 
 from src.engines.engine_3D.models import *
-from src.engines.engine_3D.relative_paths import get_path
 
 from src.systems.computed_system import ComputedSystem
 from src.bodies.fake_body import FakeBody
 
 
 class Scene:
-    def __init__(self, app, scene_objects):
+    def __init__(self, app):
         self.app = app
         self.objects = []
         self.surfaces = []
+        self.hidden_surfaces = []
         self.system = None
-        if scene_objects:
-            self.load_objects(scene_objects)
+        if app.objects:
+            self.load_objects(app.objects)
         if app.functions:
             self.load_surfaces(app.functions)
         if app.simulation:
@@ -25,8 +25,8 @@ class Scene:
         self.current_tick = 0
         self.total_ticks = 0
 
-    def load_objects(self, scene_objects):
-        for obj in scene_objects:
+    def load_objects(self, objects):
+        for obj in objects:
             if obj.instance:
                 self.objects.append(obj.model(app=self.app, texture_id=obj.texture, scale=obj.scale,
                                    rotation=obj.rotation, position=obj.instance.get_position(), instance=obj.instance))
@@ -36,9 +36,13 @@ class Scene:
             
     def load_surfaces(self, functions):
         for i, surface in enumerate(functions):
-            self.surfaces.append(Surface(app=self.app, vertex_array_object_name=f"surface_{i}",
-                                         texture_id=surface.texture, scale=surface.scale, position=surface.position,
-                                         rotation=surface.rotation, instance=surface.instance))
+            surf = Surface(app=self.app, vertex_array_object_name=f"surface_{i}",
+                           texture_id=surface.texture, scale=surface.scale, position=surface.position,
+                           rotation=surface.rotation, instance=surface.instance)
+            if not surface.hidden:
+                self.surfaces.append(surf)
+            else:
+                self.hidden_surfaces.append(surf)
             
     def load_simulation(self):
         # Determine the displayed colors
@@ -54,28 +58,33 @@ class Scene:
                 if body.mass == 1:
                     s *= 0.5
             else:
-                if abs(body.mass - M_sun.value) < 1e28: s = R_sun.value / 10**(self.app.simulation.system.n)
-                elif abs(body.mass == M_earth.value) < 1e22: s = R_earth.value / 10**(self.app.simulation.system.n)
-                else: s = R_earth.value / 10**(self.app.simulation.system.n) / 10
+                if abs(body.mass - M_sun.value) < 1e28:
+                    # Hard code sun size
+                    s = R_sun.value / 10**(self.app.simulation.system.n)
+                elif abs(body.mass - M_earth.value) < 1e22:
+                    # Hard code earth size
+                    s = R_earth.value / 10**(self.app.simulation.system.n)
+                elif abs(body.mass - 0.07346e24) < 1e10:
+                    # Hard code moon size
+                    s = 1737e3 / 10**(self.app.simulation.system.n)
+                else:
+                    s = R_earth.value / 10**(self.app.simulation.system.n) / 2
             if isinstance(body, FakeBody):
                 self.objects.append(Sphere(app=self.app, texture_id="grey", scale=(s,s,s), instance=body,
-                                        position=tuple(body.position), saturated=True))
+                                        position=tuple(body.position), saturated=self.app.saturated))
             else:
                 self.objects.append(Sphere(app=self.app, texture_id=color_func(body), scale=(s,s,s), instance=body,
-                                        position=tuple(body.position), saturated=True))
+                                           position=tuple(body.position),
+                                           saturated=self.app.saturated if body.mass < 1e29 else True))
 
     def update(self):
         if self.system:
             # Update system
             self.current_tick += self.app.delta_time
             self.total_ticks += self.app.delta_time
-            # print(self.total_ticks)
             for i in range(int(self.current_tick // self.app.simulation.maximum_delta_time)):
                 self.system.update(self.app.simulation.maximum_delta_time)
                 self.current_tick -= self.app.simulation.maximum_delta_time
-            # for i in range(int(self.app.delta_time // self.app.simulation.maximum_delta_time)):
-            #     self.system.update(self.app.simulation.maximum_delta_time)
-            # self.system.update(self.app.delta_time % self.app.simulation.maximum_delta_time)
 
             # Update objects on display
             for obj in self.objects:
@@ -85,28 +94,6 @@ class Scene:
                     else:
                         obj.destroy()
                         self.objects.remove(obj)
-
-            # # Update surfaces on display only once every 10 updates
-            # self.current_i += 1
-            # if self.current_i > 10:
-            #     self.current_i = 0
-            #     for i, surface in enumerate(self.app.functions):
-            #         if surface.instance:
-            #             surface.update()
-            #             vbo = self.app.mesh.vertex_array_object.vertex_buffer_object.vertex_buffer_objects[f"surface_{i}"]
-            #             vbo.write(surface.get_vertex_data().tobytes())  # Update VBO with new vertex data
-
-            #             # Rebind VAO with updated VBO
-            #             self.app.mesh.vertex_array_object.vertex_array_objects[f"surface_{i}"] = self.app.mesh.vertex_array_object.get_vertex_array_object(
-            #                 program=self.app.mesh.vertex_array_object.program.programs["surface"],
-            #                 vertex_buffer_object=vbo
-            #             )
-            #             # self.app.mesh.vertex_array_object.vertex_buffer_object.vertex_buffer_objects[
-            #             #                                                                     f"surface_{i}"].update()
-            #             # self.app.mesh.vertex_array_object.vertex_array_objects[f"surface_{i}"] = self.app.mesh.vertex_array_object.get_vertex_array_object(
-            #             #     program=self.app.mesh.vertex_array_object.program.programs["surface"],
-            #             #     vertex_buffer_object=self.app.mesh.vertex_array_object.vertex_buffer_object.vertex_buffer_objects[f"surface_{i}"]
-            #             # )
 
         else:
             # Keep old methods for legacy
