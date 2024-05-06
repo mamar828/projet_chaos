@@ -6,6 +6,10 @@ from src.engines.inputs.controller import Controller
 
 
 class MasterInput:
+    """
+    This class defines the base class for combining inputs.
+    """
+
     def __init__(self):
         self.inputs = [Keyboard(self)]
         joystick.init()

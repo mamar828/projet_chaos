@@ -5,7 +5,6 @@ import numpy as np
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.bodies.fake_body import *
-from src.bodies.new_body import NewBody
 from src.tools.vector import Vector
 from src.simulator.simulation_mother import SimulationMother
 from src.simulator.simulation import Simulation

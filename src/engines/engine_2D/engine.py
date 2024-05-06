@@ -5,9 +5,13 @@ from src.engines.global_engine import GlobalEngine
 
 
 class Engine2D(GlobalEngine):
+    """
+    This class defines the 2D engine.
+    """
+
     def __init__(
             self,
-            simulation=None,#:Simulation                 Cannot provide type due to circular imports
+            simulation=None, # Simulation instance
             window_size: tuple[int,int]=(900,900),
             framerate: int=60,
             display_clock: bool=False,
@@ -16,6 +20,28 @@ class Engine2D(GlobalEngine):
             screen_color: tuple[int,int,int]=(0,0,0),
             objects: list=None
         ):
+        """
+        Initialize the Engine2D class.
+
+        Parameters:
+        -----------
+        simulation : Simulation, optional
+            Simulation instance. None if not provided.
+        window_size : tuple[int,int], optional
+            Window size in pixels. Default is (900,900).
+        framerate : int, optional
+            Desired framerate. Default is 60.
+        display_clock : bool, optional
+            Whether to display a clock on the screen. Default is False.
+        clock_font : tuple[tuple[str,int], str], optional
+            Font and size of the clock text, and its color. Default is (("Trebuchet MS", 25), "white").
+        fullscreen : bool, optional
+            Whether to start in fullscreen mode. Default is False.
+        screen_color : tuple[int,int,int], optional
+            RGB color of the screen background. Default is (0,0,0).
+        objects : list, optional
+            List of 2D objects to be rendered. Default is None.
+        """
 
         self.key_modes = ["presets", "manual"]
         super().__init__(simulation=simulation, window_size=window_size, framerate=framerate, fullscreen=fullscreen)

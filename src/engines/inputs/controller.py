@@ -3,6 +3,21 @@ from numpy import max as npmax, abs as npabs
 
 
 class Controller:
+    """
+    This class defines the base class for a controller.
+
+    Supported controls are :
+    - Left joystick for movement
+    - Right joystick for rotation
+    - Triggers for vertical movement
+    - Button 0 for body tracking
+    - Button 1 for camera movement mode switching
+    - Button 3 for toggling hidden functions
+    - Button 6 for killing the engine
+    - D-Pad left/right for switching between key modes
+    - D-Pad up/down for changing speed modifiers
+    """
+
     def __init__(self, master_input, joystick, threshold: float=0.3, rotation_sensitivity: float=2):
         self.master_input = master_input
         self.joystick = joystick

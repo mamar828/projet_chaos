@@ -3,7 +3,6 @@ from astropy.constants import M_sun, M_earth
 
 from src.systems.base_system import BaseSystem
 from src.bodies.gravitational_body import GravitationalBody
-from src.bodies.new_body import NewBody
 from src.tools.vector import Vector
 from src.engines.engine_3D.elements import *
 
@@ -41,10 +40,3 @@ bremss = Function3D(
     function=lambda x, y: 30 * np.sin(x/20) * np.sin(y/20) + 500 * np.exp(-((x-450)**2+(y-450)**2)/1000), 
     x_limits=(0,900), y_limits=(0,900), resolution=500, hidden=True
 )
-
-cinematic_movement = {
-    "positive_acceleration" : 0.05,
-    "negative_acceleration" : 0,
-    "positive_rotation" : 0.05,
-    "negative_rotation" : 1
-}

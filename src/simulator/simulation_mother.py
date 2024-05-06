@@ -8,24 +8,32 @@ from datetime import datetime
 from os.path import exists
 from os import makedirs
 from tqdm import tqdm
-from typing import Callable
 from eztcolors import Colors as C
 
 from src.simulator.simulation import Simulation
 from src.simulator.lambda_func import Lambda
 from src.systems.base_system import BaseSystem
-from src.systems.new_system import NewSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.bodies.fake_body import FakeBody
-from src.bodies.new_body import NewBody
 from src.bodies.computed_body import ComputedBody
 from src.tools.vector import Vector
 
 
 class SimulationMother:
+    """
+    The base class for generating multiple simulations.
+    """
+
     def __init__(self, base_system: BaseSystem):
+        """
+        Initialize a SimulationMother object.
+
+        Arguments
+        ---------
+        base_system : BaseSystem
+            Base system on which to base the simulations.
+        """
         self.initial_system = base_system
-        self.pool = None
 
     @staticmethod
     def dump_body(body: GravitationalBody | ComputedBody | FakeBody, type: str, file: GzipFile):
@@ -34,7 +42,7 @@ class SimulationMother:
 
         Parameters
         ----------
-        body : GravitationalBody | ComputedBody
+        body : GravitationalBody | ComputedBody | FakeBody
             Body to dump into the file.
         type : str
             Type of the body.
@@ -193,7 +201,7 @@ class SimulationMother:
             Delta time between of each step. Defaults to 1000.
         positions_saving_frequency : int
             Sets the number of steps after which the body's positions will be saved. Defaults to 1e2. Use multiples of
-            10 for better results. Also sets the frequency at which the bodies' state will be checked (dead/alive)
+            10 for better results. Also sets the frequency at which the bodies' state will be checked (dead/alive).
         potential_gradient_limit: float
             Limit for the potential gradient on a body to be considered still alive. Defaults to 5e-10.
         body_alive_func: Lambda
@@ -224,42 +232,16 @@ class SimulationMother:
         body_initial_position_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_position_limits]
         body_initial_velocity_limits = [(round(val[0],10), round(val[1],10)) for val in body_initial_velocity_limits]
 
-        def get_meshed_array(x_lims, y_lims, z_lims, count) -> np.ndarray:
-            x_coords = np.linspace(*x_lims, num=round(count**(1/3)))
-            y_coords = np.linspace(*y_lims, num=round(count**(1/3)))
-            z_coords = np.linspace(*z_lims, num=round(count**(1/3)))
-            X, Y, Z = np.meshgrid(x_coords, y_coords, z_coords)
-            return np.vstack((X.ravel(), Y.ravel(), Z.ravel())).transpose()
-
-        if True:
-            body_positions = np.array([
-                np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
-                np.random.uniform(*body_initial_position_limits[1], size=simulation_count),
-                np.random.uniform(*body_initial_position_limits[2], size=simulation_count)
-            ]).transpose()
-            body_velocities = np.array([
-                np.random.uniform(*body_initial_velocity_limits[0], size=bodies_per_simulation),
-                np.random.uniform(*body_initial_velocity_limits[1], size=bodies_per_simulation),
-                np.random.uniform(*body_initial_velocity_limits[2], size=bodies_per_simulation)
-            ]).transpose().tolist()
-        elif False:
-            body_positions = np.array([
-                np.tile(np.linspace(*body_initial_position_limits[0], num=int(simulation_count**0.5)),
-                        int(simulation_count**0.5)),
-                np.repeat(np.linspace(*body_initial_position_limits[1], num=int(simulation_count**0.5)),
-                        int(simulation_count**0.5)),
-                np.linspace(*body_initial_position_limits[2], num=simulation_count)
-            ]).transpose().tolist()
-            body_velocities = np.array([
-                np.tile(np.linspace(*body_initial_velocity_limits[0], num=int(bodies_per_simulation**0.5)),
-                        int(bodies_per_simulation**0.5)),
-                np.repeat(np.linspace(*body_initial_velocity_limits[1], num=int(bodies_per_simulation**0.5)),
-                        int(bodies_per_simulation**0.5)),
-                np.linspace(*body_initial_velocity_limits[2], num=bodies_per_simulation)
-            ]).transpose().tolist()
-        else:
-            body_positions = get_meshed_array(*body_initial_position_limits, simulation_count).tolist()
-            body_velocities = get_meshed_array(*body_initial_velocity_limits, bodies_per_simulation).tolist()
+        body_positions = np.array([
+            np.random.uniform(*body_initial_position_limits[0], size=simulation_count),
+            np.random.uniform(*body_initial_position_limits[1], size=simulation_count),
+            np.random.uniform(*body_initial_position_limits[2], size=simulation_count)
+        ]).transpose()
+        body_velocities = np.array([
+            np.random.uniform(*body_initial_velocity_limits[0], size=bodies_per_simulation),
+            np.random.uniform(*body_initial_velocity_limits[1], size=bodies_per_simulation),
+            np.random.uniform(*body_initial_velocity_limits[2], size=bodies_per_simulation)
+        ]).transpose().tolist()
 
         print(f"{C.YELLOW+C.BOLD}Simulation starting at {datetime.now().strftime('%H:%M:%S')} with parameters:{C.END}")
         print(C.BROWN)
@@ -276,8 +258,8 @@ class SimulationMother:
               f"\n    integrator:               {integrator}" +
               f"\n    save_foldername:          {save_foldername}{C.END}\n")
 
-        self.pool = Pool()
-        number_of_processes = self.pool._processes
+        pool = Pool()
+        number_of_processes = pool._processes
         print(f"{C.BROWN}Number of processes used: {number_of_processes}{C.END}")
         start = datetime.now()
 
@@ -294,7 +276,7 @@ class SimulationMother:
 
         total_args = special_args + worker_args
         results = []
-        mapped_pool = self.pool.imap(self.worker_simulation_star, total_args)
+        mapped_pool = pool.imap(self.worker_simulation_star, total_args)
         print(C.LIGHT_PURPLE, end="")
         for result in tqdm(mapped_pool, total=len(total_args), desc="Simulating", miniters=1, mininterval=0.001):
             results.append(result)
@@ -318,7 +300,7 @@ class SimulationMother:
         )
         self.save_results(results, save_foldername)
         print(f"{C.GREEN+C.BOLD}Simulation successfully saved at {save_foldername}.{C.END}")
-        self.pool.close()
+        pool.close()
         return save_foldername
     
     @staticmethod
@@ -340,6 +322,9 @@ def worker_simulation(
         body_alive_func: tuple[int,int],
         integrator: str
     ):
+    """
+    Worker function to execute a single simulation.
+    """
     if not isinstance(body_position, np.ndarray) and not isinstance(body_velocities, np.ndarray):
         # Special simulation, occuring only once
         simulation = Simulation(

@@ -4,10 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyregion
 from src.systems.base_system import BaseSystem
-from src.systems.new_system import NewSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.bodies.fake_body import *
-from src.bodies.new_body import NewBody
 from src.tools.vector import Vector
 from src.simulator.simulation_mother import SimulationMother
 from src.simulator.simulation import Simulation
