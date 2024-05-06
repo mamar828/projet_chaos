@@ -61,8 +61,7 @@ class GravitationalBody(Body):
             self.yoshida_d_constants = (w_1, w_0, w_1)
 
         super().__init__(position, velocity, fixed, has_potential)
-        if mass < 0:
-            raise ValueError("mass must be positive")
+        assert mass > 0, "mass must be positive"
         self.mass = mass
         self.dead = False   # Whether the body is dead or not and should be removed from the display
         self.time_survived = 0

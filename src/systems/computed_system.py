@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from src.systems.base_system import BaseSystem
 from src.bodies.fake_body import *

@@ -1,19 +1,8 @@
-"""
-    @file:              scalar_field.py
-    @Author:            Félix Desroches
+from typing import List, Tuple
+from numpy import sqrt
 
-    @Creation Date:     03/2024
-    @Last modification: 03/2024
-
-    @Description:       This file contains a class used to create the basic structure of a scalar field.
-"""
-
-from typing import Dict, List, Tuple
-import time
-from numpy import sqrt, linspace, zeros, ndarray
-
-from src.tools.vector import FakeVector, Vector
 from src.fields.base_field import Field
+from src.tools.vector import FakeVector, Vector
 
 
 class VectorField(Field):
@@ -111,6 +100,7 @@ class VectorField(Field):
         value : float
             The value of the field at the given position.
         """
+
         force = FakeVector(0, 0, 0)
         for term in self.terms:
             relative_distance = sqrt((term[2].x-position.x)**2+(term[2].y-position.y)**2+(term[2].z-position.z)**2)
@@ -121,7 +111,7 @@ class VectorField(Field):
             )
         return force.vectorise()
 
-    def get_acceleration(self, position: Vector, epsilon: float = 10 ** (-2), iterative: bool = False) -> Vector:
+    def get_acceleration(self, position: Vector, *args) -> Vector:
         """
         Computes the gradient of the scalar field at a given position using a step of size epsilon.
 
@@ -129,9 +119,8 @@ class VectorField(Field):
         ----------
         position : Vector
             The position where the gradient should be evaluated
-        epsilon : float
-            The space interval with which the gradient is computed, a smaller value gives more accurate results,
-            defaults to 10**(-3).
+        args :
+            Arguments to match signature.
 
         Returns
         -------
@@ -140,5 +129,3 @@ class VectorField(Field):
         """
 
         return self(position)
-
-

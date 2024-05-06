@@ -1,19 +1,9 @@
-"""
-    @file:              scalar_field.py
-    @Author:            Félix Desroches
-
-    @Creation Date:     03/2024
-    @Last modification: 03/2024
-
-    @Description:       This file contains a class used to create the basic structure of a scalar field.
-"""
-
 from typing import Dict, List, Tuple
 
-from numpy import sqrt, linspace, zeros, ndarray
+from numpy import linspace, ndarray, sqrt, zeros
 
-from src.tools.vector import Vector
 from src.fields.base_field import Field
+from src.tools.vector import Vector
 
 
 class ScalarField(Field):
@@ -111,6 +101,7 @@ class ScalarField(Field):
         value : float
             The value of the field at the given position.
         """
+
         value = 0
         if iterative:
             value = []
@@ -201,8 +192,8 @@ class ScalarField(Field):
                 -(self(Vector(x, y, z + epsilon/2)) - self(Vector(x, y, z - epsilon/2)))/epsilon,
             )
 
+    @staticmethod
     def _compute_field_wide_operations(
-            self,
             start: Vector,
             stop: Vector,
             function,

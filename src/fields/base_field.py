@@ -1,13 +1,3 @@
-"""
-    @file:              base_field.py
-    @Author:            Félix Desroches
-
-    @Creation Date:     03/2024
-    @Last modification: 03/2024
-
-    @Description:       This file contains a class used to create the basic structure of a field quantity.
-"""
-
 from src.tools.vector import Vector
 
 
