@@ -2,6 +2,25 @@ import pygame as pg
 
 
 class Keyboard:
+    """
+    This class defines the base class for a keyboard.
+
+    Supported controls are :
+    - WASD for movement
+    - IJKL or mouse for rotation
+    - SHIFT/Space for vertical movement
+    - TAB for body tracking
+    - 0-9 for choosing the speed of the current key mode.
+    - p for switching to presets key mode
+    - m for switching to manual key mode
+        Equations may be written then the enter key must be pressed.
+        e.g. "x1000", "+2", "-1", "/50".
+    - c for switching to camera key mode
+    - t for camera movement mode switching
+    - b for toggling hidden functions
+    - Escape for killing the engine
+    """
+
     def __init__(self, master_input):
         self.master_input = master_input
         self.current_pressed_keys = set()

@@ -1,6 +1,3 @@
-from inspect import getsource, signature
-
-
 class Lambda:
     """
     Wraps the lambda function to allow pickling.

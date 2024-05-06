@@ -2,11 +2,17 @@ import curses
 
 
 class Display:
-    def __init__(self, app):
+    """
+    This class defines the base class for a terminal display.
+
+    Note : if the terminal window is not big enough, the text will not be displayed at all.
+    """
+
+    def __init__(self, app, line_length: int=120):
         self.app = app
         self.console = curses.initscr()
         curses.noecho()
-        self.line_length = 120
+        self.line_length = line_length
 
     def update(self, state: dict):
         try:

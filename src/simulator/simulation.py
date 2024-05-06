@@ -16,6 +16,7 @@ except ImportError:
     Engine2D = None
     Engine3D = None
 
+
 class Simulation:
     def __init__(self, system: BaseSystem, maximum_delta_time: int=5000):
         """
@@ -172,7 +173,7 @@ class Simulation:
             positions_saving_frequency: int,
             potential_gradient_limit: float,
             body_alive_func: Lambda
-        ) -> dict:
+    ) -> dict:
         """
         Run the simulation.
 
@@ -216,7 +217,7 @@ class Simulation:
             "dead": system.dead_bodies
         }
     
-    def run_attractive_bodies(self, duration: int, positions_saving_frequency: int) -> list:
+    def run_attractive_bodies(self, duration: int, positions_saving_frequency: int) -> dict:
         """ 
         Run the simulation only for the attractive moving bodies of the system.
 

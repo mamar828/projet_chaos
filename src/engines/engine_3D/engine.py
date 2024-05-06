@@ -9,12 +9,17 @@ from src.engines.engine_3D.scene import Scene
 from src.engines.engine_3D.scene_renderer import SceneRenderer
 from src.engines.engine_3D.elements import Object3D, Function3D
 from src.engines.global_engine import GlobalEngine
-from src.engines.inputs.keyboard import Keyboard
+
+
 
 class Engine3D(GlobalEngine):
+    """
+    This class defines the 3D engine.
+    """
+
     def __init__(
             self,
-            simulation=None,#: Simulation                 Cannot provide type due to circular imports
+            simulation=None, # Simulation instance
             window_size: tuple[int,int]=(1440,900),
             framerate: int=60,
             fullscreen: bool=True,
@@ -43,8 +48,57 @@ class Engine3D(GlobalEngine):
                 "negative_rotation" : 0.94
             }
         ):
-        """ 
-        Supported model_size_types are "exaggerated" and "realistic".
+        """
+        Initialize the Engine3D class.
+
+        Arguments
+        ---------
+        simulation : Simulation, optional
+            Simulation instance. None if not provided.
+        window_size : tuple[int,int], optional
+            Window size in pixels. Default is (1440,900).
+        framerate : int, optional
+            Desired framerate. Default is 60.
+        fullscreen : bool, optional
+            Whether to start in fullscreen mode. Default is True.
+        light_position : tuple[int,int,int], optional
+            Light position in 3D space. Default is (0,0,0) or the simulation.system.origin if applicable.
+        light_color : tuple[int,int,int], optional
+            Light color. Default is (1,1,1).
+        light_ambient_intensity : float, optional
+            Ambient light intensity. Default is 0.
+        light_diffuse_intensity : float, optional
+            Diffuse light intensity. Default is 1.5.
+        light_specular_intensity : float, optional
+            Specular light intensity. Default is 1.0.
+        camera_origin : tuple[int,int,int], optional
+            Camera origin in 3D space. Default is (0,0,0) or the simulation.system.origin if applicable.
+        camera_speed : float, optional
+            Camera base movement speed. Default is 0.025.
+        camera_sensitivity : float, optional
+            Camera sensitivity. Default is 0.1.
+        camera_fov : float, optional
+            Camera field of view. Default is 50.
+        camera_near_render_distance : float, optional
+            Camera near render distance. Default is 0.05.
+        camera_far_render_distance : float, optional
+            Camera far render distance. Default is 1e20.
+        camera_yaw : float, optional
+            Camera starting yaw value. Default is -90.
+        camera_pitch : float, optional
+            Camera starting pitch value. Default is 0.
+        objects : list[Object3D], optional
+            List of 3D objects to be rendered. Default is None.
+        functions : list[Function3D], optional
+            List of 3D functions to be rendered. Default is None.
+        simulation_presets_allowed : bool, optional
+            Whether to allow using simulation presets if one is provided. Default is True.
+        model_size_type : str, optional
+            Type of model size. Default is "exaggerated", but can be "realistic".
+        model_saturation : bool, optional
+            Whether to apply color saturation to the models. Default is True.
+        camera_cinematic_settings : dict, optional
+            Camera cinematic settings. Default is a dictionary with specific values.
         """
         assert model_size_type in ["exaggerated", "realistic"], (
             f"{C.RED+C.BOLD}model_size_type keyword given is not supported. " +

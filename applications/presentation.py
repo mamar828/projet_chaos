@@ -4,10 +4,8 @@ import numpy as np
 from astropy.constants import M_sun
 
 from src.systems.base_system import BaseSystem
-from src.systems.new_system import NewSystem
 from src.bodies.gravitational_body import GravitationalBody
 from src.bodies.fake_body import *
-from src.bodies.new_body import NewBody
 from src.tools.vector import Vector
 from src.simulator.simulation_mother import SimulationMother
 from src.simulator.simulation import Simulation
@@ -21,45 +19,12 @@ from src.engines.engine_2D.object_2D import Object2D
 from src.engines.engine_2D.models import *
 
 
-def meme_bremss():
-    # sim_system = BaseSystem(list_of_bodies=[sun, earth, L1Body(), L2Body(), L3Body(), L4Body(), L5Body()], n=9)
-    sim = Simulation(
-        system=BaseSystem(
-            list_of_bodies=(
-                sun,
-                earth
-            ),
-            n=9
-        ),
-        maximum_delta_time=1000
-    )
-    # sim.show_2D(
-    #     traces=True,
-    #     display_clock=True,
-    #     window_size=(400,400),
-    #     screen_color=(255,255,255),
-    #     clock_font=(("Trebuchet MS", 25), "black")
-    # )
-    sim.show_3D(
-        show_potential=True,
-        functions=[
-            Function3D(texture="bremss_1", instance=sim.system, x_limits=(0,900), y_limits=(0,900),
-                        resolution=200, hidden=True),
-            Function3D(texture="bremss_2", instance=sim.system, x_limits=(0,900), y_limits=(0,900),
-                        resolution=200, hidden=True, rotation=(0,0,90), position=(900,0,0))
-        ],
-        objects=[Object3D()],
-        # fullscreen=False,
-        # model_size_type="realistic",
-        model_size_type="exaggerated",
-        # window_size=(1000,600),
-        window_size=(1440,900),
-        # window_size=(1920,1080),
-        # camera_cinematic_settings=cinematic_movement
-    )
-
-
-# meme_bremss()
+cinematic_movement = {
+    "positive_acceleration" : 0.05,
+    "negative_acceleration" : 0,
+    "positive_rotation" : 0.05,
+    "negative_rotation" : 1
+}
 
 
 def dvd():
@@ -120,8 +85,8 @@ def L1_viewer_single():
             #             resolution=200, hidden=True, rotation=(0,0,90), position=(900,0,0))
         ],
         # model_size_type="exaggerated",
-        window_size=(1920,1080)
-        # window_size=(1440,900)
+        # window_size=(1920,1080)
+        window_size=(1440,900)
     )
 
 
@@ -198,8 +163,8 @@ def all_lagrange_points():
         show_potential=True,
         # model_size_type="realistic",
         model_size_type="exaggerated",
-        window_size=(1920,1080)
-        # window_size=(1440,900)
+        # window_size=(1920,1080)
+        window_size=(1440,900)
     )
 
 
@@ -253,12 +218,25 @@ def size_comparison():
 # size_comparison()
 
 
+def squares():
+    sim = Simulation.load_from_folder("simulations/old/squares_2")
+    sim.show_3D(
+        # model_size_type="realistic",
+        model_size_type="exaggerated",
+        # window_size=(1920,1080),
+        window_size=(1440,900),
+    )
+
+
+# squares()
+
+
 def plot_your_func():
     Engine3D(
         window_size=(1920,1080),
         functions=[
-            Function3D(texture=2, x_limits=(-100,100), y_limits=(-100,100), resolution=50,
-                       function=lambda x, y: np.sin(0.1*x)*np.sin(0.1*y)*30 + 100*np.exp(-(x**2+y**2)/100))
+            Function3D(texture="filix", x_limits=(-500,500), y_limits=(-500,500), resolution=50,
+                       function=lambda x, y: 50 * np.sin(0.1*x) * np.sin(0.1*y))
         ],
         simulation_presets_allowed=False,
         model_saturation=False,
@@ -268,3 +246,22 @@ def plot_your_func():
 
 
 # plot_your_func()
+
+
+def cat():
+    Engine3D(
+        window_size=(1920,1080),
+        objects=[
+            Object3D("filix", scale=(10,10,10), position=(0,0,100), model=Sphere),
+            Object3D("bremss_1", scale=(10,10,10), position=(100,0,100), model=Sphere),
+            Object3D("bremss_2", rotation=(-90,0,0), scale=(1,1,1), model=Cat)
+        ]
+        # simulation_presets_allowed=False,
+        # model_saturation=False,
+        # light_position=(100,0,100),
+        # light_color=(5,5,5),
+    ).run()
+
+
+# cat()
+

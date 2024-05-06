@@ -7,13 +7,31 @@ from src.engines.inputs.controller import Controller
 from src.engines.display import Display
 
 class GlobalEngine:
+    """
+    This class defines the base class for all engines.
+    """
+    
     def __init__(
             self,
             simulation,
-            window_size,
-            framerate,
-            fullscreen
-        ):
+            window_size: tuple[int,int],
+            framerate: int,
+            fullscreen: bool
+    ):
+        """
+        Initialize the GlobalEngine class.
+
+        Arguments
+        ---------
+        simulation : Simulation
+            The simulation object to be associated with the engine.
+        window_size : tuple[int,int]
+            A tuple representing the width and height of the window.
+        framerate : int
+            The target framerate for the engine.
+        fullscreen : bool
+            A flag indicating whether the engine should run in fullscreen mode.
+        """
         self.simulation = simulation
         self.window_size = window_size
         self.framerate = framerate
