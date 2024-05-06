@@ -20,6 +20,7 @@ class ComputedSystem(BaseSystem):
         kwargs : dict
             Dictionary of arguments to pass to the BaseSystem constructor.
         """
+
         super().__init__(*args, **kwargs)
         self.tick_factor = tick_factor
         self.current_tick = 0
@@ -39,6 +40,7 @@ class ComputedSystem(BaseSystem):
             The time step during which the acceleration and velocity are considered constant, a smaller values gives
             more accurate results.
         """
+
         self.current_tick += time_step
         if self.current_tick > self.tick_factor:
             self.current_tick -= self.tick_factor
@@ -55,6 +57,7 @@ class ComputedSystem(BaseSystem):
         base_system : BaseSystem
             BaseSystem with all the ComputedSystem's bodies.
         """
+
         new_bodies = []
         for body in self.list_of_bodies:
             if body.time_survived == 1e20:
@@ -81,6 +84,7 @@ class ComputedSystem(BaseSystem):
         """
         Plot the positions of all the bodies in the system.
         """
+
         filtered_bodies = self.get_bodies_info()
         number_of_positions = int(self.info["simulation_count"])
         for i in range(int(self.info["bodies_per_simulation"])):
@@ -100,7 +104,6 @@ class ComputedSystem(BaseSystem):
             ax1.set_xlabel("Distance horizontale avec le Soleil [Gm]")
             ax1.set_ylabel("Distance verticale avec le Soleil [Gm]")
 
-            width = depth = 1
             plt.gca
             plt.gcf
 
@@ -123,13 +126,12 @@ class ComputedSystem(BaseSystem):
         """
         Plot the positions of all the bodies in the system.
         """
+
         filtered_bodies = self.get_bodies_info()
         number_of_positions = int(self.info["simulation_count"])
         if plot_best_body:
             # Determine the velocity that will be plotted by using the velocity which has the longest surviving body
             vel = np.argmax(filtered_bodies[:,6]) // number_of_positions
-            # filtered_bodies[vel*number_of_positions:(vel+1)*number_of_positions] = np.zeros((1,7))
-            # vel = np.argmax(filtered_bodies[:,6]) // number_of_positions
         else:
             vel = 0
         

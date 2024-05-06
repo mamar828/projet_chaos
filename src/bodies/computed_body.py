@@ -1,14 +1,16 @@
+from eztcolors import Colors as C
 from numpy.random import randint
 from random import choice
-from eztcolors import Colors as C
-from time import sleep
 
 from src.bodies.gravitational_body import GravitationalBody
 
 
-
 class ComputedBody(GravitationalBody):
-    def __init__(self, positions: list, type: str, time_survived: int=None, *args, **kwargs):
+    """
+    A class to create bodies that are updated using sequences of positions and not the system's physics.
+    """
+
+    def __init__(self, positions: list, type: str, time_survived: int = None, *args, **kwargs):
         """
         Defines required parameters.
 
@@ -23,8 +25,9 @@ class ComputedBody(GravitationalBody):
         args : list
             Arguments to pass to the GravitationalBody constructor.
         kwargs : dict
-            Arguments to pass to the GravitationalBody constructor.
+            Keyword arguments to pass to the GravitationalBody constructor.
         """
+
         super().__init__(*args, **kwargs)
         self.positions = positions
         self.type = type
@@ -42,6 +45,7 @@ class ComputedBody(GravitationalBody):
         gravitational_body : GravitationalBody
             GravitationalBody with the initial conditions of the original ComputedBody.
         """
+
         return GravitationalBody(
             mass=self.mass,
             position=self.position,
@@ -55,6 +59,7 @@ class ComputedBody(GravitationalBody):
         """
         Update the body's position.
         """
+
         if self.positions:
             self._position = self.positions[0]
             del self.positions[0]
@@ -68,13 +73,15 @@ class ComputedBody(GravitationalBody):
         Parameters
         ----------
         random_tuple : bool, optional
-            Wether the function is allowed to return a tuple of ints or should always return a named color.
+            Whether the function is allowed to return a tuple of ints or should always return a named color. Defaults to
+            True.
 
         Returns
         -------
         color : str | tuple[int, int, int]
             The color of the body: green if it stays alive, red if not and random for the others.
         """
+
         if self.type == "base_body" or self.type == "attractive_moving":
             if random_tuple:
                 return randint(0, 255, 3)

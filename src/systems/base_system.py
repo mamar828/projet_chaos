@@ -1,18 +1,8 @@
-"""
-    @file:              base_system.py
-    @Author:            Félix Desroches
-
-    @Creation Date:     03/2024
-    @Last modification: 03/2024
-
-    @Description:       This file contains a class used to create the basic structure of a many body system.
-"""
 from typing import Dict, List, Union, Optional
 
 import numpy as np
 from numpy import abs, gradient, ones_like, rot90, zeros_like, argmax
 from matplotlib.pyplot import close, colorbar, imshow, gca, scatter, show
-from matplotlib.pyplot import xlim, ylim
 
 from src.bodies.base_body import Body
 from src.bodies.gravitational_body import GravitationalBody
@@ -47,17 +37,28 @@ class BaseSystem:
         list_of_bodies : List[Body]
             A list of the bodies used to create the system.
         base_potential : Optional[ScalarField]
-            A ScalarField object to define the source-less potential. Defaults to a constant and null potential.
+            A ScalarField object to define the source-less interactions. Defaults to a constant and null interaction.
+        base_force_field : Optional[VectorField]
+            A VectorField object to define the source-less interactions. Defaults to a constant and null interaction.
         n : int
             The log base 10 of the space unit relative to the meter (e.g. 3 means 1000m or km and 6 means 10**6m or
-            Mm).
+            Mm). Defaults to 9 (Gm).
+        method : str
+            The computation method, thus the form in which the interaction is required. The currently implemented
+            methods are: "potential", "force". Defaults to "force".
+        integrator : str
+            The type of integrator to use when updating the position of the body. Defaults to "synchronous". Currently
+            implemented integrators are: "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida",
+            "runge-kutta".
         """
+
         assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"], \
             ('The currently implemented integrators are:'
              ' "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta"')
         self.integrator = integrator
         assert method in ["potential", "force"], 'The currently implemented methods are: "potential", "force"'
         self.method = method
+
         self.n = n
         if base_potential is None:
             base_potential = ScalarField([(0, 0, Vector(0, 0, 0))])
@@ -65,11 +66,13 @@ class BaseSystem:
             base_force_field = VectorField([(0, 0, Vector(0, 0, 0))])
         self._base_potential = base_potential
         self._base_force_field = base_force_field
+
         self.fixed_bodies = []
         self.moving_bodies = []
         self.attractive_bodies = []
         self.dead_bodies = []
         self.list_of_bodies = list_of_bodies
+
         if integrator == "leapfrog":
             self.set_up_step = True
         self.fake_bodies = []
@@ -83,6 +86,7 @@ class BaseSystem:
                 self.moving_bodies.append(body)
             if body.has_potential:
                 self.attractive_bodies.append(body)
+
         self.current_potential = None
         # Find origin for plotting the potential
         masses = loads(dumps([body.mass for body in self.list_of_bodies]))
@@ -98,7 +102,7 @@ class BaseSystem:
                 body.save_position()
 
         elif len(self.list_of_bodies) > 1:
-            # Reference the second largest body to be the body to track
+            # Reference the second-largest body to be the body to track
             moving_masses = [body.mass for body in self.moving_bodies]
             self.tracked_body = self.moving_bodies[argmax(moving_masses)]
 
@@ -116,14 +120,18 @@ class BaseSystem:
         epsilon : float
             The space interval with which the gradient is computed, a smaller value gives more accurate results,
             defaults to 10**(-2).
+        method : str
+            The computation method, thus the form in which the interaction is required. The currently implemented
+            methods are: "potential", "force". Defaults to "force".
         """
+        
         method = self.method
         if method == "force":
             force_field = loads(dumps(self._base_force_field))
             for body in self.attractive_bodies:
                 force_field += body.gravitational_field
             if len(force_field.terms) > 2:
-                force_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
+                force_field -= VectorField([(0, 0, Vector(0, 0, 0))])
             force_field = loads(dumps(force_field))
             for body in self.moving_bodies:
                 if body is not None:
@@ -145,7 +153,7 @@ class BaseSystem:
                         acting_potential = loads(dumps(potential_field)) - body.potential    # equivalent to deepcopy()
                     else:
                         acting_potential = loads(dumps(potential_field))
-                    body(time_step, acting_potential*(10**(-self.n))**3, epsilon*10**(-self.n), method=method)
+                    body(time_step, acting_potential * (10 ** (-self.n)) ** 3, epsilon * 10 ** (-self.n), method=method)
 
         if self.fake_bodies:
             for body in self.fake_bodies:
@@ -158,13 +166,19 @@ class BaseSystem:
             potential_field -= ScalarField([(0, 0, Vector(0, 0, 0))])
         self.current_potential = loads(dumps(potential_field))*(10**(-self.n))**3
 
-    def update_new(self, time_step: float, epsilon: float = 10**(-2)):
+    def update_with_matrices(self, time_step: float, epsilon: float = 10 ** (-2)):
         """
+        Updates the position and velocity of the bodies within the system according to a potential and time step. This
+        method uses matrix computations. |!| THIS METHOD IS UNDER CONSTRUCTION AND MAY NOT WORK PERFECTLY|!|
 
-        :param time_step:
-        :param epsilon:
-        :param method:
-        :return:
+        Parameters
+        ----------
+        time_step : float
+            The time step during which the acceleration and velocity are considered constant, a smaller values gives
+            more accurate results.
+        epsilon : float
+            The space interval with which the gradient is computed, a smaller value gives more accurate results,
+            defaults to 10**(-2).
         """
         epsilon = epsilon*(10**(-self.n))
         scale = (10**(-self.n))**3
@@ -173,6 +187,7 @@ class BaseSystem:
             field = loads(dumps(self._base_force_field))
         elif method == "potential":
             field = loads(dumps(self._base_potential))
+
         for body in self.attractive_bodies:
             field += body.get_field(method)
         if (0, 0, Vector(0, 0, 0)) in field.terms:
@@ -211,7 +226,10 @@ class BaseSystem:
 
             new_accelerations = np.array(
                 [
-                    loads(dumps(field)).__sub__(body.get_field(method)*scale).get_acceleration(Vector(*updated_positions[i, :]), epsilon)
+                    loads(dumps(field)).__sub__(body.get_field(method)*scale).get_acceleration(
+                        Vector(*updated_positions[i, :]),
+                        epsilon
+                    )
                     for i, body in enumerate(self.moving_bodies) if body is not None
                 ]
             )
@@ -235,7 +253,6 @@ class BaseSystem:
             for i, body in enumerate(self.moving_bodies):
                 body._velocity = Vector(*updated_velocities[i, :])
 
-
     def remove_dead_bodies(self, potential_gradient_limit: float, body_alive_func: Lambda):
         """
         Removes the bodies that are considered to be destroyed or too distant. Checks only for the moving bodies
@@ -248,11 +265,16 @@ class BaseSystem:
         body_alive_func: Lambda
             Lambda object specifying the conditions a body must respect to stay alive.
         """
+
         epsilon = 10**(-2)*10**(-self.n)
         for body in self.moving_bodies:
-            if not body.has_potential and body.is_dead(self.current_potential, epsilon,
-                                                        potential_gradient_limit, body_alive_func,
-                                                        self.tracked_body):
+            if not body.has_potential and body.is_dead(
+                    self.current_potential,
+                    epsilon,
+                    potential_gradient_limit,
+                    body_alive_func,
+                    self.tracked_body
+            ):
                 self.dead_bodies.append(body)
                 self.moving_bodies.remove(body)
 
@@ -260,6 +282,7 @@ class BaseSystem:
         """
         Save the positions of every body in the system.
         """
+
         for body in self.moving_bodies:
             body.save_position()
         if save_fake and self.fake_bodies:
@@ -326,7 +349,7 @@ class BaseSystem:
             axes_size = [max_first_axis * 1.1, max_second_axis * 1.1]
 
         if show_potential or show_potential_null_slope_points:
-            potential_field = loads(dumps((self._base_potential)))
+            potential_field = loads(dumps(self._base_potential))
             for body in self.attractive_bodies:
                 potential_field += body.potential
 
@@ -382,13 +405,6 @@ class BaseSystem:
                     c=colours[(i + len(list_of_massive_bodies)) % len(colours)]
                 )
 
-        # TO REMOVE
-        # x, y, z = self.tracked_body.position
-        # xlim(x-3,x+3)
-        # ylim(y-3,y+3)
-        # xlim(0,900)
-        # ylim(0,900)
-
         if show_bodies or show_potential_null_slope_points or show_potential:
             show()
             close()
@@ -402,6 +418,7 @@ class BaseSystem:
         potential_function : ScalarField
             Function of three variables giving the potential value at the specified position.
         """
+
         potential_field = loads(dumps(self._base_potential))
         for body in self.attractive_bodies:
             potential_field += body.potential
@@ -419,6 +436,7 @@ class BaseSystem:
         best_body : ComputedBody
             The body in the system who survived the longest.
         """
+
         simulated_bodies = [body for body in list(set(self.moving_bodies) - set(self.attractive_bodies))
                             if body.time_survived != 1e20]
         return simulated_bodies[argmax([body.time_survived for body in simulated_bodies])]

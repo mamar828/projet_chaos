@@ -1,12 +1,3 @@
-"""
-    @file:              vector.py
-    @Author:            Félix Desroches
-
-    @Creation Date:     03/2024
-    @Last modification: 03/2024
-
-    @Description:       This file contains a class used to create vectors in 3D space.
-"""
 from __future__ import annotations
 
 from typing import NamedTuple

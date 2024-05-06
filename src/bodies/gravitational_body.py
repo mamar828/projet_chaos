@@ -1,19 +1,9 @@
-"""
-    @file:              gravitational_body.py
-    @Author:            Félix Desroches
-
-    @Creation Date:     03/2024
-    @Last modification: 03/2024
-
-    @Description:       This file contains a class used to create a body with a mass used for computations using
-                        gravitational potentials.
-"""
 from __future__ import annotations
 
 from scipy.constants.constants import gravitational_constant
+from eztcolors import Colors as C
 from numpy.linalg import norm
 from numpy.random import randint
-from eztcolors import Colors as C
 
 from src.bodies.base_body import Body
 from src.fields.scalar_field import ScalarField
@@ -36,7 +26,7 @@ class GravitationalBody(Body):
             fixed: bool = False,
             has_potential: bool = True,
             integrator: str = "synchronous"
-        ):
+    ):
         """
         Defines required parameters.
 
@@ -49,13 +39,13 @@ class GravitationalBody(Body):
         velocity : Vector
             The velocity of the body when created.
         fixed : bool
-            Whether the body is fixed to it's initial position independent of all velocity and potentials.
+            Whether the body is fixed to it's initial position independent of velocity and potential.
         has_potential : bool
-            Whether the body generates a potential field during simulations.
+            Whether the body generates a potential field that acts on other bodies during simulations.
         integrator : str
             The type of integrator to use when updating the position of the body. Defaults to "synchronous". Currently
             implemented integrators are: "euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", 
-            "runge-kutta"
+            "runge-kutta".
         """
 
         assert integrator in ["euler", "leapfrog", "synchronous", "kick-drift-kick", "yoshida", "runge-kutta", None], \
@@ -85,20 +75,24 @@ class GravitationalBody(Body):
             method: str = "potential"
     ) -> None:
         """
-        Updates the position and velocity of the body according to a potential and time step.
+        Updates the position and velocity of the body according to an interaction field and time step.
 
         Parameters
         ----------
         time_step : float
             The time step during which the acceleration and velocity are considered constant, a smaller value gives
             more accurate results.
-        field : ScalarField
-            The potential causing the body's acceleration.
+        field : ScalarField | VectorField
+            The interaction causing the body's acceleration.
         epsilon : float
-            The space interval with which the gradient is computed, a smaller value gives more accurate results,
-            defaults to 10**(-3).
+            The space interval with which the gradient is computed, defaults to 10**(-2).
+        method : str
+            The acceleration computation method, "potential" uses the gradient of the potential field and "force" uses
+            a force field, defaults to "potential".
         """
+
         assert method in ["potential", "force"], 'The currently implemented methods are: "potential", "force"'
+
         self.time_survived += time_step
         x, y, z = self._position
         v_x, v_y, v_z = self._velocity
@@ -106,6 +100,7 @@ class GravitationalBody(Body):
             a_x, a_y, a_z = field.get_acceleration(self._position, epsilon)
         else:
             a_x, a_y, a_z = 0, 0, 0
+
         if self.integrator == "euler":
             self._position = Vector(
                 x+v_x*time_step+a_x/2*time_step**2,
@@ -210,55 +205,64 @@ class GravitationalBody(Body):
                 v_z + (a_z_1 + 2 * a_z_2 + 2 * a_z_3 + a_z_4) / 6 * time_step
             )
 
-    def update(self, time_step: float, potential: ScalarField, epsilon: float = 10**(-2)):
+    def update(
+            self,
+            time_step: float,
+            field: ScalarField | VectorField,
+            epsilon: float = 10 ** (-2),
+            method: str = "potential"
+    ) -> None:
         """
-        Updates the position and velocity of the body according to a potential and time step.
+        Updates the position and velocity of the body according to an interaction field and time step.
 
         Parameters
         ----------
         time_step : float
-            The time step during which the acceleration and velocity are considered constant, a smaller values gives
+            The time step during which the acceleration and velocity are considered constant, a smaller value gives
             more accurate results.
-        potential : ScalarField
-            The potential causing the body's acceleration.
+        field : ScalarField | VectorField
+            The interaction causing the body's acceleration.
         epsilon : float
-            The space interval with which the gradient is computed, a smaller value gives more accurate results,
-            defaults to 10**(-3).
+            The space interval with which the gradient is computed, defaults to 10**(-2).
+        method : str
+            The acceleration computation method, "potential" uses the gradient of the potential field and "force" uses
+            a force field, defaults to "potential".
         """
 
-        self(time_step, potential, epsilon)
+        self(time_step, field, epsilon, method)
 
     def save_position(self):
         """
         Saves the current position of the body to the positions list.
         """
+
         self.positions.append(self._position)
 
     @property
     def potential(self) -> ScalarField:
         """
-        Gives the body's potential as a ScalarField object.
+        Gives the body's interaction as a ScalarField object.
 
         Returns
         -------
         scalar_field : ScalarField
-            The ScalarField object associated with the body's gravitational potential.
+            The ScalarField object associated with the body's interaction.
         """
 
         return ScalarField([(-1, -self.mass * gravitational_constant, self._position)])
 
     @property
-    def gravitational_field(self) -> ScalarField:
+    def gravitational_field(self) -> VectorField:
         """
-        Gives the body's potential as a ScalarField object.
+        Gives the body's interaction as a VectorField object.
 
         Returns
         -------
-        scalar_field : ScalarField
-            The ScalarField object associated with the body's gravitational potential.
+        vector_field : VectorField
+            The VectorField object associated with the body's interaction.
         """
 
-        return ScalarField([(-2, -self.mass * gravitational_constant, self._position)])
+        return VectorField([(-2, -self.mass * gravitational_constant, self._position)])
     
     def is_dead(
             self,
@@ -266,10 +270,10 @@ class GravitationalBody(Body):
             epsilon: float,
             potential_gradient_limit: float,
             body_alive_limits: Lambda,
-            tracked_body: GravitationalBody=None
-        ) -> bool:
+            tracked_body: GravitationalBody = None
+    ) -> bool:
         """
-        Gives whether the body is considered dead by evaluating if the modulus of the acceleration to which the body is
+        Gives whether the body is considered dead by evaluating the modulus of the acceleration to which the body is
         subjected. Also checks if the body is too far away from its initial position.
 
         Parameters
@@ -277,48 +281,67 @@ class GravitationalBody(Body):
         potential : ScalarField
             Potential field to evaluate the body's acceleration.
         epsilon : float
-            The space interval with which the gradient is computed, a smaller value gives more accurate results,
+            The space interval with which the gradient is computed.
         potential_gradient_limit: float
-            Quantity over which the body is considered dead.
-        body_alive_func: Lambda
+            Limit above which the body is considered dead.
+        body_alive_limits: Lambda
             Lambda function specifying the conditions a body must respect to stay alive.
         tracked_body: GravitationalBody
-            Body that is tracked in the system. This allows to make operations with that body to determine alive
+            Body that is tracked in the system. This allows to make operations with that body to determine survival
             conditions.
             
         Returns
         -------
         is_dead : bool
-            Whether the body is considered dead or not.
+            Whether the body is considered dead or alive.
         """
+
         if body_alive_limits:
             if body_alive_limits.number_of_parameters == 3:
-                if not body_alive_limits(*self.position): return True
+                if not body_alive_limits(*self.position):
+                    return True
             elif body_alive_limits.number_of_parameters == 6:
-                if not body_alive_limits(*self.position, *tracked_body.position): return True
+                if not body_alive_limits(*self.position, *tracked_body.position):
+                    return True
             else:
                 raise ValueError(C.RED + "Function has an incorrect number of parameters. Expected 3 or 6." + C.END)
 
-        if norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit: return True
+        if norm([*potential.get_gradient(self._position, epsilon)]) > potential_gradient_limit:
+            return True
         
         return False
 
     def get_color(self) -> tuple[int, int, int]:
         """
-        Get a random color of the body.
+        Get a random color.
 
         Returns
         -------
         color : tuple[int, int, int]
-            The color of the body.
+            The random color.
         """
+
         return randint(0, 255, 3)
 
-    def get_field(self, method: str):
+    def get_field(self, method: str) -> ScalarField | VectorField:
+        """
+        Gets the interaction in a specific form.
+
+        Parameters
+        ----------
+        method : str
+            The computation method, thus the form in which the interaction is required. The currently implemented
+            methods are: "potential", "force".
+
+        Returns
+        -------
+        field : calarField | VectorField
+            The desired interaction
+        """
+
         assert method in ["potential", "force"], 'The currently implemented methods are: "potential", "force"'
 
         if method == "force":
             return self.gravitational_field
         elif method == "potential":
             return self.potential
-

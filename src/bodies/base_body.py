@@ -1,20 +1,13 @@
-"""
-    @file:              base_body.py
-    @Author:            Félix Desroches
+from __future__ import annotations
 
-    @Creation Date:     03/2024
-    @Last modification: 03/2024
-
-    @Description:       This file contains a class used to create the basic structure of a physical body used for
-                        simulation.
-"""
 from copy import deepcopy
 from warnings import filterwarnings
-filterwarnings('ignore')
 
 from src.fields.scalar_field import ScalarField
 from src.fields.vector_field import VectorField
 from src.tools.vector import Vector
+
+filterwarnings('ignore')
 
 
 class Body:
@@ -36,13 +29,13 @@ class Body:
         Parameters
         ----------
         position : Vector
-            The position of the body when created.
+            The position of the body when created at time t=0.
         velocity : Vector
-            The velocity of the body when created.
+            The velocity of the body when created at time t=0.
         fixed : bool
-            Whether the body is fixed to it's initial position independent of all velocity and potentials.
+            Whether the body is fixed to it's initial position independent of velocity and potential.
         has_potential : bool
-            Whether the body generates a potential field during simulations.
+            Whether the body generates a potential field that acts on other bodies during simulations.
         """
 
         self._position = position
@@ -53,7 +46,13 @@ class Body:
         self.initial_velocity = deepcopy(velocity)
         self.positions = [deepcopy(position)]
 
-    def __call__(self, time_step: float, potential: ScalarField, epsilon: float, method: str):
+    def __call__(
+            self,
+            time_step: float,
+            field: ScalarField | VectorField,
+            epsilon: float,
+            method: str
+    ):
         """
         Updates the position and velocity of the body according to a potential and time step.
 
@@ -62,10 +61,10 @@ class Body:
         time_step : float
             The time step during which the acceleration and velocity are considered constant, a smaller values gives
             more accurate results.
-        potential : ScalarField
-            The potential causing the body's acceleration.
+        field : ScalarField | VectorField
+            The potential causing the body's acceleration or the force field resulting from it.
         epsilon : float
-            The space interval with which the gradient is computed, a smaller value gives more accurate results.
+            The space interval with which the gradient is computed.
         """
 
         raise NotImplementedError
@@ -103,12 +102,12 @@ class Body:
     @property
     def potential(self) -> ScalarField:
         """
-        Gives the body's potential as a ScalarField object.
+        Gives the body's interaction as a ScalarField object.
 
         Returns
         -------
         scalar_field : ScalarField
-            The ScalarField object associated with the body's potential.
+            The ScalarField object associated with the body's interaction.
         """
 
         raise NotImplementedError
@@ -116,12 +115,12 @@ class Body:
     @property
     def gravitational_field(self) -> VectorField:
         """
-        Gives the body's potential as a ScalarField object.
+        Gives the body's interaction as a VectorField object.
 
         Returns
         -------
-        scalar_field : ScalarField
-            The ScalarField object associated with the body's gravitational potential.
+        vector_field : VectorField
+            The VectorField object associated with the body's interaction.
         """
 
         raise NotImplementedError
